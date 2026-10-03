@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
 
-    <title>{{ $title ?? 'PrimeEstates | Exclusive Properties & Luxury Living' }}</title>
+    <title>{{ $title ?? 'Assan Zameen | Exclusive Properties & Luxury Living' }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
