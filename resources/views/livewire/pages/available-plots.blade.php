@@ -35,9 +35,9 @@
                         <label class="text-slate-400 block mb-1">Plot Size</label>
                         <select wire:model.live="size" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 focus:border-amber-500 focus:outline-none">
                             <option value="all">Any Size</option>
-                            <option value="5_marla">5 Marla</option>
-                            <option value="10_marla">10 Marla</option>
-                            <option value="1_kanal">1 Kanal</option>
+                            <option value="5">5 Marla</option>
+                            <option value="10">10 Marla</option>
+                            <option value="1">1 Kanal</option>
                         </select>
                     </div>
                 </div>
