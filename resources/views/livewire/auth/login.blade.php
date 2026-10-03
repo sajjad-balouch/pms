@@ -210,17 +210,17 @@
                 </button>
             </form>
 
-            <div class="relative my-6">
+           <!--  <div class="relative my-6">
                 <div class="absolute inset-0 flex items-center">
                     <div class="w-full border-t border-slate-800"></div>
                 </div>
                 <div class="relative flex justify-center text-xs uppercase">
                     <span class="bg-slate-900/40 px-3 text-slate-500 font-semibold tracking-wider">Or continue with</span>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Social Action Buttons -->
-            <div class="grid grid-cols-2 gap-3">
+            <!-- <div class="grid grid-cols-2 gap-3">
                 <button type="button" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-950/60 border border-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-800/80 hover:border-slate-700 transition-all duration-200">
                     <i class="fa-brands fa-google text-rose-500"></i>
                     <span>Google</span>
@@ -229,7 +229,7 @@
                     <i class="fa-brands fa-whatsapp text-emerald-500"></i>
                     <span>OTP Mobile</span>
                 </button>
-            </div>
+            </div> -->
 
             <div class="mt-8 pt-6 border-t border-slate-800/60 text-center">
                 <p class="text-xs text-slate-400">
