@@ -12,7 +12,7 @@
                     Assan Zameen real estate platform providing verified land ownership records, transparent plot transactions, and end-to-end legal support for buyers and investors.
                 </p>
                 <div class="flex items-center gap-3 pt-2">
-                    <a href="#" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-amber-400 hover:border-amber-400 transition-colors"><i class="fa-brands fa-facebook-f text-xs"></i></a>
+                    <a href="https://www.facebook.com/share/1bWhGHS5Vy/" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-amber-400 hover:border-amber-400 transition-colors"><i class="fa-brands fa-facebook-f text-xs"></i></a>
                     <a href="#" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-amber-400 hover:border-amber-400 transition-colors"><i class="fa-brands fa-twitter text-xs"></i></a>
                     <a href="#" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-amber-400 hover:border-amber-400 transition-colors"><i class="fa-brands fa-instagram text-xs"></i></a>
                 </div>
