@@ -208,7 +208,7 @@
 
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Description & Amenities</label>
-                    <textarea wire:model="description" rows="3" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500" placeholder="Mention gas, water, electricity, facing road, etc."></textarea>
+                    <textarea wire:model="description" rows="3" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500 editor" placeholder="Mention gas, water, electricity, facing road, etc."></textarea>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-slate-700">

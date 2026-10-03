@@ -8,7 +8,7 @@
         <title>{{ config('app.name', 'Property Marketplace') }}</title>
 
         <link rel="icon" type="image/png" href="{{asset('public/favicon.png')}}">
-
+    
         <!-- Google Fonts: Plus Jakarta Sans -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,5 +73,7 @@
         <!-- Fully Generic Livewire Script Endpoint -->
         <script src="{{ url('livewire/livewire.js') }}" data-csrf="{{ csrf_token() }}" data-update-uri="{{ url('pms/livewire/update') }}" data-navigate-once></script>
         @livewireScriptConfig
+
+        
     </body>
 </html>
