@@ -7,6 +7,8 @@
 
         <title>{{ config('app.name', 'Property Marketplace') }}</title>
 
+        <link rel="icon" type="image/png" href="{{asset('public/favicon.png')}}">
+
         <!-- Google Fonts: Plus Jakarta Sans -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
