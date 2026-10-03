@@ -172,7 +172,7 @@ class FrontendHome extends Component
         }
 
         if (!empty($this->size)) {
-            $propertiesQuery->where('size', $this->size);
+            $propertiesQuery->where('area_size', $this->size);
         }
 
         if ($this->filterStatus !== 'all') {
