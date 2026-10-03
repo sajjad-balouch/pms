@@ -22,8 +22,8 @@
                         <i class="fa-solid fa-phone-volume"></i>
                     </div>
                     <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Help Desk UAN</h4>
-                        <a href="tel:+9242111774633" class="text-sm font-extrabold text-white hover:text-amber-400 transition-colors">+92 (042) 111-774-633</a>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">For Help</h4>
+                        <a href="tel:+923078617447" class="text-sm font-extrabold text-white hover:text-amber-400 transition-colors">0307-8617447</a>
                     </div>
                 </div>
 
@@ -34,7 +34,7 @@
                     </div>
                     <div>
                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Official Support Email</h4>
-                        <a href="mailto:support@primeestates.com" class="text-sm font-extrabold text-white hover:text-amber-400 transition-colors">support@primeestates.com</a>
+                        <a href="mailto:support@primeestates.com" class="text-sm font-extrabold text-white hover:text-amber-400 transition-colors">support@assanzameen.com</a>
                     </div>
                 </div>
 
@@ -45,7 +45,7 @@
                     </div>
                     <div>
                         <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Headquarters</h4>
-                        <p class="text-xs font-semibold text-slate-200 mt-0.5">Prime Estates Tower, Main Boulevard, Phase 6 DHA, Lahore</p>
+                        <p class="text-xs font-semibold text-slate-200 mt-0.5">Chachran Road Zahirpir</p>
                     </div>
                 </div>
 
