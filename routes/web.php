@@ -36,6 +36,7 @@ use App\Livewire\Pages\ShowHousingScheme;
 use App\Livewire\Admin\ManageInquiries;
 use App\Livewire\Admin\PropertyManagement;
 use App\Livewire\Admin\TownSchemeManagement;
+use App\Livewire\Admin\CityManagement;
 
 // Public Routes
 Route::get('/', function () {
@@ -91,6 +92,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/properties', PropertyManagement::class)->name('properties');
         Route::get('/town-schemes', TownSchemeManagement::class)->name('town-schemes');
+
+        // Cities Management Route
+        Route::get('/cities', CityManagement::class)->name('cities');
 
     });
 

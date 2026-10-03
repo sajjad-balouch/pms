@@ -75,6 +75,14 @@
                         <span>{{ __('Dashboard') }}</span>
                     </a>
 
+                    <!-- Cities Management Nav Link -->
+                    <a href="{{ route('admin.cities') }}" 
+                       wire:navigate 
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.cities*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900' }}">
+                        <i class="fa-solid fa-city text-lg {{ request()->routeIs('admin.cities*') ? 'text-amber-400' : 'text-slate-500' }}"></i>
+                        <span>Cities</span>
+                    </a>
+
                     <!-- Top-Up Requests Link -->
                     @php $isTopup = request()->routeIs('admin.topup-requests'); @endphp
                     <a href="{{ route('admin.topup-requests') }}" wire:navigate

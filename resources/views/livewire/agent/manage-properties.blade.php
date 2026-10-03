@@ -24,7 +24,7 @@
     <!-- Filters Section -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-800/90 p-4 rounded-2xl shadow-md border border-slate-700/80">
         <div class="relative">
-            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search location, title..." 
+            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search location, title, city..." 
                    class="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500">
             <svg class="w-4 h-4 absolute left-3.5 top-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
@@ -61,6 +61,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-700/60 text-sm">
                     @forelse ($properties as $property)
+                        
                         <tr class="hover:bg-slate-700/30 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="font-bold text-white">{{ $property->title }}</div>
@@ -74,7 +75,11 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="font-semibold text-slate-200">{{ $property->area_size }}</div>
-                                <div class="text-xs text-slate-400">{{ $property->location }}, {{ $property->city }}</div>
+                                <div class="text-xs text-slate-400">{{ $property->location }}, 
+                                    <span class="text-amber-400 font-medium">
+                                        {{ $property->city ?? $property->town?->city ?? 'N/A' }}
+                                    </span>
+                                </div>
                             </td>
                             <td class="px-6 py-4 font-black text-emerald-400">
                                 Rs. {{ number_format($property->price) }}
@@ -121,7 +126,7 @@
                     @error('title') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Property Type *</label>
                         <select wire:model="property_type" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
@@ -140,15 +145,50 @@
                             <option value="for_rent">For Rent</option>
                         </select>
                     </div>
+                </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Searchable City Dropdown (Alpine.js) -->
+                    <div x-data="{ open: false }" class="relative">
+                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">City *</label>
+                        
+                        <div @click="open = !open" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-white cursor-pointer flex justify-between items-center focus:outline-none">
+                            <span>{{ $selected_city_name ?: 'Select a City...' }}</span>
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+
+                        <div x-show="open" @click.outside="open = false" x-transition class="absolute z-50 left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-xl p-2 space-y-2 max-h-60 overflow-y-auto">
+                            <input type="text" wire:model.live.debounce.200ms="city_search" placeholder="Search city..." class="w-full px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                            
+                            <div class="divide-y divide-slate-800">
+                                @forelse($cities as $c)
+                                    <button type="button" wire:click="selectCity({{ $c->id }}, '{{ addslashes($c->name) }}')" @click="open = false" class="w-full text-left px-3 py-2 text-xs text-slate-200 hover:bg-indigo-600/30 hover:text-white rounded-lg transition-colors flex justify-between items-center">
+                                        <span>{{ $c->name }}</span>
+                                        @if($city_id == $c->id)
+                                            <span class="text-emerald-400 font-bold">✓</span>
+                                        @endif
+                                    </button>
+                                @empty
+                                    <div class="px-3 py-2 text-xs text-slate-500">No city found.</div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        @error('city_id') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Dependent Town Dropdown -->
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Town / Scheme (Optional)</label>
-                        <select wire:model="town_id" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
+                        <select wire:model="town_id" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500" {{ !$city_id ? 'disabled' : '' }}>
                             <option value="">None (Individual)</option>
                             @foreach($towns as $town)
                                 <option value="{{ $town->id }}">{{ $town->name }}</option>
                             @endforeach
                         </select>
+                        @if(!$city_id)
+                            <span class="text-[11px] text-slate-500 mt-1 block">Pehle city select karein.</span>
+                        @endif
                     </div>
                 </div>
 
@@ -168,28 +208,11 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">City *</label>
-                        <input type="text" wire:model="city" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
-                    </div>
-
-                    <div>
                         <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Location / Address *</label>
                         <input type="text" wire:model="location" placeholder="e.g. Main Canal Road, Near Mall" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
                         @error('location') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
-                </div>
 
-                <div>
-                    <!-- Google Map Link Field (Optional) -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Google Map Location Link (Optional)</label>
-                        <div class="relative">
-                            <input type="url" wire:model="google_map_url" placeholder="https://maps.app.goo.gl/..." class="w-full pl-9 rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
-                            <svg class="w-4 h-4 absolute left-3 top-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        </div>
-                        <span class="text-[11px] text-slate-400 mt-1 block">Google Maps se "Share" link copy karke yahan paste karein.</span>
-                        @error('google_map_url') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
-                    </div>
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Status</label>
                         <select wire:model="status" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
@@ -199,6 +222,16 @@
                             <option value="rented">Rented</option>
                         </select>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Google Map Location Link (Optional)</label>
+                    <div class="relative">
+                        <input type="url" wire:model="google_map_url" placeholder="https://maps.app.goo.gl/..." class="w-full pl-9 rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
+                        <svg class="w-4 h-4 absolute left-3 top-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <span class="text-[11px] text-slate-400 mt-1 block">Google Maps se "Share" link copy karke yahan paste karein.</span>
+                    @error('google_map_url') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <div>

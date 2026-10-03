@@ -16,7 +16,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-        CitySeeder::class;
+        $this->call([
+            CitySeeder::class, // <-- Yahan add karein
+        ]);
         // PaymentMethodSeeder::class,
 
         // User::factory()->create([

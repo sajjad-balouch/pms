@@ -19,7 +19,7 @@ class Property extends Model
         'purpose',
         'price',
         'area_size',
-        'city',
+        'name',
         'location',
         'description',
         'features',
