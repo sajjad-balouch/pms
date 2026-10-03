@@ -34,6 +34,8 @@ use App\Livewire\Pages\ContactUs;
 use App\Livewire\Pages\DynamicPage;
 use App\Livewire\Pages\ShowHousingScheme;
 use App\Livewire\Admin\ManageInquiries;
+use App\Livewire\Admin\PropertyManagement;
+use App\Livewire\Admin\TownSchemeManagement;
 
 // Public Routes
 Route::get('/', function () {
@@ -86,6 +88,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/pages', PageManagement::class)->name('pages');
 
         Route::get('/contact-inquiries', ManageInquiries::class)->name('contact-inquiries');
+
+        Route::get('/properties', PropertyManagement::class)->name('properties');
+        Route::get('/town-schemes', TownSchemeManagement::class)->name('town-schemes');
 
     });
 

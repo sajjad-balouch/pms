@@ -144,6 +144,27 @@
                         <span>{{ __('Pages Management') }}</span>
                     </a>
 
+                    <!-- Admin Navigation Section -->
+                    <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        Property Management
+                    </div>
+
+                    <!-- 1. All Properties Nav Link -->
+                    <a href="{{ route('admin.properties') }}" 
+                       wire:navigate 
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.properties*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900' }}">
+                        <i class="fa-solid fa-building-circle-check text-lg {{ request()->routeIs('admin.properties*') ? 'text-amber-400' : 'text-slate-500' }}"></i>
+                        <span>All Properties</span>
+                    </a>
+
+                    <!-- 2. Town Schemes Nav Link -->
+                    <a href="{{ route('admin.town-schemes') }}" 
+                       wire:navigate 
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.town-schemes*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900' }}">
+                        <i class="fa-solid fa-city text-lg {{ request()->routeIs('admin.town-schemes*') ? 'text-amber-400' : 'text-slate-500' }}"></i>
+                        <span>Town Schemes</span>
+                    </a>
+
                 </nav>
             </div>
 

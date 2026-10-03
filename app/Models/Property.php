@@ -13,6 +13,7 @@ class Property extends Model
     protected $fillable = [
         'agent_id',
         'town_id',
+        'city_id',
         'title',
         'property_type',
         'purpose',
@@ -25,7 +26,9 @@ class Property extends Model
         'images',
         'status',
         'is_featured',
-        'google_map_url'
+        'google_map_url',
+        'is_active',
+        'rejection_reason',
     ];
 
     protected $casts = [
@@ -45,13 +48,16 @@ class Property extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'agent_id');
     }
 
-    // public function town(): BelongsTo
-    // {
-    //     return $this->belongsTo(Town::class, 'town_id');
-    // }
+    /**
+     * Property belongs to a City.
+     */
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
 
 
 }
