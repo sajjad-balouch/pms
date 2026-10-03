@@ -71,9 +71,9 @@
                         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Property Size</label>
                         <select wire:model.live="size" class="w-full bg-slate-900/80 border border-slate-700 text-slate-200 rounded-xl px-3.5 py-3 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                             <option value="">Any Size</option>
-                            <option value="5_marla">5 Marla</option>
-                            <option value="10_marla">10 Marla</option>
-                            <option value="1_kanal">1 Kanal</option>
+                            <option value="5">5 Marla</option>
+                            <option value="10">10 Marla</option>
+                            <option value="1">1 Kanal</option>
                         </select>
                     </div>
 
