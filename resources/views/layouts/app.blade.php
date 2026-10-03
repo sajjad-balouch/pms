@@ -71,7 +71,12 @@
         </div>
 
         <!-- Fully Generic Livewire Script Endpoint -->
-        <script src="{{ url('livewire/livewire.js') }}" data-csrf="{{ csrf_token() }}" data-update-uri="{{ url('pms/livewire/update') }}" data-navigate-once></script>
+        <script
+            src="{{ url('livewire/livewire.js') }}"
+            data-csrf="{{ csrf_token() }}"
+            data-update-uri="{{ url('livewire/update') }}"
+            data-navigate-once>
+        </script>
         @livewireScriptConfig
 
         
