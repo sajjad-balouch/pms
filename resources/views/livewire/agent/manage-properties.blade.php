@@ -3,7 +3,9 @@
     <!-- Flash Alert -->
     @if (session()->has('message'))
         <div class="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-xl shadow-sm">
-            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 0118 0z"></path></svg>
+            <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 0118 0z"></path>
+            </svg>
             <span class="text-sm font-semibold">{{ session('message') }}</span>
         </div>
     @endif
@@ -15,8 +17,10 @@
             <p class="text-sm text-slate-400">مکان، دکان، پلاٹ، اپارٹمنٹ یا زرعی زمین براہِ راست لسٹ کریں</p>
         </div>
 
-        <button wire:click="create" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <button wire:click="create" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
             Add New Property
         </button>
     </div>
@@ -26,7 +30,9 @@
         <div class="relative">
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Search location, title, city..." 
                    class="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 text-white placeholder-slate-500">
-            <svg class="w-4 h-4 absolute left-3.5 top-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <svg class="w-4 h-4 absolute left-3.5 top-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
         </div>
 
         <select wire:model.live="typeFilter" class="px-4 py-2 bg-slate-900/80 border border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 text-white">
@@ -61,8 +67,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-700/60 text-sm">
                     @forelse ($properties as $property)
-                        
-                        <tr class="hover:bg-slate-700/30 transition-colors">
+                        <tr wire:key="property-row-{{ $property->id }}" class="hover:bg-slate-700/30 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="font-bold text-white">{{ $property->title }}</div>
                                 @if($property->town)
@@ -75,7 +80,8 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="font-semibold text-slate-200">{{ $property->area_size }}</div>
-                                <div class="text-xs text-slate-400">{{ $property->location }}, 
+                                <div class="text-xs text-slate-400">
+                                    {{ $property->location }}, 
                                     <span class="text-amber-400 font-medium">
                                         {{ $property->city ?? $property->town?->city ?? 'N/A' }}
                                     </span>
@@ -119,7 +125,7 @@
                 <button wire:click="$set('isModalOpen', false)" class="text-slate-400 hover:text-white">&times;</button>
             </div>
 
-            <form wire:submit.prevent="save" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+            <form wire:submit="save" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Property Title / Description Name *</label>
                     <input type="text" wire:model="title" placeholder="e.g. 10 Marla Luxury House for Sale" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
@@ -148,28 +154,33 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Searchable City Dropdown (Alpine.js) -->
-                    <div x-data="{ open: false }" class="relative">
+                    <!-- Searchable City Dropdown (Alpine.js with Livewire Binding) -->
+                    <div x-data="{ open: false }" class="relative" wire:key="city-selector-modal-{{ $property_id ?? 'create' }}">
                         <label class="block text-xs font-bold uppercase text-slate-300 mb-1">City *</label>
                         
-                        <div @click="open = !open" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-white cursor-pointer flex justify-between items-center focus:outline-none">
-                            <span>{{ $selected_city_name ?: 'Select a City...' }}</span>
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        <div @click="open = !open" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-white cursor-pointer flex justify-between items-center focus:outline-none hover:border-slate-600 transition-colors">
+                            <span class="{{ $selected_city_name ? 'text-white font-medium' : 'text-slate-400' }}">
+                                {{ $selected_city_name ?: 'Select a City...' }}
+                            </span>
+                            <svg class="w-4 h-4 text-slate-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
                         </div>
 
-                        <div x-show="open" @click.outside="open = false" x-transition class="absolute z-50 left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-xl p-2 space-y-2 max-h-60 overflow-y-auto">
+                        <!-- Dropdown Menu -->
+                        <div x-show="open" @click.outside="open = false" x-transition class="absolute z-50 left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-2 space-y-2 max-h-60 overflow-y-auto" style="display: none;">
                             <input type="text" wire:model.live.debounce.200ms="city_search" placeholder="Search city..." class="w-full px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
                             
                             <div class="divide-y divide-slate-800">
                                 @forelse($cities as $c)
-                                    <button type="button" wire:click="selectCity({{ $c->id }}, '{{ addslashes($c->name) }}')" @click="open = false" class="w-full text-left px-3 py-2 text-xs text-slate-200 hover:bg-indigo-600/30 hover:text-white rounded-lg transition-colors flex justify-between items-center">
+                                    <button type="button" wire:click="selectCity({{ $c->id }}, '{{ addslashes($c->name) }}')" @click="open = false" class="w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex justify-between items-center {{ $city_id == $c->id ? 'bg-indigo-600/30 text-indigo-400 font-bold' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
                                         <span>{{ $c->name }}</span>
                                         @if($city_id == $c->id)
-                                            <span class="text-emerald-400 font-bold">✓</span>
+                                            <span class="text-indigo-400 font-bold">✓</span>
                                         @endif
                                     </button>
                                 @empty
-                                    <div class="px-3 py-2 text-xs text-slate-500">No city found.</div>
+                                    <div class="px-3 py-2 text-xs text-slate-500">No active city found.</div>
                                 @endforelse
                             </div>
                         </div>
@@ -228,7 +239,10 @@
                     <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Google Map Location Link (Optional)</label>
                     <div class="relative">
                         <input type="url" wire:model="google_map_url" placeholder="https://maps.app.goo.gl/..." class="w-full pl-9 rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500">
-                        <svg class="w-4 h-4 absolute left-3 top-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <svg class="w-4 h-4 absolute left-3 top-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
                     </div>
                     <span class="text-[11px] text-slate-400 mt-1 block">Google Maps se "Share" link copy karke yahan paste karein.</span>
                     @error('google_map_url') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
@@ -241,12 +255,15 @@
 
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Description & Amenities</label>
-                    <textarea wire:model="description" rows="3" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500 editor" placeholder="Mention gas, water, electricity, facing road, etc."></textarea>
+                    <textarea wire:model="description" rows="3" class="w-full rounded-xl border-slate-700 bg-slate-900 text-white text-sm focus:ring-2 focus:ring-indigo-500" placeholder="Mention gas, water, electricity, facing road, etc."></textarea>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-slate-700">
-                    <button type="button" wire:click="$set('isModalOpen', false)" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl font-semibold text-xs">Cancel</button>
-                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-xs shadow-md">Save Property</button>
+                    <button type="button" wire:click="$set('isModalOpen', false)" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl font-semibold text-xs transition-colors">Cancel</button>
+                    <button type="submit" wire:loading.attr="disabled" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-xs shadow-md transition-all disabled:opacity-50">
+                        <span wire:loading.remove wire:target="save">Save Property</span>
+                        <span wire:loading wire:target="save">Saving...</span>
+                    </button>
                 </div>
             </form>
         </div>

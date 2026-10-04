@@ -21,9 +21,11 @@ class ShowHousingScheme extends Component
 
     public function render()
     {
-        $scheme = Town::withCount(['plots as available_plots_count' => function ($q) {
-            $q->where('status', 'available');
-        }])->findOrFail($this->townId);
+        $scheme = Town::with(['city'])
+            ->withCount(['plots as available_plots_count' => function ($q) {
+                $q->where('status', 'available');
+            }])
+            ->findOrFail($this->townId);
 
         $plots = $scheme->plots()
             ->when($this->searchPlot, function ($q) {

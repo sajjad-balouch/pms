@@ -11,16 +11,21 @@ class Town extends Model
 
     protected $fillable = [
         'user_id',
+        'city_id',
         'name',
         'location',
         'city',
+        'google_map_url',
+        'master_plan_map',
+        'gallery_images',
         'total_area',
         'noc_number',
-        'is_active',
-        'google_map_url',
-        'city_id',
-        'slug',
     ];
+
+    protected $casts = [
+        'gallery_images' => 'array',
+    ];
+
 
     public function owner()
     {

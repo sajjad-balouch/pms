@@ -133,13 +133,17 @@ class ManageProperties extends Component
         $this->resetForm();
     }
 
-    public function edit($id)
+   public function edit($id)
     {
-        $property = Property::where('agent_id', Auth::id())->with('city')->findOrFail($id);
+        // city aur town eager load karein
+        $property = Property::where('agent_id', Auth::id())->with(['city', 'town'])->findOrFail($id);
 
         $this->property_id = $property->id;
         $this->city_id = $property->city_id;
-        $this->selected_city_name = $property->city?->name ?? '';
+        
+        // Agar property par direct city_id hai to uska name, warna town ki city ka fallback
+        $this->selected_city_name = $property->city ?? $property->town?->city ?? '';
+        
         $this->town_id = $property->town_id;
         $this->title = $property->title;
         $this->property_type = $property->property_type;

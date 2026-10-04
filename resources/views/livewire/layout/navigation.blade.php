@@ -16,7 +16,13 @@ new class extends Component
     }
 }; ?>
 
+
 <nav x-data="{ open: false }" class="bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-50">
+    <style>
+    .text-gray-900 {
+        color: rgb(252 211 77 / var(--tw-text-opacity, 1));
+    }
+</style>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
             
@@ -41,7 +47,7 @@ new class extends Component
                             <i class="fa-solid fa-city text-slate-950 text-lg"></i>
                         </div>
                         <span class="text-lg font-black tracking-wider text-white uppercase group-hover:text-amber-400 transition-colors">
-                            Property<span class="text-amber-400">Hub</span>
+                            Assan<span class="text-amber-400">Zameen</span>
                         </span>
                     </a>
                 </div>
