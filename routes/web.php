@@ -37,6 +37,7 @@ use App\Livewire\Admin\ManageInquiries;
 use App\Livewire\Admin\PropertyManagement;
 use App\Livewire\Admin\TownSchemeManagement;
 use App\Livewire\Admin\CityManagement;
+use App\Livewire\Admin\CreateProperty;
 
 // Public Routes
 Route::get('/', function () {
@@ -77,6 +78,8 @@ Route::middleware(['auth'])->group(function () {
     // Admin Routes
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+
+        Route::get('/properties/create', CreateProperty::class)->name('properties.create');
 
         Route::get('/users', ManageUsers::class)->name('users');
 

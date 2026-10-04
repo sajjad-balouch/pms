@@ -83,6 +83,12 @@
                         <span>Cities</span>
                     </a>
 
+                    <a href="{{ route('admin.properties.create') }}" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-200 {{ request()->routeIs('admin.properties.create') ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                        <i class="fa-solid fa-circle-plus text-base {{ request()->routeIs('admin.properties.create') ? 'text-slate-950' : 'text-amber-400' }}"></i>
+                        <span>Add Property</span>
+                    </a>
+
                     <!-- Top-Up Requests Link -->
                     @php $isTopup = request()->routeIs('admin.topup-requests'); @endphp
                     <a href="{{ route('admin.topup-requests') }}" wire:navigate
