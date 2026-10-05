@@ -67,10 +67,12 @@
 
     <!-- Mobile Navigation Drawer -->
     <div x-show="mobileOpen" x-cloak class="md:hidden bg-slate-900/95 border-b border-slate-800 px-6 py-6 space-y-4">
-        <a href="/" class="block text-slate-200 font-medium hover:text-amber-400">Home</a>
-        <a href="#schemes" class="block text-slate-200 font-medium hover:text-amber-400">Housing Schemes</a>
-        <a href="#properties" class="block text-slate-200 font-medium hover:text-amber-400">Available Plots</a>
-        <a href="#about" class="block text-slate-200 font-medium hover:text-amber-400">About Us</a>
+        <a href="{{url('/')}}" class="block text-slate-200 font-medium hover:text-amber-400">Home</a>
+        <a href="{{route('housing-schemes')}}" class="block text-slate-200 font-medium hover:text-amber-400">Housing Schemes</a>
+        <a href="{{route('available-plots')}}" class="block text-slate-200 font-medium hover:text-amber-400">Available Plots</a>
+        <a href="{{route('about-us')}}" class="block text-slate-200 font-medium hover:text-amber-400">About Us</a>
+        
+        <a href="{{route('contact')}}" class="block text-slate-200 font-medium hover:text-amber-400">Contact</a>
         <div class="pt-4 border-t border-slate-800 flex flex-col gap-3">
             @auth
                 <a href="/dashboard" class="w-full text-center bg-slate-800 text-white font-medium py-2.5 rounded-xl">Dashboard</a>
