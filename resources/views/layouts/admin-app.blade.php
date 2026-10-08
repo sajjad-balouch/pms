@@ -233,4 +233,23 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-xs font-bold text-rose-400 hover:text-white hover:bg-rose-600 transition flex items-center gap-2 bg-rose-500/10 px-3.5 py-2 rounded-xl border border-rose-500/20 shadow-sm">
-                            <i class="fa-solid fa
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>{{ __('Logout') }}</span>
+                        </button>
+                    </form>
+                </div>
+
+            </header>
+
+            <!-- Page Content View -->
+            <main class="flex-1">
+                {{ $slot }}
+            </main>
+
+        </div>
+
+    </div>
+
+    @livewireScripts
+</body>
+</html>
