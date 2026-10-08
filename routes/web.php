@@ -38,6 +38,7 @@ use App\Livewire\Admin\PropertyManagement;
 use App\Livewire\Admin\TownSchemeManagement;
 use App\Livewire\Admin\CityManagement;
 use App\Livewire\Admin\CreateProperty;
+use Illuminate\Support\Facades\Session;
 
 // Public Routes
 Route::get('/', function () {
@@ -46,6 +47,13 @@ Route::get('/', function () {
         'plots' => Plot::where('status', 'available')->get(),
     ])->layout('layouts.front-app');
 })->name('home');
+
+Route::get('/lang/{locale}', function ($locale) {
+    if (in_array($locale, ['en', 'ur'])) {
+        Session::put('locale', $locale);
+    }
+    return redirect()->back();
+})->name('lang.switch');
 
 // Dynamic Page Frontend Route
 Route::get('/page/{slug}', DynamicPage::class)->name('dynamic.page');

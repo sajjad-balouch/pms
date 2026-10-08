@@ -6,9 +6,9 @@
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800 pb-8">
                 <div>
                     <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest rounded-full">
-                        <i class="fa-solid fa-city mr-1"></i> Approved Projects
+                        <i class="fa-solid fa-city mr-1"></i> {{__("Approved Projects")}}
                     </span>
-                    <h1 class="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight">Housing Schemes</h1>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight">{{__("Housing Schemes")}}</h1>
                     <p class="text-slate-400 text-sm mt-2">Explore government-verified LDA, CDA, and RDA approved housing societies.</p>
                 </div>
                 <!-- Search & Filter -->

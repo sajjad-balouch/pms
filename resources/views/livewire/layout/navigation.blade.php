@@ -219,6 +219,9 @@ new class extends Component
                     <a href="{{ route('agent.leads') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('agent.leads.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
                         <i class="fa-solid fa-bullhorn text-amber-400"></i> {{ __('Leads & Inquiries') }}
                     </a>
+                    <a href="{{ route('agent.properties') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('agent.leads.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
+                        <i class="fa-solid fa-house mr-2 {{ request()->routeIs('agent.properties.*') ? 'text-amber-400' : 'text-slate-400' }}"></i>{{ __('My Properties') }}
+                    </a>
                 @endif
 
                 @if($role === 'admin')

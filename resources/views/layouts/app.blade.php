@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ur' ? 'rtl' : 'ltr' }}" class="dark">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,9 +7,9 @@
 
         <title>{{ config('app.name', 'Assan Zameen') }}</title>
 
-        <link rel="icon" type="image/png" href="{{asset('public/favicon.png')}}">
+        <link rel="icon" type="image/png" href="{{ asset('public/favicon.png') }}">
     
-        <!-- Google Fonts: Plus Jakarta Sans -->
+        <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,9 +22,28 @@
         @livewireStyles
 
         <style>
-            body {
-                font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Jameel Noori Nastaleeq Web Font CDN */
+            /* Jameel Noori Nastaleeq Web Font */
+        @font-face {
+            font-family: 'Jameel Noori Nastaleeq';
+            src: url('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff2') format('woff2'),
+                 url('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff') format('woff'),
+                 url('public/fonts/Jameel_Noori_Nastaleeq_Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        body {
+            font-family: {{ app()->getLocale() == 'ur' ? "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif" : "'Plus Jakarta Sans', sans-serif" }} !important;
+        }
+
+        @if(app()->getLocale() == 'ur')
+            input, button, select, textarea, h1, h2, h3, h4, h5, h6, p, span, a {
+                font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif !important;
             }
+        @endif
+
             /* Custom Scrollbar */
             ::-webkit-scrollbar {
                 width: 8px;
@@ -78,7 +97,5 @@
             data-navigate-once>
         </script>
         @livewireScriptConfig
-
-        
     </body>
 </html>

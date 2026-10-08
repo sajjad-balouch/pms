@@ -1,18 +1,22 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ur' ? 'rtl' : 'ltr' }}" class="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Admin Dashboard' }} - {{ config('app.name', 'Property Portal') }}</title>
+    <title>{{ $title ?? __('Admin Dashboard') }} - {{ config('app.name', 'Property Portal') }}</title>
 
-    <link rel="icon" type="image/png" href="{{asset('public/favicon.png')}}">
+    <link rel="icon" type="image/png" href="{{ asset('public/favicon.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    @if(app()->getLocale() == 'ur')
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @endif
 
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -23,7 +27,7 @@
 
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: {{ app()->getLocale() == 'ur' ? "'Noto Naskh Arabic', 'Jameel Noori Nastaleeq', sans-serif" : "'Plus Jakarta Sans', sans-serif" }} !important;
         }
         [x-cloak] {
             display: none !important;
@@ -42,8 +46,8 @@
              class="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm lg:hidden"></div>
 
         <!-- Sidebar Navigation -->
-        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
-               class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0a0f1d] border-r border-slate-800/80 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col justify-between shadow-2xl">
+        <aside :class="sidebarOpen ? 'translate-x-0' : ({{ app()->getLocale() == 'ur' ? "'translate-x-full'" : "'-translate-x-full'" }})" 
+               class="fixed inset-y-0 {{ app()->getLocale() == 'ur' ? 'right-0 border-l' : 'left-0 border-r' }} z-50 w-64 bg-[#0a0f1d] border-slate-800/80 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col justify-between shadow-2xl">
             
             <div>
                 <!-- Brand / Logo Header -->
@@ -52,7 +56,7 @@
                         <div class="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
                             A
                         </div>
-                        <span class="text-base font-extrabold text-white tracking-wide">Control Panel</span>
+                        <span class="text-base font-extrabold text-white tracking-wide">{{ __('Control Panel') }}</span>
                     </a>
                     
                     <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1">
@@ -64,7 +68,7 @@
                 <nav class="p-4 space-y-1.5 overflow-y-auto">
                     
                     <div class="px-3 pt-2 pb-2 text-[10px] font-black text-slate-400/90 uppercase tracking-widest">
-                        Main Management
+                        {{ __('Main Management') }}
                     </div>
 
                     <!-- Dashboard Link -->
@@ -80,13 +84,13 @@
                        wire:navigate 
                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.cities*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900' }}">
                         <i class="fa-solid fa-city text-lg {{ request()->routeIs('admin.cities*') ? 'text-amber-400' : 'text-slate-500' }}"></i>
-                        <span>Cities</span>
+                        <span>{{ __('Cities') }}</span>
                     </a>
 
                     <a href="{{ route('admin.properties.create') }}" 
                        class="flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all duration-200 {{ request()->routeIs('admin.properties.create') ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
                         <i class="fa-solid fa-circle-plus text-base {{ request()->routeIs('admin.properties.create') ? 'text-slate-950' : 'text-amber-400' }}"></i>
-                        <span>Add Property</span>
+                        <span>{{ __('Add Property') }}</span>
                     </a>
 
                     <!-- Top-Up Requests Link -->
@@ -145,12 +149,11 @@
                         <span>{{ __('Payment Methods') }}</span>
                     </a>
 
-                    <!-- CMS & Content Section Header -->
+                    <!-- Content Management -->
                     <div class="px-3 pt-4 pb-2 text-[10px] font-black text-slate-400/90 uppercase tracking-widest">
-                        Content Management
+                        {{ __('Content Management') }}
                     </div>
 
-                    <!-- Page Management Link -->
                     @php $isPages = request()->routeIs('admin.pages'); @endphp
                     <a href="{{ route('admin.pages') }}" wire:navigate
                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 {{ $isPages ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-extrabold' : 'text-slate-300 hover:bg-slate-800/60 hover:text-white' }}">
@@ -158,25 +161,23 @@
                         <span>{{ __('Pages Management') }}</span>
                     </a>
 
-                    <!-- Admin Navigation Section -->
+                    <!-- Property Management Section -->
                     <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        Property Management
+                        {{ __('Property Management') }}
                     </div>
 
-                    <!-- 1. All Properties Nav Link -->
                     <a href="{{ route('admin.properties') }}" 
                        wire:navigate 
                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.properties*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900' }}">
                         <i class="fa-solid fa-building-circle-check text-lg {{ request()->routeIs('admin.properties*') ? 'text-amber-400' : 'text-slate-500' }}"></i>
-                        <span>All Properties</span>
+                        <span>{{ __('All Properties') }}</span>
                     </a>
 
-                    <!-- 2. Town Schemes Nav Link -->
                     <a href="{{ route('admin.town-schemes') }}" 
                        wire:navigate 
                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin.town-schemes*') ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900' }}">
                         <i class="fa-solid fa-city text-lg {{ request()->routeIs('admin.town-schemes*') ? 'text-amber-400' : 'text-slate-500' }}"></i>
-                        <span>Town Schemes</span>
+                        <span>{{ __('Town Schemes') }}</span>
                     </a>
 
                 </nav>
@@ -189,7 +190,7 @@
                         {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
                     </div>
                     <div class="overflow-hidden">
-                        <span class="text-xs font-bold text-white block truncate">{{ auth()->user()->name ?? 'Admin' }}</span>
+                        <span class="text-xs font-bold text-white block truncate">{{ auth()->user()->name ?? __('Admin') }}</span>
                         <span class="text-[10px] font-medium text-slate-400 block truncate">{{ auth()->user()->email ?? '' }}</span>
                     </div>
                 </div>
@@ -207,37 +208,29 @@
                     <button @click="sidebarOpen = true" class="lg:hidden text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80">
                         <i class="fa-solid fa-bars text-lg"></i>
                     </button>
-                    <span class="text-xs font-bold text-slate-400 hidden sm:inline-block tracking-wide">Administrator Mode</span>
+                    <span class="text-xs font-bold text-slate-400 hidden sm:inline-block tracking-wide">{{ __('Administrator Mode') }}</span>
                 </div>
 
                 <div class="flex items-center gap-3">
+                    
+                    <!-- Language Switcher -->
+                    <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl px-2 py-1 text-xs">
+                        <i class="fa-solid fa-globe text-amber-400 mr-1.5 ml-1.5"></i>
+                        @if(app()->getLocale() == 'ur')
+                            <a href="{{ route('lang.switch', 'en') }}" class="font-bold text-slate-300 hover:text-amber-400 px-1.5 py-0.5 rounded">English</a>
+                        @else
+                            <a href="{{ route('lang.switch', 'ur') }}" class="font-bold text-amber-400 hover:text-amber-300 px-1.5 py-0.5 rounded">اردو</a>
+                        @endif
+                    </div>
+
                     <!-- Front Site Button -->
                     <a href="{{ url('/') }}" target="_blank" class="text-xs font-bold text-slate-300 hover:text-amber-400 transition flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700/60 shadow-sm">
                         <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
-                        <span>Visit Site</span>
+                        <span>{{ __('Visit Site') }}</span>
                     </a>
 
                     <!-- Logout Button -->
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-xs font-bold text-rose-400 hover:text-white hover:bg-rose-600 transition flex items-center gap-2 bg-rose-500/10 px-3.5 py-2 rounded-xl border border-rose-500/20 shadow-sm">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                            <span>Logout</span>
-                        </button>
-                    </form>
-                </div>
-
-            </header>
-
-            <!-- Page Content View -->
-            <main class="flex-1">
-                {{ $slot }}
-            </main>
-
-        </div>
-
-    </div>
-
-    @livewireScripts
-</body>
-</html>
+                            <i class="fa-solid fa
