@@ -179,7 +179,7 @@ class FrontendHome extends Component
             $propertiesQuery->where('status', $this->filterStatus);
         }
 
-        $properties = $propertiesQuery->latest()->get();
+        $properties = $propertiesQuery->latest()->where('is_active','active')->get();
 
         return view('livewire.frontend-home', [
             'towns'      => $towns,
