@@ -7,7 +7,7 @@
                 <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest rounded-full">
                     <i class="fa-solid fa-vector-square mr-1"></i> Inventory Marketplace
                 </span>
-                <h1 class="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight">Available Plots</h1>
+                <h1 class="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight">{{__("Available Plots")}}</h1>
                 <p class="text-slate-400 text-sm mt-2">Filter and inspect verified residential & commercial property inventory.</p>
             </div>
 

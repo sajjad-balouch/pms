@@ -48,23 +48,28 @@ Route::get('/', function () {
     ])->layout('layouts.front-app');
 })->name('home');
 
-Route::get('/lang/{locale}', function ($locale) {
-    if (in_array($locale, ['en', 'ur'])) {
-        Session::put('locale', $locale);
-    }
-    return redirect()->back();
-})->name('lang.switch');
 
-// Dynamic Page Frontend Route
-Route::get('/page/{slug}', DynamicPage::class)->name('dynamic.page');
-Route::get('/properties/{id}/{slug?}', PropertyDetails::class)->name('property.details');
 
-Route::get('/housing-schemes', HousingSchemes::class)->name('housing-schemes');
-Route::get('/housing-schemes/{id}', ShowHousingScheme::class)->name('housing-schemes.show');
+Route::middleware(['web'])->group(function () {
 
-Route::get('/available-plots', AvailablePlots::class)->name('available-plots');
-Route::get('/about-us', AboutUs::class)->name('about-us');
-Route::get('/contact', ContactUs::class)->name('contact');
+    Route::get('/lang/{locale}', function ($locale) {
+        if (in_array($locale, ['en', 'ur'])) {
+            Session::put('locale', $locale);
+        }
+        return redirect()->back();
+    })->name('lang.switch');
+    // Public / Frontend Routes
+    Route::get('/page/{slug}', DynamicPage::class)->name('dynamic.page');
+    Route::get('/properties/{id}/{slug?}', PropertyDetails::class)->name('property.details');
+
+    Route::get('/housing-schemes', HousingSchemes::class)->name('housing-schemes');
+    Route::get('/housing-schemes/{id}', ShowHousingScheme::class)->name('housing-schemes.show');
+
+    Route::get('/available-plots', AvailablePlots::class)->name('available-plots');
+    Route::get('/about-us', AboutUs::class)->name('about-us');
+    Route::get('/contact', ContactUs::class)->name('contact');
+
+});
 
 
 Route::middleware('auth')->group(function () {

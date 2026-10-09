@@ -5,10 +5,10 @@
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800 pb-8">
             <div>
                 <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest rounded-full">
-                    <i class="fa-solid fa-city mr-1"></i> Approved Projects
+                    <i class="fa-solid fa-city mr-1"></i> {{__("Approved Projects")}}
                 </span>
-                <h1 class="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight">Housing Schemes</h1>
-                <p class="text-slate-400 text-sm mt-2">Explore government-verified LDA, CDA, and RDA approved housing societies.</p>
+                <h1 class="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight">{{__("Housing Schemes")}}</h1>
+                <p class="text-slate-400 text-sm mt-2">{{__("Explore government-verified LDA, CDA, and RDA approved housing societies.")}}</p>
             </div>
             
             <!-- Dynamic Search -->
@@ -31,12 +31,12 @@
                         <div class="relative h-48 bg-slate-800 overflow-hidden">
                             <img src="{{ $scheme->cover_image ? asset('storage/' . $scheme->cover_image) : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=600' }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-amber-400 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-500/20">
-                                {{ $scheme->noc_number ?? 'Approved' }}
+                                {{ $scheme->noc_number ?? '__("Approved")' }}
                             </span>
 
                             <!-- Map Button (DB Link or Generated Address Link) -->
                             <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" title="View Location Map" class="absolute top-3 right-3 bg-emerald-500/90 hover:bg-emerald-600 text-white text-[11px] font-bold px-3 py-1 rounded-full backdrop-blur-md transition-all flex items-center gap-1 shadow-lg">
-                                <i class="fa-solid fa-location-dot"></i> Map
+                                <i class="fa-solid fa-location-dot"></i> {{__("Map")}}
                             </a>
                         </div>
                         <div class="p-6 space-y-4">
@@ -51,14 +51,14 @@
                             </p>
 
                             <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-                                <div><span class="text-slate-500">Available Plots:</span> <strong class="text-emerald-400 font-bold ml-1">{{ $scheme->available_plots_count ?? 0 }}</strong></div>
-                                <div><span class="text-slate-500">City:</span> <strong class="text-slate-200 ml-1">{{ $scheme->city ?? 'N/A' }}</strong></div>
+                                <div><span class="text-slate-500">{{__("Available Plots:")}}</span> <strong class="text-emerald-400 font-bold ml-1">{{ $scheme->available_plots_count ?? 0 }}</strong></div>
+                                <div><span class="text-slate-500">{{__("City:")}}</span> <strong class="text-slate-200 ml-1">{{ $scheme->city ?? 'N/A' }}</strong></div>
                             </div>
                         </div>
                     </div>
                     <div class="p-6 pt-0 space-y-2">
                         <a href="{{ route('housing-schemes.show', $scheme->id) }}" class="block text-center py-2.5 w-full bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-white font-bold text-xs rounded-xl transition-all">
-                            View Complete Details
+                            {{__("View Complete Details")}}
                         </a>
                     </div>
                 </div>

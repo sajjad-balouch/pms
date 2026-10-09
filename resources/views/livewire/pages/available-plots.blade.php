@@ -4,10 +4,10 @@
         <!-- Header -->
         <div class="border-b border-slate-800 pb-8">
             <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest rounded-full">
-                <i class="fa-solid fa-vector-square mr-1"></i> Inventory Marketplace
+                <i class="fa-solid fa-vector-square mr-1"></i> {{__("Inventory Marketplace")}}
             </span>
-            <h1 class="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight">Available Plots</h1>
-            <p class="text-slate-400 text-sm mt-2">Filter and inspect verified residential & commercial property inventory.</p>
+            <h1 class="text-3xl sm:text-5xl font-extrabold text-white mt-3 tracking-tight">{{__("Available Plots")}}</h1>
+            <p class="text-slate-400 text-sm mt-2">{{__("Filter and inspect verified residential & commercial property inventory.")}}</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -15,29 +15,29 @@
             <!-- Filters Sidebar -->
             <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 h-fit space-y-5">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-amber-400"></i> Filter Inventory
+                    <i class="fa-solid fa-sliders text-amber-400"></i> {{__("Filter Inventory")}}
                 </h3>
                 
                 <div class="space-y-4 text-xs">
                     <div>
-                        <label class="text-slate-400 block mb-1">Search Plot No.</label>
+                        <label class="text-slate-400 block mb-1">{{__("Search Plot No.")}}</label>
                         <input type="text" wire:model.live.debounce.300ms="search" placeholder="e.g. B-104" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 focus:border-amber-500 focus:outline-none">
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">Category Type</label>
+                        <label class="text-slate-400 block mb-1">{{__("Category Type")}}</label>
                         <select wire:model.live="type" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 focus:border-amber-500 focus:outline-none">
-                            <option value="all">All Categories</option>
-                            <option value="residential">Residential Plot</option>
-                            <option value="commercial">Commercial Plot</option>
+                            <option value="all">{{__("All Categories")}}</option>
+                            <option value="residential">{{__("Residential Plot")}}</option>
+                            <option value="commercial">{{__("Commercial Plot")}}</option>
                         </select>
                     </div>
                     <div>
-                        <label class="text-slate-400 block mb-1">Plot Size</label>
+                        <label class="text-slate-400 block mb-1">{{__("Plot Size")}}</label>
                         <select wire:model.live="size" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 focus:border-amber-500 focus:outline-none">
-                            <option value="all">Any Size</option>
-                            <option value="5">5 Marla</option>
-                            <option value="10">10 Marla</option>
-                            <option value="1">1 Kanal</option>
+                            <option value="all">{{__("Any Size")}}</option>
+                            <option value="5">{{__("5 Marla")}}</option>
+                            <option value="10">{{__("10 Marla")}}</option>
+                            <option value="1">{{__("1 Kanal")}}</option>
                         </select>
                     </div>
                 </div>
@@ -59,9 +59,9 @@
                                 <div class="flex justify-between items-start mb-3">
                                     <div>
                                         <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-bold uppercase">
-                                            {{ $plot->status ?? 'Available' }}
+                                            {{ $plot->status ?? '__("Available")' }}
                                         </span>
-                                        <h3 class="text-xl font-extrabold text-white mt-2">Plot #{{ $plot->plot_number }}</h3>
+                                        <h3 class="text-xl font-extrabold text-white mt-2">{{__("Plot")}} #{{ $plot->plot_number }}</h3>
                                         
                                         <!-- 🏢 TOWN DETAIL WITH GOOGLE MAP LINK -->
                                         <div class="text-xs text-amber-400 font-semibold mt-1 flex items-center gap-1.5 flex-wrap">
@@ -74,7 +74,7 @@
 
                                             <!-- Google Map Marker Button/Link -->
                                             <a href="{{ $townMapUrl }}" target="_blank" rel="noopener noreferrer" title="View Town on Google Maps" class="inline-flex items-center gap-1 text-[10px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md transition-colors ml-1">
-                                                <i class="fa-solid fa-location-dot"></i> Map
+                                                <i class="fa-solid fa-location-dot"></i> {{__("Map")}}
                                             </a>
                                         </div>
                                     </div>

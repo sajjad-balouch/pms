@@ -4,11 +4,11 @@
         <!-- Header -->
         <div class="text-center space-y-3 max-w-2xl mx-auto">
             <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest rounded-full">
-                <i class="fa-solid fa-headset mr-1"></i> Get In Touch
+                <i class="fa-solid fa-headset mr-1"></i> {{__("Get In Touch")}}
             </span>
-            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight">Contact PrimeEstates</h1>
+            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight">{{__("Contact Us")}}</h1>
             <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
-                Have questions regarding land administration records, ownership verification, or housing scheme NOCs? Our team is available 24/7 to assist you.
+                {{__("Have questions regarding land administration records, ownership verification, or housing scheme NOCs? Our team is available 24/7 to assist you.")}}
             </p>
         </div>
 
@@ -22,7 +22,7 @@
                         <i class="fa-solid fa-phone-volume"></i>
                     </div>
                     <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">For Help</h4>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{__("For Help")}}</h4>
                         <a href="tel:+923078617447" class="text-sm font-extrabold text-white hover:text-amber-400 transition-colors">0307-8617447</a>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                         <i class="fa-solid fa-envelope-open-text"></i>
                     </div>
                     <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Official Support Email</h4>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{__("Official Support Email")}}</h4>
                         <a href="mailto:support@primeestates.com" class="text-sm font-extrabold text-white hover:text-amber-400 transition-colors">support@assanzameen.com</a>
                     </div>
                 </div>
@@ -44,8 +44,8 @@
                         <i class="fa-solid fa-location-dot"></i>
                     </div>
                     <div>
-                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Headquarters</h4>
-                        <p class="text-xs font-semibold text-slate-200 mt-0.5">Chachran Road Zahirpir</p>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{__("Headquarters")}}</h4>
+                        <p class="text-xs font-semibold text-slate-200 mt-0.5">{{__("Chachran Road Zahirpir")}}</p>
                     </div>
                 </div>
 
@@ -76,14 +76,14 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Full Name -->
                         <div>
-                            <label class="text-xs text-slate-400 block mb-1 font-semibold">Full Name <span class="text-amber-400">*</span></label>
+                            <label class="text-xs text-slate-400 block mb-1 font-semibold">{{__("Full Name")}} <span class="text-amber-400">*</span></label>
                             <input type="text" wire:model="name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500 transition-all placeholder:text-slate-600" placeholder="e.g. Ali Raza">
                             @error('name') <span class="text-rose-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <!-- Email Address -->
                         <div>
-                            <label class="text-xs text-slate-400 block mb-1 font-semibold">Email Address <span class="text-amber-400">*</span></label>
+                            <label class="text-xs text-slate-400 block mb-1 font-semibold">{{__("Email Address")}} <span class="text-amber-400">*</span></label>
                             <input type="email" wire:model="email" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500 transition-all placeholder:text-slate-600" placeholder="e.g. ali@example.com">
                             @error('email') <span class="text-rose-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
@@ -92,14 +92,14 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Contact Phone Field -->
                         <div>
-                            <label class="text-xs text-slate-400 block mb-1 font-semibold">Contact Phone Number <span class="text-amber-400">*</span></label>
+                            <label class="text-xs text-slate-400 block mb-1 font-semibold">{{__("Contact Phone Number")}} <span class="text-amber-400">*</span></label>
                             <input type="text" wire:model="phone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500 transition-all placeholder:text-slate-600" placeholder="e.g. +92 300 1234567">
                             @error('phone') <span class="text-rose-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <!-- Subject -->
                         <div>
-                            <label class="text-xs text-slate-400 block mb-1 font-semibold">Subject <span class="text-amber-400">*</span></label>
+                            <label class="text-xs text-slate-400 block mb-1 font-semibold">{{__("Subject")}} <span class="text-amber-400">*</span></label>
                             <input type="text" wire:model="subject" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500 transition-all placeholder:text-slate-600" placeholder="e.g. Plot NOC Inquiry">
                             @error('subject') <span class="text-rose-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                         </div>
@@ -107,15 +107,15 @@
 
                     <!-- Message Body -->
                     <div>
-                        <label class="text-xs text-slate-400 block mb-1 font-semibold">Message <span class="text-amber-400">*</span></label>
+                        <label class="text-xs text-slate-400 block mb-1 font-semibold">{{__("Message")}} <span class="text-amber-400">*</span></label>
                         <textarea rows="5" wire:model="message" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500 transition-all placeholder:text-slate-600 resize-none" placeholder="Explain your inquiry in detail..."></textarea>
                         @error('message') <span class="text-rose-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Submit Button -->
                     <button type="submit" wire:loading.attr="disabled" class="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black text-xs py-3.5 rounded-xl transition-all flex items-center justify-center gap-2">
-                        <span wire:loading.remove><i class="fa-solid fa-paper-plane mr-1"></i> Send Message</span>
-                        <span wire:loading><i class="fa-solid fa-spinner fa-spin"></i> Submitting Inquiry...</span>
+                        <span wire:loading.remove><i class="fa-solid fa-paper-plane mr-1"></i> {{__("Send Message")}}</span>
+                        <span wire:loading><i class="fa-solid fa-spinner fa-spin"></i> {{__("Submitting Inquiry...")}}</span>
                     </button>
                 </form>
 
