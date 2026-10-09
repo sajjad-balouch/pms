@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="icon" type="image/png" href="{{ asset('public/favicon.png') }}">
+        <meta name="facebook-domain-verification" content="0euryzc4bk3zu3xheravcmf8iloetv" />
 
         <title>{{ config('app.name', 'Assan Zameen') }}</title>
 
