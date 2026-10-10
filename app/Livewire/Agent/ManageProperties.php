@@ -6,6 +6,7 @@ use App\Models\City;
 use App\Models\Property;
 use App\Models\Town;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -82,6 +83,7 @@ class ManageProperties extends Component
         $this->status = 'available';
         $this->new_images = [];
         $this->existing_images = [];
+        $this->resetValidation();
     }
 
     public function selectCity($id, $name)
@@ -90,7 +92,7 @@ class ManageProperties extends Component
         $this->selected_city_name = $name;
         $this->city_search = '';
         
-        // Jab city change ho to town filter reset kar dein
+        // City change hone par town filter reset
         $this->town_id = null; 
     }
 
@@ -98,13 +100,24 @@ class ManageProperties extends Component
     {
         $this->validate();
 
-        $imagePaths = $this->existing_images;
+        $imagePaths = is_array($this->existing_images) ? $this->existing_images : [];
+
+        // Direct public folder upload logic (Zero-Exception)
         if (!empty($this->new_images)) {
             $destinationPath = public_path('property_images');
 
+            // Agar folder nahi hai to direct create karein
+            if (!File::exists($destinationPath)) {
+                File::makeDirectory($destinationPath, 0755, true);
+            }
+
             foreach ($this->new_images as $image) {
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                $image->move($destinationPath, $imageName);
+                $targetFile = $destinationPath . DIRECTORY_SEPARATOR . $imageName;
+
+                // Native copy ensures no lock/permission error from symfony move
+                copy($image->getRealPath(), $targetFile);
+
                 $imagePaths[] = 'property_images/' . $imageName;
             }
         }
@@ -133,16 +146,15 @@ class ManageProperties extends Component
         $this->resetForm();
     }
 
-   public function edit($id)
+    public function edit($id)
     {
-        // city aur town eager load karein
         $property = Property::where('agent_id', Auth::id())->with(['city', 'town'])->findOrFail($id);
 
         $this->property_id = $property->id;
         $this->city_id = $property->city_id;
         
-        // Agar property par direct city_id hai to uska name, warna town ki city ka fallback
-        $this->selected_city_name = $property->city ?? $property->town?->city ?? '';
+        // City relation se name nikaalein ya town relation se fallback
+        $this->selected_city_name = $property->city?->name ?? $property->town?->city?->name ?? '';
         
         $this->town_id = $property->town_id;
         $this->title = $property->title;
@@ -154,15 +166,50 @@ class ManageProperties extends Component
         $this->google_map_url = $property->google_map_url;
         $this->description = $property->description;
         $this->status = $property->status;
-        $this->existing_images = $property->images ?? [];
+        $this->existing_images = is_array($property->images) ? $property->images : [];
+        $this->new_images = [];
 
         $this->isModalOpen = true;
     }
 
+    public function deleteImage($index)
+    {
+        if (isset($this->existing_images[$index])) {
+            $imageToDelete = $this->existing_images[$index];
+            $fullPath = public_path($imageToDelete);
+
+            if (File::exists($fullPath)) {
+                File::delete($fullPath);
+            }
+
+            unset($this->existing_images[$index]);
+            $this->existing_images = array_values($this->existing_images);
+
+            // Agar edit mode mein hain to database update karein
+            if ($this->property_id) {
+                Property::where('id', $this->property_id)->update([
+                    'images' => $this->existing_images
+                ]);
+            }
+        }
+    }
+
     public function delete($id)
     {
-        Property::where('agent_id', Auth::id())->findOrFail($id)->delete();
-        session()->flash('message', 'Property deleted.');
+        $property = Property::where('agent_id', Auth::id())->findOrFail($id);
+        
+        // Attached images ko public folder se clean karein
+        if (!empty($property->images) && is_array($property->images)) {
+            foreach ($property->images as $imgPath) {
+                $file = public_path($imgPath);
+                if (File::exists($file)) {
+                    File::delete($file);
+                }
+            }
+        }
+
+        $property->delete();
+        session()->flash('message', 'Property deleted successfully.');
     }
 
     public function render()
@@ -187,15 +234,13 @@ class ManageProperties extends Component
             $query->where('purpose', $this->purposeFilter);
         }
 
-        // Searchable Modal Cities Filter (Sirf Active Cities)
         $citiesQuery = City::query()->where('is_active', 1);
         if ($this->city_search) {
             $citiesQuery->where('name', 'like', '%' . $this->city_search . '%');
         }
 
-        // Filter towns according to selected city
         $towns = $this->city_id 
-            ? Town::where([['city_id', $this->city_id],['is_active',1]])->get() 
+            ? Town::where([['city_id', $this->city_id], ['is_active', 1]])->get() 
             : collect();
 
         return view('livewire.agent.manage-properties', [
