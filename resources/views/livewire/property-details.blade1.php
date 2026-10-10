@@ -1,4 +1,6 @@
 @php 
+    //dd($property);
+    // Agar relation load nahi hua toh direct relationship method call karke name nikal lein
     $cityName = $property->city?->name 
         ?? $property->city()->first()?->name 
         ?? $property->town?->city?->name 
@@ -8,19 +10,16 @@
     $mapUrl = !empty($property->google_map_url) 
         ? $property->google_map_url 
         : 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode(($property->location ?? '') . ', ' . $cityName);
-
-    // Contact person (Agent ya Owner) fallback
-    $contactPerson = $property->agent ?? $property->user ?? null;
-    $contactPhone = $contactPerson?->phone ?? $property->contact_number ?? null;
-    $cleanPhone = $contactPhone ? preg_replace('/[^0-9]/', '', $contactPhone) : null;
 @endphp
 
 <div 
     x-data="{ 
+        unlockModal: false,
         activeImage: '{{ $firstImg }}',
         lightboxOpen: false,
         lightboxSrc: ''
     }"
+    x-on:unlock-success.window="unlockModal = false"
     class="bg-slate-950 min-h-screen text-slate-100 py-10 px-4 sm:px-6 lg:px-8"
 >
     <!-- Flash Messages -->
@@ -72,7 +71,7 @@
             <!-- Left 2-Columns: Images & Details -->
             <div class="lg:col-span-2 space-y-8">
                 
-                <!-- Image Gallery Section -->
+                <!-- Modern Image Gallery Section -->
                 <div class="space-y-4">
                     <div class="relative h-[360px] sm:h-[460px] rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl group">
                         @if(count($images) > 0)
@@ -165,7 +164,7 @@
 
             </div>
 
-            <!-- Right Column: Sidebar (Location Guidance & Direct Contact Info) -->
+            <!-- Right Column: Sidebar (Location Guidance & Agent Contact) -->
             <div class="space-y-6">
 
                 <!-- Location Map Card -->
@@ -187,53 +186,139 @@
                     </a>
                 </div>
 
-                <!-- Direct Agent / Owner Details Card -->
+                <!-- Agent Details Sidebar Card (Locked / Unlocked) -->
                 <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl relative">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                         <span class="text-amber-400 text-xs font-bold uppercase tracking-widest">
-                            <i class="fa-solid fa-address-card mr-1"></i> Contact Information
+                            <i class="fa-solid fa-address-card mr-1"></i> Agent Contact Info
                         </span>
-                        <span class="text-[10px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase px-2 py-0.5 rounded-full">
-                            Verified
-                        </span>
-                    </div>
-
-                    <!-- Contact Person Info -->
-                    <div class="flex items-center gap-4 border-b border-slate-800 pb-6">
-                        <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl font-bold uppercase shrink-0">
-                            {{ substr($contactPerson->name ?? 'A', 0, 1) }}
-                        </div>
-                        <div class="overflow-hidden">
-                            <h4 class="text-lg font-bold text-white truncate">{{ $contactPerson->name ?? 'Property Representative' }}</h4>
-                            <span class="text-xs text-slate-400 capitalize block">{{ $contactPerson->role ?? 'Agent / Dealer' }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Direct Contact Buttons -->
-                    <div class="space-y-3">
-                        @if(!empty($contactPhone))
-                            <a href="tel:{{ $contactPhone }}" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
-                                <i class="fa-solid fa-phone"></i> Call {{ $contactPhone }}
-                            </a>
-                            
-                            @if(!empty($cleanPhone))
-                                <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode('Assalam-o-Alaikum, I am inquiring about property #' . $property->id . ' listed on AssanZameen.') }}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
-                                    <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp Direct
-                                </a>
-                            @endif
-                        @else
-                            <div class="text-center py-3 px-4 bg-slate-950/60 rounded-2xl border border-slate-800">
-                                <i class="fa-solid fa-phone-slash text-slate-500 text-lg mb-1 block"></i>
-                                <p class="text-xs text-slate-400">Phone number not listed for this property.</p>
-                            </div>
+                        @if($isUnlocked)
+                            <span class="text-[10px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase px-2 py-0.5 rounded-full">
+                                Unlocked
+                            </span>
                         @endif
                     </div>
+
+                    @if($isUnlocked)
+                        <!-- Unlocked Contact State -->
+                        <div class="flex items-center gap-4 border-b border-slate-800 pb-6">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl font-bold">
+                                {{ substr($property->agent->name ?? 'A', 0, 1) }}
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-white">{{ $property->agent->name ?? 'Property Agent' }}</h4>
+                                <span class="text-xs text-slate-400 capitalize block">{{ $property->agent->role ?? 'Agent' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            @if(!empty($property->agent->phone))
+                                <a href="tel:{{ $property->agent->phone }}" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
+                                    <i class="fa-solid fa-phone"></i> Call {{ $property->agent->phone }}
+                                </a>
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $property->agent->phone) }}?text=Hi, I unlocked your property #{{ $property->id }}" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+                                    <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp Direct
+                                </a>
+                            @else
+                                <p class="text-xs text-slate-400 text-center py-2">Phone number not listed on agent profile.</p>
+                            @endif
+                        </div>
+                    @else
+                        <!-- Locked Contact State -->
+                        <div class="relative rounded-2xl border border-slate-800 bg-slate-950 p-6 text-center space-y-4 overflow-hidden">
+                            <div class="filter blur-sm select-none opacity-40 space-y-2 pointer-events-none">
+                                <div class="w-12 h-12 rounded-full bg-slate-800 mx-auto"></div>
+                                <div class="h-4 bg-slate-800 rounded w-2/3 mx-auto"></div>
+                                <div class="h-3 bg-slate-800 rounded w-1/2 mx-auto"></div>
+                                <div class="h-10 bg-slate-800 rounded-xl w-full mt-4"></div>
+                            </div>
+
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/90 rounded-2xl p-4 z-10">
+                                <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-lg mb-2">
+                                    <i class="fa-solid fa-lock"></i>
+                                </div>
+                                <h4 class="text-white font-bold text-sm mb-1">Direct Contact Protected</h4>
+                                <p class="text-xs text-slate-400 mb-4 max-w-[220px]">Pay a small fee from your wallet to instantly unlock agent phone & WhatsApp.</p>
+                                
+                                @guest
+                                    <a href="{{ route('login') }}" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                        <i class="fa-solid fa-right-to-bracket"></i> Login to Unlock
+                                    </a>
+                                @else
+                                    <button 
+                                        type="button" 
+                                        @click="unlockModal = true" 
+                                        class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold py-3 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer"
+                                    >
+                                        <i class="fa-solid fa-key"></i> Unlock Contact (PKR {{ number_format($unlockFee) }})
+                                    </button>
+                                @endguest
+                            </div>
+                        </div>
+                    @endif
+
                 </div>
 
             </div>
 
         </div>
 
+    </div>
+
+    <!-- Unlock Fee Modal (Alpine Driven - Zero Morphing Conflict) -->
+    <div 
+        x-show="unlockModal" 
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md" 
+        style="display: none;"
+    >
+        <div @click.outside="unlockModal = false" class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+            <button type="button" @click="unlockModal = false" class="absolute top-5 right-5 text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center space-y-3">
+                <div class="w-16 h-16 bg-amber-500/20 border border-amber-500/40 text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-inner">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-white">Unlock Contact Details</h3>
+                <p class="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                    To connect directly with the verified agent, a small fee of 
+                    <strong class="text-amber-400 font-bold">PKR {{ number_format($unlockFee) }}</strong> will be deducted from your wallet.
+                </p>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2">
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span>Property ID:</span>
+                    <span class="font-bold text-slate-200">#{{ $property->id }}</span>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400">
+                    <span>Unlock Fee:</span>
+                    <span class="font-bold text-amber-400">PKR {{ number_format($unlockFee) }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" @click="unlockModal = false" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl text-sm transition">
+                    Cancel
+                </button>
+                <button 
+                    type="button" 
+                    wire:click="processUnlock" 
+                    wire:loading.attr="disabled"
+                    class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 rounded-xl text-sm transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                    <span wire:loading.remove wire:target="processUnlock">Yes, Pay & Unlock</span>
+                    <span wire:loading wire:target="processUnlock"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Processing...</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Fullscreen Lightbox Modal (Alpine.js) -->
