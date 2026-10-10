@@ -238,7 +238,7 @@
                         </div>
 
                         <div class="mt-5">
-                            @if($this->isUnlocked($person->id))
+                           
                                 <div class="bg-slate-900/90 rounded-xl p-3 border border-emerald-500/30 space-y-1.5 text-xs">
                                     <div class="flex items-center justify-between text-emerald-400 font-semibold text-[11px] mb-1">
                                         <span class="flex items-center gap-1.5">
@@ -253,11 +253,7 @@
                                         <i class="fa-solid fa-envelope text-amber-400 text-[10px]"></i> {{ $person->email }}
                                     </a>
                                 </div>
-                            @else
-                                <button wire:click="openUnlockModal({{ $person->id }})" class="w-full bg-slate-900 hover:bg-amber-500/10 hover:border-amber-500/50 text-amber-400 border border-slate-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-lock text-amber-400"></i> {{__("Unlock Contact Details")}}
-                                </button>
-                            @endif
+                            
                         </div>
                     </div>
                 @empty
