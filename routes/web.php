@@ -39,6 +39,7 @@ use App\Livewire\Admin\TownSchemeManagement;
 use App\Livewire\Admin\CityManagement;
 use App\Livewire\Admin\CreateProperty;
 use Illuminate\Support\Facades\Session;
+use App\Livewire\Admin\PageAnalytics;
 
 // Public Routes
 Route::get('/', function () {
@@ -111,6 +112,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Cities Management Route
         Route::get('/cities', CityManagement::class)->name('cities');
+
+        Route::get('/admin/analytics', PageAnalytics::class)->name('analytics');
 
     });
 

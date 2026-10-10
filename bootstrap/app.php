@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Web middleware group mein SetLocale append karein (yeh automatically session ke baad execute hoga)
         $middleware->web(append: [
             SetLocale::class,
+            \App\Http\Middleware\TrackPageViews::class,
         ]);
 
         // Route Aliases
