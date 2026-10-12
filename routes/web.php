@@ -40,6 +40,7 @@ use App\Livewire\Admin\CityManagement;
 use App\Livewire\Admin\CreateProperty;
 use Illuminate\Support\Facades\Session;
 use App\Livewire\Admin\PageAnalytics;
+use App\Livewire\Admin\WhatsAppMarketing;
 
 // Public Routes
 Route::get('/', function () {
@@ -114,6 +115,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/cities', CityManagement::class)->name('cities');
 
         Route::get('/admin/analytics', PageAnalytics::class)->name('analytics');
+
+        Route::get('/whatsapp-marketing', WhatsAppMarketing::class)->name('whatsapp.marketing');
 
     });
 
