@@ -27,16 +27,19 @@
             /* Jameel Noori Nastaleeq Web Font */
         @font-face {
             font-family: 'Jameel Noori Nastaleeq';
-            src: url('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff2') format('woff2'),
-                 url('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff') format('woff'),
-                 url('public/fonts/Jameel_Noori_Nastaleeq_Regular.ttf') format('truetype');
+            src: url('../public/fonts/Jameel_Noori_Nastaleeq_Regular.woff2') format('woff2'),
+                 url('../public/fonts/Jameel_Noori_Nastaleeq_Regular.woff') format('woff'),
+                 url('../public/fonts/Jameel_Noori_Nastaleeq_Regular.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap;
         }
 
         body {
-            font-family: {{ app()->getLocale() == 'ur' ? "'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif" : "'Plus Jakarta Sans', sans-serif" }} !important;
+            font-family: {{ app()->getLocale() == 'ur' ? "Jameel Noori Nastaleeq, Noto Nastaliq Urdu, serif" : "sans-serif" }} !important;
+        }
+        .urdu{
+            font-family: Jameel Noori Nastaleeq !important;
         }
 
         @if(app()->getLocale() == 'ur')
@@ -62,7 +65,7 @@
             }
         </style>
     </head>
-    <body class="font-sans antialiased bg-[#090d16] text-slate-100 selection:bg-amber-400 selection:text-slate-950">
+    <body class="font-sans antialiased bg-[#090d16] text-slate-100 selection:bg-amber-400 selection:text-slate-950 urdu">
         <!-- Ambient Glowing Background Elements -->
         <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
             <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px]"></div>

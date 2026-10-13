@@ -9,10 +9,13 @@ use Livewire\Component;
 
 class AgentDashboard extends Component
 {
+    public function mount(){
+        // dd($agentId);
+    }
     public function render()
     {
         $agentId = Auth::id();
-
+        
         // Agent Specific Metrics
         $totalLeads = Lead::where('agent_id', $agentId)->count();
         $activeLeads = Lead::where('agent_id', $agentId)->whereIn('status', ['new', 'contacted', 'site_visit', 'negotiation'])->count();

@@ -16,13 +16,12 @@ new class extends Component
     }
 }; ?>
 
-
 <nav x-data="{ open: false }" class="bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-50">
     <style>
-    .text-gray-900 {
-        color: rgb(252 211 77 / var(--tw-text-opacity, 1));
-    }
-</style>
+        .text-gray-900 {
+            color: rgb(252 211 77 / var(--tw-text-opacity, 1));
+        }
+    </style>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
             
@@ -54,10 +53,10 @@ new class extends Component
 
                 <!-- Desktop Navigation Links -->
                 @auth
-                    <div class="hidden lg:flex items-center space-x-1.5">
+                    <div class="hidden lg:flex items-center space-x-2">
                         <!-- Dashboard -->
                         <x-nav-link :href="route($dashboardRoute)" :active="request()->routeIs('*dashboard')" wire:navigate 
-                            class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('*dashboard') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                            class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('*dashboard') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                             <i class="fa-solid fa-chart-pie mr-2 {{ request()->routeIs('*dashboard') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                             {{ __('Dashboard') }}
                         </x-nav-link>
@@ -65,19 +64,19 @@ new class extends Component
                         <!-- Town Owner Menu Items -->
                         @if($role === 'town_owner')
                             <x-nav-link :href="route('town_owner.towns')" :active="request()->routeIs('town_owner.towns*')" wire:navigate
-                                class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.towns*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.towns*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-building mr-2 {{ request()->routeIs('town_owner.towns*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('My Housing Schemes') }}
                             </x-nav-link>
 
                             <x-nav-link :href="route('town_owner.employees')" :active="request()->routeIs('town_owner.employees*')" wire:navigate
-                                class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.employees*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.employees*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-users mr-2 {{ request()->routeIs('town_owner.employees*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Employees') }}
                             </x-nav-link>
 
                             <x-nav-link :href="route('town_owner.expenses')" :active="request()->routeIs('town_owner.expenses*')" wire:navigate
-                                class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.expenses*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.expenses*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-receipt mr-2 {{ request()->routeIs('town_owner.expenses*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Expenses') }}
                             </x-nav-link>
@@ -85,35 +84,116 @@ new class extends Component
 
                         <!-- Agent Menu Items -->
                         @if($role === 'agent')
+                            <!-- Leads (Direct Link) -->
                             <x-nav-link :href="route('agent.leads')" :active="request()->routeIs('agent.leads.*')" wire:navigate
-                                class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('agent.leads.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('agent.leads.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-bullhorn mr-2 {{ request()->routeIs('agent.leads.*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Leads') }}
                             </x-nav-link>
 
-                            <x-nav-link :href="route('agent.properties')" :active="request()->routeIs('agent.properties.*')" wire:navigate
-                                class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('agent.properties.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
-                                <i class="fa-solid fa-house mr-2 {{ request()->routeIs('agent.properties.*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
-                                {{ __('My Properties') }}
-                            </x-nav-link>
+                            <!-- Dropdown 1: Properties, Digital Card & B2B Exchange -->
+                            @php
+                                $isPropertiesActive = request()->routeIs('agent.properties.*') || request()->routeIs('agent.portfolio.settings') || request()->routeIs('agent.dealer.network');
+                            @endphp
+                            <x-dropdown align="left" width="56">
+                                <x-slot name="trigger">
+                                    <button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 focus:outline-none {{ $isPropertiesActive ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/70' }}">
+                                        <i class="fa-solid fa-house text-sm {{ $isPropertiesActive ? 'text-amber-400' : 'text-slate-400' }}"></i>
+                                        <span>{{ __('Properties & Hub') }}</span>
+                                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
+                                    </button>
+                                </x-slot>
+
+                                <x-slot name="content">
+                                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1">
+                                        <!-- My Properties -->
+                                        <a href="{{ route('agent.properties') }}" wire:navigate
+                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.properties.*') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                            <div class="flex items-center gap-2.5">
+                                                <i class="fa-solid fa-house-chimney text-amber-400"></i>
+                                                <span>{{ __('My Properties') }}</span>
+                                            </div>
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-bold">List</span>
+                                        </a>
+
+                                        <!-- Digital Card -->
+                                        <a href="{{ route('agent.portfolio.settings') }}" wire:navigate
+                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.portfolio.settings') ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                            <div class="flex items-center gap-2.5">
+                                                <i class="fa-solid fa-id-card-clip text-indigo-400"></i>
+                                                <span>{{ __('Digital Visiting Card') }}</span>
+                                            </div>
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">Web</span>
+                                        </a>
+
+                                        <!-- B2B Dealer Exchange -->
+                                        <a href="{{ route('agent.dealer.network') }}" wire:navigate
+                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.dealer.network') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                            <div class="flex items-center gap-2.5">
+                                                <i class="fa-solid fa-handshake-angle text-amber-400"></i>
+                                                <span>{{ __('B2B Dealer Exchange') }}</span>
+                                            </div>
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black">B2B</span>
+                                        </a>
+                                    </div>
+                                </x-slot>
+                            </x-dropdown>
+
+                            <!-- Dropdown 2: Agent Tools (Calculator & Bayana) -->
+                            @php
+                                $isToolsActive = request()->routeIs('agent.calculator') || request()->routeIs('agent.bayana');
+                            @endphp
+                            <x-dropdown align="left" width="56">
+                                <x-slot name="trigger">
+                                    <button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 focus:outline-none {{ $isToolsActive ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/70' }}">
+                                        <i class="fa-solid fa-screwdriver-wrench text-sm {{ $isToolsActive ? 'text-amber-400' : 'text-slate-400' }}"></i>
+                                        <span>{{ __('Tools') }}</span>
+                                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
+                                    </button>
+                                </x-slot>
+
+                                <x-slot name="content">
+                                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1">
+                                        <!-- Patwari Calculator -->
+                                        <a href="{{ route('agent.calculator') }}" wire:navigate
+                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.calculator') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                            <div class="flex items-center gap-2.5">
+                                                <i class="fa-solid fa-calculator text-amber-400"></i>
+                                                <span>{{ __('لینڈ کیلکولیٹر') }}</span>
+                                            </div>
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Tool</span>
+                                        </a>
+
+                                        <!-- Bayana Agreement PDF -->
+                                        <a href="{{ route('agent.bayana') }}" wire:navigate
+                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.bayana') ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                            <div class="flex items-center gap-2.5">
+                                                <i class="fa-solid fa-file-contract text-emerald-400"></i>
+                                                <span>{{ __('اقرار نامہ بیعانہ') }}</span>
+                                            </div>
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-black">PDF</span>
+                                        </a>
+                                    </div>
+                                </x-slot>
+                            </x-dropdown>
                         @endif
 
                         <!-- Admin Menu Items -->
                         @if($role === 'admin')
                             <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users.*')" wire:navigate
-                                class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('admin.users.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('admin.users.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-user-gear mr-2 {{ request()->routeIs('admin.users.*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Users') }}
                             </x-nav-link>
 
                             <x-nav-link :href="route('admin.towns')" :active="request()->routeIs('admin.towns.*')" wire:navigate
-                                class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('admin.towns.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('admin.towns.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-layer-group mr-2 {{ request()->routeIs('admin.towns.*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Housing Schemes') }}
                             </x-nav-link>
 
                             <x-nav-link :href="route('admin.topup-requests')" :active="request()->routeIs('admin.topup-requests')" wire:navigate
-                                class="relative px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('admin.topup-requests') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                class="relative px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('admin.topup-requests') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-wallet mr-2 {{ request()->routeIs('admin.topup-requests') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Top-Ups') }}
                                 @php
@@ -127,7 +207,7 @@ new class extends Component
                             </x-nav-link>
 
                             <x-nav-link :href="route('admin.payment-methods')" :active="request()->routeIs('admin.payment-methods')" wire:navigate
-                                class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('admin.payment-methods') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('admin.payment-methods') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-credit-card mr-2 {{ request()->routeIs('admin.payment-methods') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Payment Methods') }}
                             </x-nav-link>
@@ -162,7 +242,7 @@ new class extends Component
                                     <p class="text-xs font-bold text-white truncate">{{ auth()->user()->email }}</p>
                                 </div>
 
-                                <button wire:click="logout" class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors">
+                                <button wire:click="logout" class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer">
                                     <i class="fa-solid fa-right-from-bracket"></i>
                                     {{ __('Log Out') }}
                                 </button>
@@ -216,11 +296,48 @@ new class extends Component
                 @endif
 
                 @if($role === 'agent')
+                    <!-- Leads -->
                     <a href="{{ route('agent.leads') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('agent.leads.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
-                        <i class="fa-solid fa-bullhorn text-amber-400"></i> {{ __('Leads & Inquiries') }}
+                        <i class="fa-solid fa-bullhorn text-amber-400"></i> {{ __('Leads CRM') }}
                     </a>
-                    <a href="{{ route('agent.properties') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('agent.leads.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
-                        <i class="fa-solid fa-house mr-2 {{ request()->routeIs('agent.properties.*') ? 'text-amber-400' : 'text-slate-400' }}"></i>{{ __('My Properties') }}
+
+                    <!-- Properties Section Header -->
+                    <div class="pt-2 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Properties & Network</div>
+
+                    <a href="{{ route('agent.properties') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.properties.*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
+                        <i class="fa-solid fa-house text-amber-400"></i> {{ __('My Properties') }}
+                    </a>
+                    <a href="{{ route('agent.portfolio.settings') }}" class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.portfolio.settings') ? 'text-indigo-300 bg-indigo-500/15 border border-indigo-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-id-card-clip text-indigo-400"></i>
+                            <span>{{ __('Digital Visiting Card') }}</span>
+                        </div>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">Web</span>
+                    </a>
+                    <a href="{{ route('agent.dealer.network') }}" class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.dealer.network') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-handshake-angle text-amber-400"></i>
+                            <span>{{ __('B2B Dealer Exchange') }}</span>
+                        </div>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black">B2B</span>
+                    </a>
+
+                    <!-- Tools Section Header -->
+                    <div class="pt-2 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Agent Tools</div>
+
+                    <a href="{{ route('agent.calculator') }}" class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.calculator') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-calculator text-amber-400"></i>
+                            <span>{{ __('لینڈ کیلکولیٹر') }}</span>
+                        </div>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Tool</span>
+                    </a>
+                    <a href="{{ route('agent.bayana') }}" class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.bayana') ? 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-file-contract text-emerald-400"></i>
+                            <span>{{ __('اقرار نامہ بیعانہ') }}</span>
+                        </div>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-black">PDF</span>
                     </a>
                 @endif
 
@@ -243,7 +360,7 @@ new class extends Component
                     </div>
                 </div>
 
-                <button wire:click="logout" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-rose-400 hover:bg-rose-500/10">
+                <button wire:click="logout" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-rose-400 hover:bg-rose-500/10 cursor-pointer">
                     <i class="fa-solid fa-right-from-bracket"></i> {{ __('Log Out') }}
                 </button>
             </div>

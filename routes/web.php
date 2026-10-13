@@ -41,6 +41,11 @@ use App\Livewire\Admin\CreateProperty;
 use Illuminate\Support\Facades\Session;
 use App\Livewire\Admin\PageAnalytics;
 use App\Livewire\Admin\WhatsAppMarketing;
+use App\Livewire\Agent\LandCalculator;
+use App\Livewire\Agent\BayanaGenerator;
+use App\Livewire\Agent\AgencyProfile;
+use App\Livewire\PublicAgentPortfolio;
+use App\Livewire\Agent\DealerExchange;
 
 // Public Routes
 Route::get('/', function () {
@@ -70,6 +75,8 @@ Route::middleware(['web'])->group(function () {
     Route::get('/available-plots', AvailablePlots::class)->name('available-plots');
     Route::get('/about-us', AboutUs::class)->name('about-us');
     Route::get('/contact', ContactUs::class)->name('contact');
+
+    
 
 });
 
@@ -144,6 +151,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/properties', ManageProperties::class)->name('properties');
         // Livewire Manage Leads Route
         Route::get('/leads', ManageLeads::class)->name('leads');
+
+        Route::get('/calculator', LandCalculator::class)->name('calculator');
+        Route::get('/bayana-generator', BayanaGenerator::class)->name('bayana');
+        Route::get('/portfolio-settings', AgencyProfile::class)->name('portfolio.settings');
+        Route::get('/dealer-network', DealerExchange::class)->name('dealer.network');
+
     });
 
     // General User Routes
@@ -166,5 +179,8 @@ Route::middleware('guest')->group(function () {
     Route::get('login', NewLogin::class)->name('login');
     Route::get('register', NewRegister::class)->name('register');
 });
+
+// 2. Public Facing Digital Card Link
+    Route::get('/agent/{username}', PublicAgentPortfolio::class)->name('agent.public.portfolio');
 
 require __DIR__.'/auth.php';
