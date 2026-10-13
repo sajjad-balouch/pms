@@ -13,11 +13,14 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-800/90 p-6 rounded-2xl shadow-md border border-slate-700/80 gap-4">
         <div>
-            <h2 class="text-2xl font-bold text-white">Direct Property Listings</h2>
-            <p class="text-sm text-slate-400">مکان، دکان، پلاٹ، اپارٹمنٹ یا زرعی زمین براہِ راست لسٹ کریں</p>
+            <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                <span>Direct Property Listings & WhatsApp Hub</span>
+                <span class="text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold">Pro Tools</span>
+            </h2>
+            <p class="text-sm text-slate-400 mt-1">مکان، دکان، پلاٹ اور زرعی زمین لسٹ کریں اور 1-کلک پر گروپس و خریداروں کو واٹس ایپ بھیجیں</p>
         </div>
 
-        <button wire:click="create" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all active:scale-95">
+        <button wire:click="create" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all active:scale-95 cursor-pointer">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -62,11 +65,41 @@
                         <th class="px-6 py-4">Size & Location</th>
                         <th class="px-6 py-4">Price</th>
                         <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-center">WhatsApp Growth Tools</th>
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-700/60 text-sm">
                     @forelse ($properties as $property)
+                        @php
+                            $cityName = $property->city ?? $property->town?->city ?? 'Pakistan';
+                            $propertyUrl = url('/property/' . $property->id);
+                            $mapUrl = !empty($property->google_map_url) 
+                                ? $property->google_map_url 
+                                : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($property->location . ', ' . $cityName);
+
+                            // Clean Multi-line WhatsApp Urdu Brochure
+                            $adText = "🏢 *" . $property->title . "*\n\n"
+                                    . "🔹 *نوعیت:* " . ucfirst($property->property_type) . " (" . str_replace('_', ' ', $property->purpose) . ")\n"
+                                    . "🔹 *رقبہ:* " . $property->area_size . "\n"
+                                    . "🔹 *ڈیمانڈ قیمت:* PKR " . number_format($property->price) . "\n"
+                                    . "📍 *لوکیشن:* " . $property->location . "، " . $cityName . "\n\n"
+                                    . "🗺️ *گوگل میپ لوکیشن:*\n" . $mapUrl . "\n\n"
+                                    . "📸 *تصاویر اور مکمل تفصیلات:*\n" . $propertyUrl . "\n\n"
+                                    . "👤 *رابطہ برائے ڈیل:* " . Auth::user()->name . "\n"
+                                    . "⚡ پیشکش بذریعہ AssanZameen.com";
+
+                            // Catalog Style Card
+                            $catalogText = "📦 *PROPERTY CATALOG CARD*\n"
+                                         . "━━━━━━━━━━━━━━━━━━━━\n"
+                                         . "🏠 *{$property->title}*\n"
+                                         . "💰 قیمت: PKR " . number_format($property->price) . "\n"
+                                         . "📐 رقبہ: {$property->area_size}\n"
+                                         . "📍 لوکیشن: {$property->location}، {$cityName}\n"
+                                         . "🔗 وزٹ لنک: {$propertyUrl}\n"
+                                         . "━━━━━━━━━━━━━━━━━━━━\n"
+                                         . "ڈیلر: " . Auth::user()->name;
+                        @endphp
                         <tr wire:key="property-row-{{ $property->id }}" class="hover:bg-slate-700/30 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="font-bold text-white">{{ $property->title }}</div>
@@ -83,7 +116,7 @@
                                 <div class="text-xs text-slate-400">
                                     {{ $property->location }}, 
                                     <span class="text-amber-400 font-medium">
-                                        {{ $property->city ?? $property->town?->city ?? 'N/A' }}
+                                        {{ $cityName }}
                                     </span>
                                 </div>
                             </td>
@@ -96,14 +129,66 @@
                                     {{ $property->status }}
                                 </span>
                             </td>
+                            
+                            <!-- 7-in-1 WhatsApp Tools Grid -->
+                            <td class="px-6 py-4 text-center">
+                                <div class="inline-flex items-center gap-1.5 flex-wrap justify-center max-w-xs" x-data>
+                                    
+                                    <!-- 1. Direct Share Urdu Brochure -->
+                                    <button type="button"
+                                            @click="shareListing({{ json_encode($adText) }})"
+                                            title="Share Brochure on WhatsApp"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow-sm cursor-pointer">
+                                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                                        <span>شیئر</span>
+                                    </button>
+
+                                    <!-- 2. Copy Ad Text for Dealer Groups -->
+                                    <button type="button"
+                                            @click="navigator.clipboard.writeText({{ json_encode($adText) }}); alert('پراپرٹی کا اردو اشتہار کاپی ہو گیا! ڈیلر گروپس میں پیسٹ کریں۔')"
+                                            title="Copy Urdu Ad for WhatsApp Groups"
+                                            class="inline-flex items-center gap-1 px-2 py-1 bg-slate-900 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-lg text-xs font-bold transition cursor-pointer">
+                                        <i class="fa-solid fa-copy text-xs"></i>
+                                        <span>گروپ ایڈ</span>
+                                    </button>
+
+                                    <!-- 3. Send Location Pin Drop -->
+                                    <button type="button"
+                                            wire:click="sendLocationPin({{ $property->id }})"
+                                            title="Send Google Maps Pin to Client"
+                                            class="inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 rounded-lg text-xs font-bold transition cursor-pointer">
+                                        <i class="fa-solid fa-location-dot text-xs text-rose-400"></i>
+                                        <span>لوکیشن</span>
+                                    </button>
+
+                                    <!-- 4. Client Follow-Up Deal Closing Modal -->
+                                    <button type="button"
+                                            wire:click="openFollowUpModal({{ $property->id }})"
+                                            title="Send Instant Follow-up to Lead (Visit/Token/Offer)"
+                                            class="inline-flex items-center gap-1 px-2 py-1 bg-purple-600/20 hover:bg-purple-600 text-purple-400 hover:text-white border border-purple-500/30 rounded-lg text-xs font-bold transition cursor-pointer">
+                                        <i class="fa-solid fa-user-clock text-xs"></i>
+                                        <span>فالو اپ</span>
+                                    </button>
+
+                                    <!-- 5. Catalog Card Copy -->
+                                    <button type="button"
+                                            @click="navigator.clipboard.writeText({{ json_encode($catalogText) }}); alert('بزنس کیٹلاگ کارڈ کاپی ہو گیا۔')"
+                                            title="Copy WhatsApp Business Catalog Format"
+                                            class="inline-flex items-center px-2 py-1 bg-slate-900 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-xs font-bold transition cursor-pointer">
+                                        <i class="fa-solid fa-layer-group text-xs text-indigo-400"></i>
+                                    </button>
+
+                                </div>
+                            </td>
+
                             <td class="px-6 py-4 text-right space-x-2">
-                                <button wire:click="edit({{ $property->id }})" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">Edit</button>
-                                <button wire:click="delete({{ $property->id }})" onclick="confirm('Are you sure?') || event.stopImmediatePropagation()" class="text-xs font-semibold text-rose-400 hover:text-rose-300">Delete</button>
+                                <button wire:click="edit({{ $property->id }})" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 cursor-pointer">Edit</button>
+                                <button wire:click="delete({{ $property->id }})" onclick="confirm('Are you sure?') || event.stopImmediatePropagation()" class="text-xs font-semibold text-rose-400 hover:text-rose-300 cursor-pointer">Delete</button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-slate-500">No individual properties listed yet.</td>
+                            <td colspan="7" class="px-6 py-8 text-center text-slate-500">No individual properties listed yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -114,7 +199,82 @@
         </div>
     </div>
 
-    <!-- Modal Form -->
+    <!-- Client Follow-Up Modal -->
+    @if($isFollowUpModalOpen &&$selectedPropertyForFollowup)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+        <div class="bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg border border-slate-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white">Client WhatsApp Follow-Up</h3>
+                </div>
+                <button wire:click="$set('isFollowUpModalOpen', false)" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+
+            <form wire:submit="sendFollowUp" class="p-6 space-y-4">
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+                    <div>
+                        <span class="text-slate-500 block text-[10px] uppercase font-bold">Selected Property</span>
+                        <span class="font-bold text-amber-400">{{ $selectedPropertyForFollowup->title }}</span>
+                    </div>
+                    <span class="font-bold text-emerald-400">PKR {{ number_format($selectedPropertyForFollowup->price) }}</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Client Name *</label>
+                        <input type="text" wire:model="client_name" placeholder="مثلاً: احمد رضا" 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                        @error('client_name') <span class="text-rose-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">WhatsApp Number *</label>
+                        <input type="text" wire:model="client_phone" placeholder="03001234567" 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                        @error('client_phone') <span class="text-rose-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Follow-Up Objective</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" wire:click="$set('followup_type', 'site_visit')"
+                                class="p-2.5 rounded-xl border text-[11px] font-bold transition text-center {{ $followup_type === 'site_visit' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-800 bg-slate-950 text-slate-400' }}">
+                            🏡 موقع وزٹ
+                        </button>
+                        <button type="button" wire:click="$set('followup_type', 'token_reminder')"
+                                class="p-2.5 rounded-xl border text-[11px] font-bold transition text-center {{ $followup_type === 'token_reminder' ? 'border-amber-500 bg-amber-500/10 text-amber-400' : 'border-slate-800 bg-slate-950 text-slate-400' }}">
+                            🤝 ٹوکن پیشکش
+                        </button>
+                        <button type="button" wire:click="$set('followup_type', 'price_offer')"
+                                class="p-2.5 rounded-xl border text-[11px] font-bold transition text-center {{ $followup_type === 'price_offer' ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' : 'border-slate-800 bg-slate-950 text-slate-400' }}">
+                            💼 آفس میٹنگ
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Custom Note / Time (Optional)</label>
+                    <input type="text" wire:model="custom_note" placeholder="مثلاً: شام 5 بجے موقع پر ملاقات ہو گی" 
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                    <button type="button" wire:click="$set('isFollowUpModalOpen', false)" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span>Send WhatsApp Now</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
+
+    <!-- Main Property Create / Edit Modal -->
     @if($isModalOpen)
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
         <div class="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-700 overflow-hidden">
@@ -122,7 +282,7 @@
                 <h3 class="text-lg font-bold text-white">
                     {{ $property_id ? 'Edit Property Details' : 'Add Property Information' }}
                 </h3>
-                <button wire:click="$set('isModalOpen', false)" class="text-slate-400 hover:text-white">&times;</button>
+                <button wire:click="$set('isModalOpen', false)" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
             </div>
 
             <form wire:submit="save" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
@@ -142,6 +302,7 @@
                             <option value="agricultural">Agricultural Land</option>
                             <option value="plot">Plot / Land</option>
                         </select>
+                        @error('property_type') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
@@ -150,11 +311,12 @@
                             <option value="for_sale">For Sale</option>
                             <option value="for_rent">For Rent</option>
                         </select>
+                        @error('purpose') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Searchable City Dropdown (Alpine.js with Livewire Binding) -->
+                    <!-- Searchable City Dropdown -->
                     <div x-data="{ open: false }" class="relative" wire:key="city-selector-modal-{{ $property_id ?? 'create' }}">
                         <label class="block text-xs font-bold uppercase text-slate-300 mb-1">City *</label>
                         
@@ -173,9 +335,9 @@
                             
                             <div class="divide-y divide-slate-800">
                                 @forelse($cities as $c)
-                                    <button type="button" wire:click="selectCity({{ $c->id }}, '{{ addslashes($c->name) }}')" @click="open = false" class="w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex justify-between items-center {{ $city_id == $c->id ? 'bg-indigo-600/30 text-indigo-400 font-bold' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                    <button type="button" wire:click="selectCity({{ $c->id }}, '{{ addslashes($c->name) }}')" @click="open = false" class="w-full text-left px-3 py-2 text-xs rounded-lg transition-colors flex justify-between items-center {{ $city_id ==$c->id ? 'bg-indigo-600/30 text-indigo-400 font-bold' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
                                         <span>{{ $c->name }}</span>
-                                        @if($city_id == $c->id)
+                                        @if($city_id ==$c->id)
                                             <span class="text-indigo-400 font-bold">✓</span>
                                         @endif
                                     </button>
@@ -244,13 +406,30 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                     </div>
-                    <span class="text-[11px] text-slate-400 mt-1 block">Google Maps se "Share" link copy karke yahan paste karein.</span>
                     @error('google_map_url') <span class="text-rose-400 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
+                <!-- Existing Images Preview with Delete option -->
+                @if(!empty($existing_images))
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-300 mb-1.5">Current Saved Photos</label>
+                        <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                            @foreach($existing_images as $index =>$img)
+                                <div class="relative group rounded-lg overflow-hidden border border-slate-700 h-16 bg-slate-950">
+                                    <img src="{{ asset('public/' . $img) }}" alt="Preview" class="w-full h-full object-cover">
+                                    <button type="button" wire:click="deleteImage({{ $index }})" class="absolute top-0.5 right-0.5 bg-rose-600/90 text-white rounded-md w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                        &times;
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <div>
-                    <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Upload Images</label>
+                    <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Upload New Images</label>
                     <input type="file" wire:model="new_images" multiple class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
+                    <div wire:loading wire:target="new_images" class="text-xs text-amber-400 mt-1">Uploading images to buffer...</div>
                 </div>
 
                 <div>
@@ -259,8 +438,8 @@
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-slate-700">
-                    <button type="button" wire:click="$set('isModalOpen', false)" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl font-semibold text-xs transition-colors">Cancel</button>
-                    <button type="submit" wire:loading.attr="disabled" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-xs shadow-md transition-all disabled:opacity-50">
+                    <button type="button" wire:click="$set('isModalOpen', false)" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl font-semibold text-xs transition-colors cursor-pointer">Cancel</button>
+                    <button type="submit" wire:loading.attr="disabled" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-xs shadow-md transition-all disabled:opacity-50 cursor-pointer">
                         <span wire:loading.remove wire:target="save">Save Property</span>
                         <span wire:loading wire:target="save">Saving...</span>
                     </button>
@@ -270,4 +449,47 @@
     </div>
     @endif
 
+    <!-- Universal Smart WhatsApp Launch & Listener Script -->
+    <script>
+        function shareListing(message) {
+            let encoded = encodeURIComponent(message);
+            let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                window.location.href = `whatsapp://send?text=${encoded}`;
+            } else {
+                window.location.href = `whatsapp://send?text=${encoded}`;
+                setTimeout(function() {
+                    if (!document.hidden) {
+                        window.open(`https://web.whatsapp.com/send?text=${encoded}`, '_blank');
+                    }
+                }, 600);
+            }
+        }
+
+        // Livewire Dispatch Handler for Cross-Device Routing
+        document.addEventListener('livewire:navigated', initAgentWhatsAppListener);
+        document.addEventListener('DOMContentLoaded', initAgentWhatsAppListener);
+
+        function initAgentWhatsAppListener() {
+            if (window._agentWhatsAppListenerAttached) return;
+            window._agentWhatsAppListenerAttached = true;
+
+            window.addEventListener('trigger-whatsapp', (event) => {
+                const data = event.detail;
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+                if (isMobile) {
+                    window.location.href = data.appUrl;
+                } else {
+                    window.location.href = data.appUrl;
+                    setTimeout(function() {
+                        if (!document.hidden) {
+                            window.open(data.webUrl, '_blank');
+                        }
+                    }, 650);
+                }
+            });
+        }
+    </script>
 </div>

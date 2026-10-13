@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Lead extends Model
 {
+
+    protected $casts = [
+        'next_followup_at' => 'datetime',
+        'last_whatsapp_at' => 'datetime',
+        'budget'           => 'decimal:2',
+    ];
     protected $fillable = [
         'agent_id',
         'town_id',
@@ -14,7 +20,11 @@ class Lead extends Model
         'client_phone',
         'client_email',
         'status',
+        'priority',          // hot, warm, cold
+        'source',            // portal, whatsapp, call, walk_in, social_media, banner
         'budget',
+        'next_followup_at',  // Scheduled call/visit date & time
+        'last_whatsapp_at',  // Last WhatsApp outreach timestamp
         'notes',
     ];
 

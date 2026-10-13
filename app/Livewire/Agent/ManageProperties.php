@@ -42,6 +42,14 @@ class ManageProperties extends Component
 
     public $isModalOpen = false;
 
+    // WhatsApp Follow-Up Modal States
+    public $isFollowUpModalOpen = false;
+    public $selectedPropertyForFollowup = null;
+    public $client_name = '';
+    public $client_phone = '';
+    public $followup_type = 'site_visit';
+    public $custom_note = '';
+
     protected $rules = [
         'title' => 'required|string|max:255',
         'property_type' => 'required|in:residential,commercial,agricultural,shop,house,apartment,plot',
@@ -55,6 +63,127 @@ class ManageProperties extends Component
         'status' => 'required|in:available,under_offer,sold,rented',
         'new_images.*' => 'nullable|image|max:2048',
     ];
+
+    // ==========================================
+    // WHATSAPP ADVANCED MARKETING SUITE
+    // ==========================================
+
+    public function shareListingOnWhatsApp($propertyId)
+    {
+        $property = Property::with(['city', 'town'])->findOrFail($propertyId);
+        $agentName = Auth::user()->name;
+        $cityName = $property->city?->name ?? $property->town?->city?->name ?? 'Pakistan';
+        $propertyUrl = url('/property/' . $property->id);
+        $mapUrl = !empty($property->google_map_url) 
+            ? $property->google_map_url 
+            : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($property->location . ', ' . $cityName);
+
+        $text = "🏢 *{$property->title}*\n\n"
+              . "🔹 *نوعیت:* " . ucfirst($property->property_type) . " (" . str_replace('_', ' ', $property->purpose) . ")\n"
+              . "🔹 *رقبہ:* {$property->area_size}\n"
+              . "🔹 *ڈیمانڈ قیمت:* PKR " . number_format($property->price) . "\n"
+              . "📍 *لوکیشن:* {$property->location}، {$cityName}\n\n"
+              . "🗺️ *گوگل میپ لوکیشن:*\n{$mapUrl}\n\n"
+              . "📸 *تصاویر اور مکمل تفصیلات:*\n{$propertyUrl}\n\n"
+              . "👤 *رابطہ برائے ڈیل:* {$agentName}\n"
+              . "⚡ پیشکش بذریعہ AssanZameen.com";
+
+        $encoded = urlencode($text);
+        $this->dispatch('trigger-whatsapp', 
+            appUrl: "whatsapp://send?text={$encoded}", 
+            webUrl: "https://web.whatsapp.com/send?text={$encoded}"
+        );
+    }
+
+    public function sendLocationPin($propertyId)
+    {
+        $property = Property::with(['city', 'town'])->findOrFail($propertyId);
+        $cityName = $property->city?->name ?? $property->town?->city?->name ?? 'علاقہ';
+
+        $mapUrl = !empty($property->google_map_url) 
+            ? $property->google_map_url 
+            : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($property->location . ', ' . $cityName);
+
+        $text = "📍 *پراپرٹی لوکیشن میپ (Google Maps Pin)*\n\n"
+              . "🏢 *{$property->title}*\n"
+              . "📐 رقبہ: {$property->area_size}\n"
+              . "📌 پتہ: {$property->location}، {$cityName}\n\n"
+              . "موقع پر پہنچنے کے لیے نیچے دیے گئے لنک پر کلک کریں:\n"
+              . "🗺️ {$mapUrl}\n\n"
+              . "رابطہ: " . Auth::user()->name;
+
+        $encoded = urlencode($text);
+        $this->dispatch('trigger-whatsapp', 
+            appUrl: "whatsapp://send?text={$encoded}", 
+            webUrl: "https://web.whatsapp.com/send?text={$encoded}"
+        );
+    }
+
+    public function openFollowUpModal($propertyId)
+    {
+        $this->selectedPropertyForFollowup = Property::with(['city', 'town'])->findOrFail($propertyId);
+        $this->client_name = '';
+        $this->client_phone = '';
+        $this->followup_type = 'site_visit';
+        $this->custom_note = '';
+        $this->isFollowUpModalOpen = true;
+    }
+
+    public function sendFollowUp()
+    {
+        $this->validate([
+            'client_phone' => 'required|min:10',
+            'client_name' => 'required|string|max:50',
+        ]);
+
+        $prop = $this->selectedPropertyForFollowup;
+        $agentName = Auth::user()->name;
+        $cityName = $prop->city?->name ?? $prop->town?->city?->name ?? 'علاقہ';
+
+        $msg = "";
+
+        if ($this->followup_type === 'site_visit') {
+            $msg = "السلام علیکم {$this->client_name} صاحب!\n\n"
+                 . "امید ہے آپ خیریت سے ہوں گے۔ آپ نے پراپرٹی:\n"
+                 . "🏢 *{$prop->title}* ({$prop->area_size})\n"
+                 . "📍 لوکیشن: {$prop->location}، {$cityName}\n\n"
+                 . "میں دلچسپی ظاہر کی تھی۔ کیا ہم آج شام یا کل کے لیے موقع وزٹ (Site Visit) شیڈول کر لیں تاکہ آپ خود آکر موقع دیکھ سکیں؟\n\n"
+                 . "رابطہ: {$agentName}\nAssanZameen.com";
+        } elseif ($this->followup_type === 'token_reminder') {
+            $msg = "السلام علیکم {$this->client_name} صاحب!\n\n"
+                 . "پراپرٹی *{$prop->title}* کے حوالے سے آپ کی آفر پر مالک سے بات ہوئی ہے۔\n"
+                 . "چند مزید خریدار بھی اس پراپرٹی میں گہری دلچسپی لے رہے ہیں۔ اگر آپ ڈیل فائنل کرنا چاہتے ہیں تو برائے مہربانی ٹوکن ایڈوانس کے لیے آج رابطہ کریں۔\n\n"
+                 . "ڈیمانڈ: PKR " . number_format($prop->price) . "\n"
+                 . "رابطہ: {$agentName}";
+        } elseif ($this->followup_type === 'price_offer') {
+            $msg = "السلام علیکم {$this->client_name} صاحب!\n\n"
+                 . "پراپرٹی *{$prop->title}* کی قیمت پر بات چیت کے لیے مالک (Owner) ملاقات پر آمادہ ہیں۔\n"
+                 . "کیا آپ آج آفس تشریف لا سکتے ہیں تاکہ حتمی ڈیل کلوز کی جا سکے؟\n\n"
+                 . "مقام: {$prop->location}\n"
+                 . "رابطہ: {$agentName}";
+        }
+
+        if (!empty($this->custom_note)) {
+            $msg .= "\n\n📌 *اضافی نوٹ:* " . $this->custom_note;
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', $this->client_phone);
+        if (str_starts_with($cleanPhone, '0')) {
+            $cleanPhone = '92' . substr($cleanPhone, 1);
+        }
+
+        $encoded = urlencode($msg);
+        $this->isFollowUpModalOpen = false;
+        
+        $this->dispatch('trigger-whatsapp', 
+            appUrl: "whatsapp://send?phone={$cleanPhone}&text={$encoded}", 
+            webUrl: "https://web.whatsapp.com/send?phone={$cleanPhone}&text={$encoded}"
+        );
+    }
+
+    // ==========================================
+    // CRUD OPERATIONS
+    // ==========================================
 
     public function create()
     {
@@ -72,7 +201,6 @@ class ManageProperties extends Component
         $this->price = '';
         $this->area_size = '';
         
-        // Reset City Fields
         $this->city_id = null;
         $this->city_search = '';
         $this->selected_city_name = '';
@@ -91,8 +219,6 @@ class ManageProperties extends Component
         $this->city_id = $id;
         $this->selected_city_name = $name;
         $this->city_search = '';
-        
-        // City change hone par town filter reset
         $this->town_id = null; 
     }
 
@@ -102,11 +228,9 @@ class ManageProperties extends Component
 
         $imagePaths = is_array($this->existing_images) ? $this->existing_images : [];
 
-        // Direct public folder upload logic (Zero-Exception)
         if (!empty($this->new_images)) {
             $destinationPath = public_path('property_images');
 
-            // Agar folder nahi hai to direct create karein
             if (!File::exists($destinationPath)) {
                 File::makeDirectory($destinationPath, 0755, true);
             }
@@ -115,9 +239,7 @@ class ManageProperties extends Component
                 $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $targetFile = $destinationPath . DIRECTORY_SEPARATOR . $imageName;
 
-                // Native copy ensures no lock/permission error from symfony move
                 copy($image->getRealPath(), $targetFile);
-
                 $imagePaths[] = 'property_images/' . $imageName;
             }
         }
@@ -141,7 +263,7 @@ class ManageProperties extends Component
             ]
         );
 
-        session()->flash('message', $this->property_id ? 'Property updated successfully.' : 'New Property listed successfully.');
+        session()->flash('message', $this->property_id ? 'پراپرٹی کامیابی کے ساتھ اپ ڈیٹ ہو گئی۔' : 'نئی پراپرٹی کامیابی سے لسٹ ہو گئی۔');
         $this->isModalOpen = false;
         $this->resetForm();
     }
@@ -152,10 +274,7 @@ class ManageProperties extends Component
 
         $this->property_id = $property->id;
         $this->city_id = $property->city_id;
-        
-        // City relation se name nikaalein ya town relation se fallback
-        $this->selected_city_name = $property->city?->name ?? $property->town?->city?->name ?? '';
-        
+        $this->selected_city_name = $property->city ?? $property->town?->city ?? '';
         $this->town_id = $property->town_id;
         $this->title = $property->title;
         $this->property_type = $property->property_type;
@@ -185,7 +304,6 @@ class ManageProperties extends Component
             unset($this->existing_images[$index]);
             $this->existing_images = array_values($this->existing_images);
 
-            // Agar edit mode mein hain to database update karein
             if ($this->property_id) {
                 Property::where('id', $this->property_id)->update([
                     'images' => $this->existing_images
@@ -198,7 +316,6 @@ class ManageProperties extends Component
     {
         $property = Property::where('agent_id', Auth::id())->findOrFail($id);
         
-        // Attached images ko public folder se clean karein
         if (!empty($property->images) && is_array($property->images)) {
             foreach ($property->images as $imgPath) {
                 $file = public_path($imgPath);
@@ -209,7 +326,7 @@ class ManageProperties extends Component
         }
 
         $property->delete();
-        session()->flash('message', 'Property deleted successfully.');
+        session()->flash('message', 'پراپرٹی حذف کر دی گئی۔');
     }
 
     public function render()
