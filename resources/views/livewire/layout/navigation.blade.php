@@ -21,7 +21,18 @@ new class extends Component
         .text-gray-900 {
             color: rgb(252 211 77 / var(--tw-text-opacity, 1));
         }
+
+        /* Breeze Dropdown wrapper container white background force-remove */
+        .origin-top-left > div, 
+        .origin-top-right > div,
+        .origin-top > div,
+        [x-show="open"] > div.bg-white {
+            background-color: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
     </style>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
             
@@ -95,7 +106,7 @@ new class extends Component
                             @php
                                 $isPropertiesActive = request()->routeIs('agent.properties.*') || request()->routeIs('agent.portfolio.settings') || request()->routeIs('agent.dealer.network');
                             @endphp
-                            <x-dropdown align="left" width="56">
+                            <x-dropdown align="left" width="60" contentClasses="py-0 !bg-transparent border-0 shadow-none">
                                 <x-slot name="trigger">
                                     <button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 focus:outline-none {{ $isPropertiesActive ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/70' }}">
                                         <i class="fa-solid fa-house text-sm {{ $isPropertiesActive ? 'text-amber-400' : 'text-slate-400' }}"></i>
@@ -105,10 +116,10 @@ new class extends Component
                                 </x-slot>
 
                                 <x-slot name="content">
-                                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1">
+                                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1.5 w-64">
                                         <!-- My Properties -->
                                         <a href="{{ route('agent.properties') }}" wire:navigate
-                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.properties.*') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                           class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.properties.*') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
                                             <div class="flex items-center gap-2.5">
                                                 <i class="fa-solid fa-house-chimney text-amber-400"></i>
                                                 <span>{{ __('My Properties') }}</span>
@@ -118,7 +129,7 @@ new class extends Component
 
                                         <!-- Digital Card -->
                                         <a href="{{ route('agent.portfolio.settings') }}" wire:navigate
-                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.portfolio.settings') ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                           class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.portfolio.settings') ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
                                             <div class="flex items-center gap-2.5">
                                                 <i class="fa-solid fa-id-card-clip text-indigo-400"></i>
                                                 <span>{{ __('Digital Visiting Card') }}</span>
@@ -128,7 +139,7 @@ new class extends Component
 
                                         <!-- B2B Dealer Exchange -->
                                         <a href="{{ route('agent.dealer.network') }}" wire:navigate
-                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.dealer.network') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                           class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.dealer.network') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
                                             <div class="flex items-center gap-2.5">
                                                 <i class="fa-solid fa-handshake-angle text-amber-400"></i>
                                                 <span>{{ __('B2B Dealer Exchange') }}</span>
@@ -139,39 +150,83 @@ new class extends Component
                                 </x-slot>
                             </x-dropdown>
 
-                            <!-- Dropdown 2: Agent Tools (Calculator & Bayana) -->
+                            <!-- Dropdown 2: Agent Tools & Calculators -->
                             @php
-                                $isToolsActive = request()->routeIs('agent.calculator') || request()->routeIs('agent.bayana');
+                                $isToolsActive = request()->routeIs('agent.calculator') || 
+                                                 request()->routeIs('agent.bayana') || 
+                                                 request()->routeIs('agent.poster.maker') || 
+                                                 request()->routeIs('agent.commission.ledger') || 
+                                                 request()->routeIs('agent.tax.calculator');
                             @endphp
-                            <x-dropdown align="left" width="56">
+                            <x-dropdown align="left" width="80" contentClasses="py-0 !bg-transparent border-0 shadow-none">
                                 <x-slot name="trigger">
                                     <button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 focus:outline-none {{ $isToolsActive ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:text-white hover:bg-slate-800/70' }}">
                                         <i class="fa-solid fa-screwdriver-wrench text-sm {{ $isToolsActive ? 'text-amber-400' : 'text-slate-400' }}"></i>
-                                        <span>{{ __('Tools') }}</span>
+                                        <span>{{ __('Tools & Calculators') }}</span>
                                         <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-1"></i>
                                     </button>
                                 </x-slot>
 
                                 <x-slot name="content">
-                                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1">
-                                        <!-- Patwari Calculator -->
+                                    <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1.5 w-80">
+                                        <!-- 1. Patwari Calculator -->
                                         <a href="{{ route('agent.calculator') }}" wire:navigate
                                            class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.calculator') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
-                                            <div class="flex items-center gap-2.5">
-                                                <i class="fa-solid fa-calculator text-amber-400"></i>
-                                                <span>{{ __('لینڈ کیلکولیٹر') }}</span>
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                                                    <i class="fa-solid fa-calculator text-xs"></i>
+                                                </div>
+                                                <span class="truncate text-white font-semibold">{{ __('پٹواری لینڈ کیلکولیٹر') }}</span>
                                             </div>
-                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Tool</span>
+                                            <span class="text-[9px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 font-bold shrink-0">Area</span>
                                         </a>
 
-                                        <!-- Bayana Agreement PDF -->
+                                        <!-- 2. Bayana Agreement PDF -->
                                         <a href="{{ route('agent.bayana') }}" wire:navigate
                                            class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.bayana') ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
-                                            <div class="flex items-center gap-2.5">
-                                                <i class="fa-solid fa-file-contract text-emerald-400"></i>
-                                                <span>{{ __('اقرار نامہ بیعانہ') }}</span>
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                                                    <i class="fa-solid fa-file-contract text-xs"></i>
+                                                </div>
+                                                <span class="truncate text-white font-semibold">{{ __('اقرار نامہ بیعانہ جنریٹر') }}</span>
                                             </div>
-                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-black">PDF</span>
+                                            <span class="text-[9px] px-2 py-0.5 rounded-md bg-emerald-400 text-slate-950 font-black shrink-0">PDF</span>
+                                        </a>
+
+                                        <!-- 3. Social Media Poster Maker -->
+                                        <a href="{{ route('agent.poster.maker') }}" wire:navigate
+                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.poster.maker') ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
+                                                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                                                </div>
+                                                <span class="truncate text-white font-semibold">{{ __('سوشل میڈیا پوسٹر اسٹوڈیو') }}</span>
+                                            </div>
+                                            <span class="text-[9px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold shrink-0">HD</span>
+                                        </a>
+
+                                        <!-- 4. Munshi Khata & Commission Ledger -->
+                                        <a href="{{ route('agent.commission.ledger') }}" wire:navigate
+                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.commission.ledger') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                                                    <i class="fa-solid fa-book-bookmark text-xs"></i>
+                                                </div>
+                                                <span class="truncate text-white font-semibold">{{ __('منشی کھاتہ و کمیشن لیجر') }}</span>
+                                            </div>
+                                            <span class="text-[9px] px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black shrink-0">Khata</span>
+                                        </a>
+
+                                        <!-- 5. Registry & PLRA Tax Calculator -->
+                                        <a href="{{ route('agent.tax.calculator') }}" wire:navigate
+                                           class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors {{ request()->routeIs('agent.tax.calculator') ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'text-slate-200 hover:bg-slate-800 hover:text-white' }}">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                                                    <i class="fa-solid fa-stamp text-xs"></i>
+                                                </div>
+                                                <span class="truncate text-white font-semibold">{{ __('پلاٹ رجسٹری و ٹیکس تخمینہ') }}</span>
+                                            </div>
+                                            <span class="text-[9px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold shrink-0">Govt</span>
                                         </a>
                                     </div>
                                 </x-slot>
@@ -219,7 +274,7 @@ new class extends Component
             <!-- Right Side Profile Settings / Public Links -->
             <div class="hidden lg:flex lg:items-center lg:ms-6">
                 @auth
-                    <x-dropdown align="right" width="56">
+                    <x-dropdown align="right" width="56" contentClasses="py-0 !bg-transparent border-0 shadow-none">
                         <x-slot name="trigger">
                             <button class="flex items-center gap-3 px-3.5 py-2 rounded-2xl border border-slate-800 bg-slate-900/90 hover:bg-slate-800/80 hover:border-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-400/20">
                                 <div class="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-black text-amber-400 text-sm">
@@ -236,7 +291,7 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
-                            <div class="p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1">
+                            <div class="p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1 w-56">
                                 <div class="px-3 py-2 border-b border-slate-800/80">
                                     <p class="text-xs text-slate-400">Signed in as</p>
                                     <p class="text-xs font-bold text-white truncate">{{ auth()->user()->email }}</p>
@@ -323,14 +378,14 @@ new class extends Component
                     </a>
 
                     <!-- Tools Section Header -->
-                    <div class="pt-2 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Agent Tools</div>
+                    <div class="pt-2 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Agent Pro Tools</div>
 
                     <a href="{{ route('agent.calculator') }}" class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.calculator') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-calculator text-amber-400"></i>
-                            <span>{{ __('لینڈ کیلکولیٹر') }}</span>
+                            <span>{{ __('پٹواری لینڈ کیلکولیٹر') }}</span>
                         </div>
-                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Tool</span>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Area</span>
                     </a>
                     <a href="{{ route('agent.bayana') }}" class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.bayana') ? 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
                         <div class="flex items-center gap-3">
@@ -338,6 +393,30 @@ new class extends Component
                             <span>{{ __('اقرار نامہ بیعانہ') }}</span>
                         </div>
                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-black">PDF</span>
+                    </a>
+                    <a href="{{ route('agent.poster.maker') }}" wire:navigate
+                       class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.poster.maker') ? 'text-indigo-300 bg-indigo-500/15 border border-indigo-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i>
+                            <span>{{ __('سوشل میڈیا پوسٹر اسٹوڈیو') }}</span>
+                        </div>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">HD</span>
+                    </a>
+                    <a href="{{ route('agent.commission.ledger') }}" wire:navigate
+                       class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.commission.ledger') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-book-bookmark text-amber-400"></i>
+                            <span>{{ __('منشی کھاتہ و کمیشن لیجر') }}</span>
+                        </div>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black">Khata</span>
+                    </a>
+                    <a href="{{ route('agent.tax.calculator') }}" wire:navigate
+                       class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.tax.calculator') ? 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-stamp text-emerald-400"></i>
+                            <span>{{ __('پلاٹ رجسٹری و ٹیکس تخمینہ') }}</span>
+                        </div>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Govt</span>
                     </a>
                 @endif
 

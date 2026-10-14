@@ -46,6 +46,9 @@ use App\Livewire\Agent\BayanaGenerator;
 use App\Livewire\Agent\AgencyProfile;
 use App\Livewire\PublicAgentPortfolio;
 use App\Livewire\Agent\DealerExchange;
+use App\Livewire\Agent\PosterMaker;
+use App\Livewire\Agent\CommissionLedger;
+use App\Livewire\Agent\RegistryTaxCalculator;
 
 // Public Routes
 Route::get('/', function () {
@@ -156,6 +159,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/bayana-generator', BayanaGenerator::class)->name('bayana');
         Route::get('/portfolio-settings', AgencyProfile::class)->name('portfolio.settings');
         Route::get('/dealer-network', DealerExchange::class)->name('dealer.network');
+        Route::get('/poster-maker/{propertyId?}', PosterMaker::class)->name('poster.maker');
+        Route::get('/commission-ledger', CommissionLedger::class)->name('commission.ledger');
+        Route::get('/registry-tax-calculator', RegistryTaxCalculator::class)->name('tax.calculator');
 
     });
 
