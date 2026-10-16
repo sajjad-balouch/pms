@@ -17,7 +17,7 @@
                 <span>Direct Property Listings & WhatsApp Hub</span>
                 <span class="text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold">Pro Tools</span>
             </h2>
-            <p class="text-sm text-slate-400 mt-1">مکان، دکان، پلاٹ اور زرعی زمین لسٹ کریں اور 1-کلک پر گروپس و خریداروں کو واٹس ایپ بھیجیں</p>
+            <p class="text-sm text-slate-400 mt-1">List houses, shops, plots, and agricultural land, then share via WhatsApp to groups and buyers with 1 click</p>
         </div>
 
         <button wire:click="create" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md transition-all active:scale-95 cursor-pointer">
@@ -76,29 +76,29 @@
                             $propertyUrl = url('/property/' . $property->id);
                             $mapUrl = !empty($property->google_map_url) 
                                 ? $property->google_map_url 
-                                : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($property->location . ', ' . $cityName);
+                                : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($property->location . ', ' .$cityName);
 
-                            // Clean Multi-line WhatsApp Urdu Brochure
+                            // Clean Multi-line WhatsApp Brochure
                             $adText = "🏢 *" . $property->title . "*\n\n"
-                                    . "🔹 *نوعیت:* " . ucfirst($property->property_type) . " (" . str_replace('_', ' ', $property->purpose) . ")\n"
-                                    . "🔹 *رقبہ:* " . $property->area_size . "\n"
-                                    . "🔹 *ڈیمانڈ قیمت:* PKR " . number_format($property->price) . "\n"
-                                    . "📍 *لوکیشن:* " . $property->location . "، " . $cityName . "\n\n"
-                                    . "🗺️ *گوگل میپ لوکیشن:*\n" . $mapUrl . "\n\n"
-                                    . "📸 *تصاویر اور مکمل تفصیلات:*\n" . $propertyUrl . "\n\n"
-                                    . "👤 *رابطہ برائے ڈیل:* " . Auth::user()->name . "\n"
-                                    . "⚡ پیشکش بذریعہ AssanZameen.com";
+                                    . "🔹 *Type:* " . ucfirst($property->property_type) . " (" . str_replace('_', ' ', $property->purpose) . ")\n"
+                                    . "🔹 *Area Size:* " . $property->area_size . "\n"
+                                    . "🔹 *Demand Price:* PKR " . number_format($property->price) . "\n"
+                                    . "📍 *Location:* " . $property->location . ", " . $cityName . "\n\n"
+                                    . "🗺️ *Google Maps Location:*\n" . $mapUrl . "\n\n"
+                                    . "📸 *Photos & Full Details:*\n" . $propertyUrl . "\n\n"
+                                    . "👤 *Contact for Deal:* " . Auth::user()->name . "\n"
+                                    . "⚡ Powered by AssanZameen.com";
 
                             // Catalog Style Card
                             $catalogText = "📦 *PROPERTY CATALOG CARD*\n"
                                          . "━━━━━━━━━━━━━━━━━━━━\n"
                                          . "🏠 *{$property->title}*\n"
-                                         . "💰 قیمت: PKR " . number_format($property->price) . "\n"
-                                         . "📐 رقبہ: {$property->area_size}\n"
-                                         . "📍 لوکیشن: {$property->location}، {$cityName}\n"
-                                         . "🔗 وزٹ لنک: {$propertyUrl}\n"
+                                         . "💰 Price: PKR " . number_format($property->price) . "\n"
+                                         . "📐 Area: {$property->area_size}\n"
+                                         . "📍 Location: {$property->location}, {$cityName}\n"
+                                         . "🔗 Visit Link: {$propertyUrl}\n"
                                          . "━━━━━━━━━━━━━━━━━━━━\n"
-                                         . "ڈیلر: " . Auth::user()->name;
+                                         . "Dealer: " . Auth::user()->name;
                         @endphp
                         <tr wire:key="property-row-{{ $property->id }}" class="hover:bg-slate-700/30 transition-colors">
                             <td class="px-6 py-4">
@@ -130,26 +130,26 @@
                                 </span>
                             </td>
                             
-                            <!-- 7-in-1 WhatsApp Tools Grid -->
+                            <!-- WhatsApp Tools Grid -->
                             <td class="px-6 py-4 text-center">
                                 <div class="inline-flex items-center gap-1.5 flex-wrap justify-center max-w-xs" x-data>
                                     
-                                    <!-- 1. Direct Share Urdu Brochure -->
+                                    <!-- 1. Direct Share Brochure -->
                                     <button type="button"
                                             @click="shareListing({{ json_encode($adText) }})"
                                             title="Share Brochure on WhatsApp"
                                             class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow-sm cursor-pointer">
                                         <i class="fa-brands fa-whatsapp text-sm"></i>
-                                        <span>شیئر</span>
+                                        <span>Share</span>
                                     </button>
 
                                     <!-- 2. Copy Ad Text for Dealer Groups -->
                                     <button type="button"
-                                            @click="navigator.clipboard.writeText({{ json_encode($adText) }}); alert('پراپرٹی کا اردو اشتہار کاپی ہو گیا! ڈیلر گروپس میں پیسٹ کریں۔')"
-                                            title="Copy Urdu Ad for WhatsApp Groups"
+                                            @click="navigator.clipboard.writeText({{ json_encode($adText) }}); alert('Property advertisement copied! Ready to paste in dealer groups.')"
+                                            title="Copy Ad for WhatsApp Groups"
                                             class="inline-flex items-center gap-1 px-2 py-1 bg-slate-900 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-lg text-xs font-bold transition cursor-pointer">
                                         <i class="fa-solid fa-copy text-xs"></i>
-                                        <span>گروپ ایڈ</span>
+                                        <span>Group Ad</span>
                                     </button>
 
                                     <!-- 3. Send Location Pin Drop -->
@@ -158,7 +158,7 @@
                                             title="Send Google Maps Pin to Client"
                                             class="inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 rounded-lg text-xs font-bold transition cursor-pointer">
                                         <i class="fa-solid fa-location-dot text-xs text-rose-400"></i>
-                                        <span>لوکیشن</span>
+                                        <span>Location</span>
                                     </button>
 
                                     <!-- 4. Client Follow-Up Deal Closing Modal -->
@@ -167,12 +167,12 @@
                                             title="Send Instant Follow-up to Lead (Visit/Token/Offer)"
                                             class="inline-flex items-center gap-1 px-2 py-1 bg-purple-600/20 hover:bg-purple-600 text-purple-400 hover:text-white border border-purple-500/30 rounded-lg text-xs font-bold transition cursor-pointer">
                                         <i class="fa-solid fa-user-clock text-xs"></i>
-                                        <span>فالو اپ</span>
+                                        <span>Follow-Up</span>
                                     </button>
 
                                     <!-- 5. Catalog Card Copy -->
                                     <button type="button"
-                                            @click="navigator.clipboard.writeText({{ json_encode($catalogText) }}); alert('بزنس کیٹلاگ کارڈ کاپی ہو گیا۔')"
+                                            @click="navigator.clipboard.writeText({{ json_encode($catalogText) }}); alert('Business catalog card copied to clipboard.')"
                                             title="Copy WhatsApp Business Catalog Format"
                                             class="inline-flex items-center px-2 py-1 bg-slate-900 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-xs font-bold transition cursor-pointer">
                                         <i class="fa-solid fa-layer-group text-xs text-indigo-400"></i>
@@ -225,7 +225,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Client Name *</label>
-                        <input type="text" wire:model="client_name" placeholder="مثلاً: احمد رضا" 
+                        <input type="text" wire:model="client_name" placeholder="e.g. Ahmed Raza" 
                                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                         @error('client_name') <span class="text-rose-400 text-[10px] mt-1 block">{{ $message }}</span> @enderror
                     </div>
@@ -243,22 +243,22 @@
                     <div class="grid grid-cols-3 gap-2">
                         <button type="button" wire:click="$set('followup_type', 'site_visit')"
                                 class="p-2.5 rounded-xl border text-[11px] font-bold transition text-center {{ $followup_type === 'site_visit' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-800 bg-slate-950 text-slate-400' }}">
-                            🏡 موقع وزٹ
+                            🏡 Site Visit
                         </button>
                         <button type="button" wire:click="$set('followup_type', 'token_reminder')"
                                 class="p-2.5 rounded-xl border text-[11px] font-bold transition text-center {{ $followup_type === 'token_reminder' ? 'border-amber-500 bg-amber-500/10 text-amber-400' : 'border-slate-800 bg-slate-950 text-slate-400' }}">
-                            🤝 ٹوکن پیشکش
+                            🤝 Token Offer
                         </button>
                         <button type="button" wire:click="$set('followup_type', 'price_offer')"
                                 class="p-2.5 rounded-xl border text-[11px] font-bold transition text-center {{ $followup_type === 'price_offer' ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' : 'border-slate-800 bg-slate-950 text-slate-400' }}">
-                            💼 آفس میٹنگ
+                            💼 Office Meeting
                         </button>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Custom Note / Time (Optional)</label>
-                    <input type="text" wire:model="custom_note" placeholder="مثلاً: شام 5 بجے موقع پر ملاقات ہو گی" 
+                    <input type="text" wire:model="custom_note" placeholder="e.g. Meeting at site at 5:00 PM" 
                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                 </div>
 
@@ -360,7 +360,7 @@
                             @endforeach
                         </select>
                         @if(!$city_id)
-                            <span class="text-[11px] text-slate-500 mt-1 block">Pehle city select karein.</span>
+                            <span class="text-[11px] text-slate-500 mt-1 block">Please select a city first.</span>
                         @endif
                     </div>
                 </div>

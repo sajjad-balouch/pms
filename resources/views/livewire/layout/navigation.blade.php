@@ -176,7 +176,7 @@ new class extends Component
                                                 <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
                                                     <i class="fa-solid fa-calculator text-xs"></i>
                                                 </div>
-                                                <span class="truncate text-white font-semibold">{{ __('پٹواری لینڈ کیلکولیٹر') }}</span>
+                                                <span class="truncate text-white font-semibold">{{ __('Calculator') }}</span>
                                             </div>
                                             <span class="text-[9px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 font-bold shrink-0">Area</span>
                                         </a>
@@ -188,7 +188,7 @@ new class extends Component
                                                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
                                                     <i class="fa-solid fa-file-contract text-xs"></i>
                                                 </div>
-                                                <span class="truncate text-white font-semibold">{{ __('اقرار نامہ بیعانہ جنریٹر') }}</span>
+                                                <span class="truncate text-white font-semibold">{{ __('Affidavit') }}</span>
                                             </div>
                                             <span class="text-[9px] px-2 py-0.5 rounded-md bg-emerald-400 text-slate-950 font-black shrink-0">PDF</span>
                                         </a>
@@ -200,7 +200,7 @@ new class extends Component
                                                 <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center shrink-0">
                                                     <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
                                                 </div>
-                                                <span class="truncate text-white font-semibold">{{ __('سوشل میڈیا پوسٹر اسٹوڈیو') }}</span>
+                                                <span class="truncate text-white font-semibold">{{ __('Social Posts') }}</span>
                                             </div>
                                             <span class="text-[9px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 font-bold shrink-0">HD</span>
                                         </a>
@@ -212,7 +212,7 @@ new class extends Component
                                                 <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
                                                     <i class="fa-solid fa-book-bookmark text-xs"></i>
                                                 </div>
-                                                <span class="truncate text-white font-semibold">{{ __('منشی کھاتہ و کمیشن لیجر') }}</span>
+                                                <span class="truncate text-white font-semibold">{{ __('Manage Ledger') }}</span>
                                             </div>
                                             <span class="text-[9px] px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black shrink-0">Khata</span>
                                         </a>
@@ -224,7 +224,7 @@ new class extends Component
                                                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
                                                     <i class="fa-solid fa-stamp text-xs"></i>
                                                 </div>
-                                                <span class="truncate text-white font-semibold">{{ __('پلاٹ رجسٹری و ٹیکس تخمینہ') }}</span>
+                                                <span class="truncate text-white font-semibold">{{ __('Registry Expense') }}</span>
                                             </div>
                                             <span class="text-[9px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold shrink-0">Govt</span>
                                         </a>
@@ -383,14 +383,14 @@ new class extends Component
                     <a href="{{ route('agent.calculator') }}" class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.calculator') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-calculator text-amber-400"></i>
-                            <span>{{ __('پٹواری لینڈ کیلکولیٹر') }}</span>
+                            <span>{{ __('Calculator') }}</span>
                         </div>
                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold">Area</span>
                     </a>
                     <a href="{{ route('agent.bayana') }}" class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.bayana') ? 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-file-contract text-emerald-400"></i>
-                            <span>{{ __('اقرار نامہ بیعانہ') }}</span>
+                            <span>{{ __('Affidavit') }}</span>
                         </div>
                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-400 text-slate-950 font-black">PDF</span>
                     </a>
@@ -398,7 +398,7 @@ new class extends Component
                        class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.poster.maker') ? 'text-indigo-300 bg-indigo-500/15 border border-indigo-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i>
-                            <span>{{ __('سوشل میڈیا پوسٹر اسٹوڈیو') }}</span>
+                            <span>{{ __('Social Posts') }}</span>
                         </div>
                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">HD</span>
                     </a>
@@ -406,7 +406,7 @@ new class extends Component
                        class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.commission.ledger') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-book-bookmark text-amber-400"></i>
-                            <span>{{ __('منشی کھاتہ و کمیشن لیجر') }}</span>
+                            <span>{{ __('Manage Ledger') }}</span>
                         </div>
                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black">Khata</span>
                     </a>
@@ -414,7 +414,7 @@ new class extends Component
                        class="flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold {{ request()->routeIs('agent.tax.calculator') ? 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30' : 'text-slate-300 hover:bg-slate-800' }}">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-stamp text-emerald-400"></i>
-                            <span>{{ __('پلاٹ رجسٹری و ٹیکس تخمینہ') }}</span>
+                            <span>{{ __('Registry Expense') }}</span>
                         </div>
                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Govt</span>
                     </a>

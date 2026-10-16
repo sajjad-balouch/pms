@@ -36,9 +36,9 @@
         }
 
         body {
-            font-family: {{ app()->getLocale() == 'ur' ? "Jameel Noori Nastaleeq, Noto Nastaliq Urdu, serif" : "sans-serif" }} !important;
+            font-family: {{ app()->getLocale() == 'ur' ? "Jameel Noori Nastaleeq, Noto Nastaliq Urdu, serif" : "Helvetica" }} !important;
         }
-        .urdu{
+        .urdu1{
             font-family: Jameel Noori Nastaleeq !important;
         }
 

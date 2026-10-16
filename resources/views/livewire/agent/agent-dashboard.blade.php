@@ -8,11 +8,11 @@
             <div class="space-y-2">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-medium">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    ریئل اسٹیٹ پورٹل
+                    {{__('Real Estate Portal')}}
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Agent Portal & Leads Dashboard</h2>
                 <p class="text-slate-300 text-sm font-normal">
-                    خوش آمدید، <span class="font-semibold text-white">{{ auth()->user()->name }}</span>! اپنی سرگرمیوں کا جائزہ لیں۔
+                     {{__('Welcome')}} <span class="font-semibold text-white">{{ auth()->user()->name }}</span>
                 </p>
             </div>
             

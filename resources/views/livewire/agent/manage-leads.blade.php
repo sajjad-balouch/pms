@@ -16,7 +16,7 @@
                     <span>Leads CRM & Pipeline</span>
                     <span class="text-xs bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 px-2.5 py-0.5 rounded-full font-bold">Pro Suite</span>
                 </h2>
-                <p class="text-xs text-slate-400 mt-0.5">کلائنٹ درجہ بندی، فالو اپ شیڈولر اور ڈریگ اینڈ ڈراپ سیلز پائپ لائن</p>
+                <p class="text-xs text-slate-400 mt-0.5">Client categorization, follow-up scheduler, and drag-and-drop sales pipeline</p>
             </div>
 
             <div class="flex items-center gap-2">

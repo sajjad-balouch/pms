@@ -1,32 +1,46 @@
 <div>
+    <!-- Hero Section with Minar-e-Pakistan & Badshahi Mosque Panoramic Family Background -->
+    <div>
     <!-- Hero Section -->
-    <section class="relative min-h-0 sm:min-h-[80vh] flex items-center justify-center pt-6 pb-12 sm:pt-12 sm:pb-20 px-3 sm:px-4 overflow-hidden">
+    <section class="relative w-full min-h-[75vh] sm:min-h-[85vh] flex items-center justify-center py-12 sm:py-20 px-3 sm:px-4 overflow-hidden bg-slate-950">
+        
+        <!-- Background Banner with Real Photographic FX -->
+        <div class="absolute inset-0 z-0">
+            <img src="{{ asset('public/hero-image.jpg') }}" 
+                 alt="AssanZameen Real Estate Banner" 
+                 class="w-full h-full object-cover object-[center_35%] sm:object-center contrast-[1.05] brightness-[0.95] select-none pointer-events-none scale-100">
+            
+            <!-- Balanced Professional Dark Overlays for Ultra-Clear Text Readability -->
+            <div class="absolute inset-0 bg-slate-950/45"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-slate-950/70"></div>
+            <div class="absolute inset-0 bg-radial-at-c from-transparent via-slate-950/30 to-slate-950/80"></div>
+        </div>
+
         <!-- Background Decorative Glows -->
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-amber-500/10 rounded-full blur-[100px] sm:blur-[140px] pointer-events-none"></div>
-        <div class="absolute bottom-10 right-10 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-blue-500/10 rounded-full blur-[90px] sm:blur-[120px] pointer-events-none"></div>
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto text-center space-y-4 sm:space-y-6">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-amber-400 text-[11px] sm:text-xs font-semibold uppercase tracking-wider shadow-inner">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-amber-400 text-[11px] sm:text-xs font-semibold uppercase tracking-wider shadow-xl backdrop-blur-md">
                 <i class="fa-solid fa-sparkles text-amber-400"></i> {{__("Verified Land Registry & Agent Listings")}}
             </span>
 
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight drop-shadow-lg">
                 {{__("Find Plots, Houses & Shops")}} <br class="hidden sm:inline" />
                 <span class="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">{{__("For Sale & Rent")}}</span>
             </h1>
 
-            <p class="text-slate-400 text-xs sm:text-base max-w-2xl mx-auto font-normal px-2">
+            <p class="text-slate-200 text-xs sm:text-base max-w-2xl mx-auto font-medium px-2 drop-shadow-md">
                 {{__("Explore direct verified listings from trusted property agents, town owners, and societies.")}}
             </p>
 
-            <!-- Search Filter Card (Mobile: 2 Columns Per Row, Desktop: 3 Columns) -->
-            <div class="bg-slate-800/95 backdrop-blur-xl border border-slate-700/80 p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl text-left max-w-5xl mx-auto">
+            <!-- Search Filter Card -->
+            <div class="bg-slate-900/90 backdrop-blur-2xl border border-slate-700/80 p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl text-left max-w-5xl mx-auto ring-1 ring-white/10">
                 <div class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                     
                     <!-- Purpose (Sale / Rent) -->
                     <div>
                         <label class="block text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-1.5 truncate">{{__("Purpose")}}</label>
-                        <select wire:model.live="purpose" class="w-full bg-slate-900/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <select wire:model.live="purpose" class="w-full bg-slate-950/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                             <option value="">{{__("All (Sale & Rent)")}}</option>
                             <option value="for_sale">{{__("For Sale")}}</option>
                             <option value="for_rent">{{__("For Rent")}}</option>
@@ -36,7 +50,7 @@
                     <!-- Property Type (Plot, House, Shop) -->
                     <div>
                         <label class="block text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-1.5 truncate">{{__("Property Type")}}</label>
-                        <select wire:model.live="propertyType" class="w-full bg-slate-900/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <select wire:model.live="propertyType" class="w-full bg-slate-950/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                             <option value="">{{__("All Types")}}</option>
                             <option value="plot">{{__("Plot")}}</option>
                             <option value="house">{{__("House")}}</option>
@@ -47,7 +61,7 @@
                     <!-- Scheme / Town Selector -->
                     <div>
                         <label class="block text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-1.5 truncate">{{__("Housing Scheme")}}</label>
-                        <select wire:model.live="selectedTown" class="w-full bg-slate-900/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none truncate">
+                        <select wire:model.live="selectedTown" class="w-full bg-slate-950/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none truncate">
                             <option value="">{{__("All Schemes")}}</option>
                             @foreach($towns as $town)
                                 <option value="{{ $town->id }}">{{ $town->name }}</option>
@@ -58,7 +72,7 @@
                     <!-- Agent Wise Filter -->
                     <div>
                         <label class="block text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-1.5 truncate">{{__("Filter By Agent")}}</label>
-                        <select wire:model.live="selectedAgent" class="w-full bg-slate-900/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none truncate">
+                        <select wire:model.live="selectedAgent" class="w-full bg-slate-950/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none truncate">
                             <option value="">{{__("All Agents")}}</option>
                             @foreach($agents as $agent)
                                 <option value="{{ $agent->id }}">{{ $agent->name }}</option>
@@ -69,7 +83,7 @@
                     <!-- Size Filter -->
                     <div class="col-span-2 sm:col-span-1">
                         <label class="block text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 sm:mb-1.5 truncate">{{__("Property Size")}}</label>
-                        <select wire:model.live="size" class="w-full bg-slate-900/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <select wire:model.live="size" class="w-full bg-slate-950/90 border border-slate-700 text-slate-200 rounded-lg sm:rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
                             <option value="">{{__("Any Size")}}</option>
                             <option value="5">{{__("5 Marla")}}</option>
                             <option value="10">{{__("10 Marla")}}</option>
@@ -79,7 +93,7 @@
 
                     <!-- Search Button -->
                     <div class="col-span-2 sm:col-span-1 flex items-end pt-1 sm:pt-0">
-                        <button wire:click="applyFilter" wire:loading.attr="disabled" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 sm:py-2.5 px-4 rounded-lg sm:rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                        <button wire:click="applyFilter" wire:loading.attr="disabled" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 sm:py-2.5 px-4 rounded-lg sm:rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5 text-xs sm:text-sm cursor-pointer active:scale-95">
                             <span wire:loading.remove><i class="fa-solid fa-magnifying-glass"></i> {{__("Search Properties")}}</span>
                             <span wire:loading><i class="fa-solid fa-spinner fa-spin"></i> {{__("Searching...")}}</span>
                         </button>
@@ -88,6 +102,7 @@
             </div>
         </div>
     </section>
+</div>
 
     <!-- Property Showcase Section -->
     <section id="results-section" x-data @scroll-to-results.window="document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' })" class="py-12 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,10 +117,20 @@
             </div>
         </div>
 
-        <!-- Cards Grid -->
+        <!-- Cards Grid (Entire Card is Clickable to Property Details) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             @forelse($properties as $property) 
-            <div class="bg-slate-800/60 border border-slate-700/60 rounded-3xl overflow-hidden hover:border-amber-500/50 transition-all duration-300 hover:-translate-y-1.5 group shadow-xl">
+            @php
+                $cityName = $property->city?->name ?? $property->town?->city?->name ?? $property->city ?? '';
+                $mapUrl = !empty($property->google_map_url) 
+                    ? $property->google_map_url 
+                    : 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode(($property->location ?? '') . ', ' . $cityName);
+            @endphp
+
+            <a href="{{ route('property.details', $property->id) }}" 
+               class="block bg-slate-800/60 border border-slate-700/60 rounded-3xl overflow-hidden hover:border-amber-500/60 transition-all duration-300 hover:-translate-y-1.5 group shadow-xl hover:shadow-amber-500/10 cursor-pointer">
+                
+                <!-- Card Header Image -->
                 <div class="relative h-48 sm:h-52 bg-slate-900 overflow-hidden">
                     @if(!empty($property->images[0]))
                         <img src="{{ asset('public/'.$property->images[0]) }}" alt="Property Image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
@@ -123,27 +148,25 @@
                         </span>
                     </div>
 
-                    <!-- Google Maps Navigation Button -->
-                    @php
-                        $cityName = $property->city?->name ?? $property->town?->city?->name ?? $property->city ?? '';
-                        $mapUrl = !empty($property->google_map_url) 
-                            ? $property->google_map_url 
-                            : 'https://www.google.com/maps/dir/?api=1&destination=' . urlencode(($property->location ?? '') . ', ' . $cityName);
-                    @endphp
-                    <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" 
-                       title="Navigate via Google Maps"
-                       class="absolute top-3.5 right-3.5 bg-slate-950/80 hover:bg-emerald-600 text-emerald-400 hover:text-white p-2 rounded-full backdrop-blur-md border border-slate-700/80 transition-all duration-300 shadow-lg group/map">
+                    <!-- Google Maps Navigation Button (stopPropagation prevents card click) -->
+                    <button type="button"
+                            onclick="event.preventDefault(); event.stopPropagation(); window.open('{{ $mapUrl }}', '_blank');"
+                            title="Navigate via Google Maps"
+                            class="absolute top-3.5 right-3.5 bg-slate-950/80 hover:bg-emerald-600 text-emerald-400 hover:text-white p-2 rounded-full backdrop-blur-md border border-slate-700/80 transition-all duration-300 shadow-lg group/map z-10 cursor-pointer">
                         <i class="fa-solid fa-location-dot text-xs group-hover/map:scale-110 transition-transform"></i>
-                    </a>
+                    </button>
                 </div>
 
+                <!-- Card Body -->
                 <div class="p-5 sm:p-6 space-y-4">
                     <div class="flex justify-between items-start">
                         <div>
                             <span class="text-[11px] sm:text-xs text-amber-400 font-semibold uppercase tracking-wider">{{ $property->town->name ?? 'Prime Location' }}</span>
-                            <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5 line-clamp-1">{{ ucfirst($property->property_type ?? 'Property') }} # {{ $property->property_number ?? $property->title ?? $property->id }}</h3>
+                            <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5 line-clamp-1 group-hover:text-amber-400 transition-colors">
+                                {{ ucfirst($property->property_type ?? 'Property') }} # {{ $property->property_number ?? $property->title ?? $property->id }}
+                            </h3>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right shrink-0">
                             <span class="text-base sm:text-lg font-extrabold text-amber-400">PKR {{ number_format($property->price ?? 0) }}</span>
                             @if(($property->purpose ?? '') === 'rent')
                                 <span class="block text-[10px] text-slate-400">/ Month</span>
@@ -157,10 +180,10 @@
                             <i class="fa-solid fa-map-pin text-rose-400 mr-1"></i>
                             {{ $property->location ?? $cityName ?? 'Location N/A' }}
                         </span>
-                        <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" 
-                           class="text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 transition-colors shrink-0">
+                        <span onclick="event.preventDefault(); event.stopPropagation(); window.open('{{ $mapUrl }}', '_blank');" 
+                              class="text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 transition-colors shrink-0 cursor-pointer">
                             <i class="fa-solid fa-diamond-turn-right text-xs"></i> {{__("Navigate")}}
-                        </a>
+                        </span>
                     </div>
 
                     <!-- Details & Agent Info -->
@@ -169,20 +192,23 @@
                             <i class="fa-solid fa-ruler-combined text-slate-500"></i>
                             <span class="truncate">{{ $property->area_size ?? $property->size ?? 'N/A' }}</span>
                         </div>
-                        <div class="flex items-center gap-2 cursor-pointer hover:text-amber-400" wire:click="openUnlockModal({{ $property->agent_id ?? $property->user->id ?? 0 }})">
+                        <div class="flex items-center gap-2 hover:text-amber-400 cursor-pointer" 
+                             onclick="event.preventDefault(); event.stopPropagation();" 
+                             wire:click.stop="openUnlockModal({{ $property->agent_id ?? $property->user->id ?? 0 }})">
                             <i class="fa-solid fa-user-tie text-amber-400"></i>
                             <span class="truncate">{{ $property->agent->name ?? $property->user->name ?? 'Agent/Owner' }}</span>
                         </div>
                     </div>
 
+                    <!-- Footer Link Call to Action -->
                     <div class="flex items-center justify-between pt-1">
                         <span class="text-xs text-slate-400"><i class="fa-solid fa-shield-check text-emerald-400"></i> {{__("Verified Listing")}}</span>
-                        <a href="{{ route('property.details', $property->id) }}" class="text-xs font-bold text-white group-hover:text-amber-400 flex items-center gap-1 transition-colors">
-                            {{__("Details")}} <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                        </a>
+                        <span class="text-xs font-bold text-white group-hover:text-amber-400 flex items-center gap-1.5 transition-colors">
+                            {{__("Details")}} <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                        </span>
                     </div>
                 </div>
-            </div>
+            </a>
             @empty
             <div class="col-span-full text-center py-16 bg-slate-800/30 rounded-3xl border border-slate-800">
                 <i class="fa-solid fa-building-circle-xmark text-4xl text-slate-600 mb-3"></i>
@@ -238,22 +264,20 @@
                         </div>
 
                         <div class="mt-5">
-                           
-                                <div class="bg-slate-900/90 rounded-xl p-3 border border-emerald-500/30 space-y-1.5 text-xs">
-                                    <div class="flex items-center justify-between text-emerald-400 font-semibold text-[11px] mb-1">
-                                        <span class="flex items-center gap-1.5">
-                                            <i class="fa-solid fa-lock-open"></i> {{__("Contact Unlocked")}}
-                                        </span>
-                                        <span class="text-[10px] text-slate-400 font-normal">{{__("Active")}}</span>
-                                    </div>
-                                    <a href="tel:{{ $person->phone }}" class="flex items-center gap-2 text-slate-200 hover:text-amber-400 truncate">
-                                        <i class="fa-solid fa-phone text-amber-400 text-[10px]"></i> {{ $person->phone ?? '+92 300 0000000' }}
-                                    </a>
-                                    <a href="mailto:{{ $person->email }}" class="flex items-center gap-2 text-slate-200 hover:text-amber-400 truncate">
-                                        <i class="fa-solid fa-envelope text-amber-400 text-[10px]"></i> {{ $person->email }}
-                                    </a>
+                            <div class="bg-slate-900/90 rounded-xl p-3 border border-emerald-500/30 space-y-1.5 text-xs">
+                                <div class="flex items-center justify-between text-emerald-400 font-semibold text-[11px] mb-1">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-lock-open"></i> {{__("Contact Unlocked")}}
+                                    </span>
+                                    <span class="text-[10px] text-slate-400 font-normal">{{__("Active")}}</span>
                                 </div>
-                            
+                                <a href="tel:{{ $person->phone }}" class="flex items-center gap-2 text-slate-200 hover:text-amber-400 truncate">
+                                    <i class="fa-solid fa-phone text-amber-400 text-[10px]"></i> {{ $person->phone ?? '+92 300 0000000' }}
+                                </a>
+                                <a href="mailto:{{ $person->email }}" class="flex items-center gap-2 text-slate-200 hover:text-amber-400 truncate">
+                                    <i class="fa-solid fa-envelope text-amber-400 text-[10px]"></i> {{ $person->email }}
+                                </a>
+                            </div>
                         </div>
                     </div>
                 @empty
