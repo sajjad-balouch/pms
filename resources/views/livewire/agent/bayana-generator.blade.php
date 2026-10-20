@@ -177,7 +177,7 @@
 
     @else
     <!-- ========================================== -->
-    <!-- PRINTABLE LEGAL DOCUMENT PREVIEW -->
+    <!-- PRINTABLE LEGAL DOCUMENT PREVIEW (URDU VENDOR STYLE) -->
     <!-- ========================================== -->
     <div class="space-y-4">
         
@@ -185,102 +185,104 @@
         <div class="print:hidden flex items-center justify-between bg-slate-800 p-4 rounded-2xl border border-slate-700">
             <button type="button" wire:click="editAgreement" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i>
-                <span>Back to Edit</span>
+                <span>واپس ایڈیٹنگ پر جائیں</span>
             </button>
 
             <button type="button" onclick="window.print()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-md">
                 <i class="fa-solid fa-print"></i>
-                <span>Print or Save PDF</span>
+                <span>پرنٹ کریں یا PDF محفوظ کریں</span>
             </button>
         </div>
 
-        <!-- The Stamp Paper / Document Body -->
-        <div class="bg-white text-black p-8 sm:p-12 rounded-2xl shadow-2xl border border-slate-200 print:border-0 print:shadow-none print:p-4 text-left font-sans" dir="ltr" style="line-height: 1.8;">
+        <!-- The Traditional Urdu Stamp Paper / Affidavit Body -->
+        <div class="bg-amber-50/90 p-8 sm:p-14 rounded-2xl shadow-2xl border-2 border-amber-900/30 print:border-0 print:shadow-none print:p-4 text-right" dir="rtl" style="font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; line-height: 2.3;">
             
             <!-- Document Top Header -->
             <div class="text-center border-b-2 border-black pb-4 mb-6">
-                <h1 class="text-2xl font-extrabold uppercase tracking-wide mb-1">
-                    {{ $agreementType === 'bayana' ? 'Agreement to Sell / Bayana Contract' : 'Earnest Money & Token Receipt' }}
+                <h1 class="text-3xl font-extrabold tracking-wide mb-1 text-amber-950">
+                    {{ $agreementType === 'bayana' ? 'اقرار نامہ بیعانہ (معاہدہ فروخت اراضی)' : 'رسید ٹوکن بیعانہ سر دستی' }}
                 </h1>
-                <p class="text-xs text-gray-700 font-semibold">Dealer / Notary Office: {{ Auth::user()->name }} | Date: {{ \Carbon\Carbon::parse($agreementDate)->format('d-m-Y') }}</p>
+                <p class="text-sm font-sans font-bold">دفتر ایجنسی / ثالث: {{ Auth::user()->name }} | مورخه: {{ \Carbon\Carbon::parse($agreementDate)->format('d-m-Y') }}</p>
             </div>
 
-            <!-- Agreement Text Body -->
-            <div class="text-sm text-gray-900 space-y-4 text-justify">
+            <!-- Agreement Text Body in Traditional Urdu Legal Tone -->
+            <div class="text-base text-white space-y-4 text-justify">
                 <p>
-                    <strong>First Party (Seller):</strong> Mr./Ms. <strong>{{ $sellerName }}</strong>, 
-                    CNIC No.: <span class="font-bold">{{ $sellerCnic ?: '_____________________' }}</span>, 
-                    Contact No.: <span>{{ $sellerPhone }}</span>.
-                </p>
-
-                <p>
-                    <strong>Second Party (Buyer):</strong> Mr./Ms. <strong>{{ $buyerName }}</strong>, 
-                    CNIC No.: <span class="font-bold">{{ $buyerCnic ?: '_____________________' }}</span>, 
-                    Contact No.: <span>{{ $buyerPhone }}</span>.
-                </p>
-
-                <p class="border-t border-gray-300 pt-3">
-                    Whereas the First Party is the lawful owner in absolute possession of the property titled <strong>{{ $propertyTitle }}</strong>, 
-                    situated at <strong>{{ $schemeName ?: 'Subject Locality' }}</strong>, 
-                    measuring an area of <strong>{{ $areaSize }}</strong>, and has willingly agreed to sell the said property to the Second Party for a total agreed consideration of 
-                    <strong>PKR {{ number_format($totalDealAmount) }}</strong> (Half of which amounts to PKR {{ number_format($totalDealAmount / 2) }}).
+                    <strong>منکہ فریقِ اول (فروخت کنندہ / مالکانہ):</strong> جناب <strong>{{ $sellerName }}</strong>، 
+                    ولدیت / زوجیت: _____________________، 
+                    شناختی کارڈ نمبر: <span class="font-sans font-bold">{{ $sellerCnic ?: '_____________________' }}</span>، 
+                    ساکن: _____________________, فون نمبر: <span class="font-sans">{{ $sellerPhone }}</span>۔
                 </p>
 
                 <p>
-                    Out of the total consideration, the Second Party has paid an advance token/bayana amount of 
-                    <strong>PKR {{ number_format($bayanaAmount) }}</strong> 
-                    via <strong>({{ $paymentMethod === 'cash' ? 'Cash in Hand' : ($paymentMethod === 'cheque' ? 'Cheque / Pay Order: ' . $chequeDetails : 'Online Bank Transfer') }})</strong> 
-                    in the presence of the undersigned witnesses, receipt of which is hereby acknowledged by the First Party. 
-                    The remaining balance of <strong>PKR {{ number_format($remainingAmount) }}</strong> 
-                    shall be payable on or before <strong>{{ \Carbon\Carbon::parse($finalPaymentDate)->format('d-m-Y') }}</strong>, 
-                    upon which the First Party shall execute the final transfer, registered deed, and handover peaceful physical possession to the Second Party.
+                    <strong>بہ حق فریقِ دوئم (خریدار):</strong> جناب <strong>{{ $buyerName }}</strong>، 
+                    ولدیت: _____________________، 
+                    شناختی کارڈ نمبر: <span class="font-sans font-bold">{{ $buyerCnic ?: '_____________________' }}</span>، 
+                    ساکن: _____________________, فون نمبر: <span class="font-sans">{{ $buyerPhone }}</span>۔
                 </p>
 
-                <!-- Legal Clauses -->
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-xs space-y-2 my-4">
-                    <p class="font-bold uppercase tracking-wider text-gray-900">Terms & Conditions:</p>
-                    <ol class="list-decimal list-inside space-y-1 text-gray-800">
-                        <li>The First Party guarantees that the subject property is free from all legal disputes, encumbrances, bank liens, dues, and litigation prior to final registration/transfer.</li>
-                        <li>If the Second Party fails to clear the remaining balance by the agreed date, the bayana/token amount shall stand forfeited. Conversely, if the First Party revokes this agreement, they shall be liable to refund double the bayana amount to the Second Party.</li>
-                        <li>This agreement is executed with mutual consent, sound mind, and free will without any undue influence or coercion in the presence of the witnesses named below.</li>
+                <p class="border-t border-amber-900/30 pt-3">
+                    چونکہ فریقِ اول اپنی ذاتی ملکیتی، منقولہ و غیر منقولہ تصرفی پراپرٹی واقع <strong>{{ $propertyTitle }}</strong>، 
+                    موضع / سوسائٹی / اسکیم <strong>{{ $schemeName ?: 'علاقہ ہذا' }}</strong>، 
+                    بقدر رقبہ <strong>{{ $areaSize }}</strong>، جملہ حقوقِ ملکیت سمیت فریقِ دوئم کے ہاتھ بابت کل طے شدہ رقم 
+                    <strong>{{ number_format($totalDealAmount) }} روپے</strong> (نصف رقم بنتی ہے: {{ number_format($totalDealAmount / 2) }} روپے) کے عوض قطعی طور پر فروخت کرنے کا اقرار و وعدہ کیا ہے۔
+                </p>
+
+                <p>
+                    جس میں سے فریقِ دوئم نے بطور بیعانہ / ایڈوانس سر دستی مبلغ 
+                    <strong>{{ number_format($bayanaAmount) }} روپے</strong> 
+                    بحساب ادائیگی <strong>({{ $paymentMethod === 'cash' ? 'نقد کیش' : ($paymentMethod === 'cheque' ? 'بینک چیک نمبر: ' . $chequeDetails : 'آن لائن بینک ٹرانسفر') }})</strong> 
+                    روبرو گواہانِ حاشیہ فریقِ اول کو بخوبی ادا کر دیے ہیں، اور فریقِ اول نے بحق خود وصول پا کر تسلیم کر لیا ہے۔ 
+                    بقیہ کل واجب الادا رقم مبلغ <strong>{{ number_format($remainingAmount) }} روپے</strong> 
+                    مورخہ <strong>{{ \Carbon\Carbon::parse($finalPaymentDate)->format('d-m-Y') }}</strong> تک باقاعدہ ادا کر کے 
+                    محکمہ مال سے رجسٹری، انتقالِ ملکیت اور موقع پر پکی قبضہ تحویل حاصل کرنے کا فریقِ دوئم کو مجاز اور حقدار بنایا گیا ہے۔
+                </p>
+
+                <!-- Traditional Legal Clauses -->
+                <div class="bg-amber-100/60 p-5 rounded-xl border border-amber-900/20 text-sm space-y-2 my-4">
+                    <p class="font-bold text-amber-950">شرائط و ضوابط معاہدہ (تکمیل بایاں):</p>
+                    <ol class="list-decimal list-inside space-y-1 text-white">
+                        <li>فریقِ اول اس امر کا مکمل پابند و ضامن ہوگا کہ مذکورہ پراپرٹی ہر قسم کے عدل و عدالت کے تنازعات، رہن، بینک قرضہ، کلیم یا مالیاتی واجبات سے بالکل پاک و صاف ہے۔</li>
+                        <li>اگر خریدار (فریقِ دوئم) مقررہ تاریخ تک بقیہ زرِ ثمن ادا کرنے میں ناکام رہا تو جمع شدہ بیعانہ کی رقم ضبط تصور ہوگی، اور اگر فروخت کنندہ (فریقِ اول) اپنے وعدے سے انحراف یا پس و پیش کرے گا تو وہ وصول شدہ بیعانہ کی دوگنی (Double) رقم واپس ادا کرنے کا پابند ہوگا۔</li>
+                        <li>یہ اقرار نامہ تحریر کرنے کا مقصد یہ ہے کہ بوقتِ ضرورت سند رہے اور بوقتِ رجسٹری کام آئے۔ یہ تحریر دونوں فریقین نے بقائمی ہوش و حواسِ خمسہ، بغیر کسی جبر و اکراہ، خوشی و رغبت کے ساتھ روبرو گواہانِ ذیل عمل میں لائی گئی۔</li>
                     </ol>
                 </div>
             </div>
 
             <!-- Signatures Section -->
-            <div class="grid grid-cols-2 gap-8 pt-12 text-center text-xs">
+            <div class="grid grid-cols-2 gap-12 pt-14 text-center" style="font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; line-height: 2.3;">
                 <div class="border-t-2 border-black pt-2">
-                    <p class="font-bold text-sm">Signature / Thumb Impression (Seller)</p>
-                    <p class="text-gray-600 mt-1">{{ $sellerName }}</p>
+                    <p class="font-bold text-sm">دستخط / نشان انگوٹھا فریقِ اول (فروخت کنندہ)</p>
+                    <p class="text-xs text-gray-700 mt-1 font-serif text-base font-bold">{{ $sellerName }}</p>
                 </div>
                 <div class="border-t-2 border-black pt-2">
-                    <p class="font-bold text-sm">Signature / Thumb Impression (Buyer)</p>
-                    <p class="text-gray-600 mt-1">{{ $buyerName }}</p>
+                    <p class="font-bold text-sm">دستخط / نشان انگوٹھا فریقِ دوئم (خریدار)</p>
+                    <p class="text-xs text-gray-700 mt-1 font-serif text-base font-bold">{{ $buyerName }}</p>
                 </div>
             </div>
 
             <!-- Witnesses Signatures -->
-            <div class="grid grid-cols-3 gap-6 pt-10 text-center text-xs">
-                <div class="border-t border-gray-400 pt-2">
-                    <p class="font-bold">Witness 1</p>
-                    <p class="text-gray-700">{{ $witness1Name ?: '________________' }}</p>
-                    <p class="text-gray-500">{{ $witness1Cnic }}</p>
+            <div class="grid grid-cols-3 gap-6 pt-12 text-center text-xs"  style="font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; line-height: 2.3;">
+                <div class="border-t border-gray-600 pt-2">
+                    <p class="font-bold">گواہ شد (1)</p>
+                    <p class="text-gray-800 font-bold">{{ $witness1Name ?: '________________' }}</p>
+                    <p class="text-gray-600 font-mono text-[11px]">{{ $witness1Cnic ?: 'CNIC: _____________' }}</p>
                 </div>
-                <div class="border-t border-gray-400 pt-2">
-                    <p class="font-bold">Dealer / Notary Stamp & Signature</p>
-                    <p class="text-emerald-700 font-bold">{{ Auth::user()->name }}</p>
-                    <p class="text-gray-500">{{ Auth::user()->phone }}</p>
+                <div class="border-t border-gray-600 pt-2">
+                    <p class="font-bold text-emerald-800">تصدق و تصدیق (ثالث / ڈیلر)</p>
+                    <p class="text-emerald-700 font-bold font-serif text-sm">{{ Auth::user()->name }}</p>
+                    <p class="text-gray-600 font-mono text-[11px]">{{ Auth::user()->phone }}</p>
                 </div>
-                <div class="border-t border-gray-400 pt-2">
-                    <p class="font-bold">Witness 2</p>
-                    <p class="text-gray-700">{{ $witness2Name ?: '________________' }}</p>
-                    <p class="text-gray-500">{{ $witness2Cnic }}</p>
+                <div class="border-t border-gray-600 pt-2">
+                    <p class="font-bold">گواہ شد (2)</p>
+                    <p class="text-gray-800 font-bold">{{ $witness2Name ?: '________________' }}</p>
+                    <p class="text-gray-600 font-mono text-[11px]">{{ $witness2Cnic ?: 'CNIC: _____________' }}</p>
                 </div>
             </div>
 
             <!-- Portal Stamp Watermark at Footer -->
-            <div class="mt-8 pt-3 border-t border-gray-200 text-center text-[10px] text-gray-400">
-                Generated via AssanZameen.com Portal | Official Legal Record for Deal Documentation
+            <div class="mt-10 pt-3 border-t border-amber-900/30 text-center text-[11px] text-gray-600">
+                دستاویز تیار کردہ بذریعہ AssanZameen.com پورٹل | قانونی ڈیل ریکارڈ برائے اسٹامپ اینڈ کچہری
             </div>
 
         </div>

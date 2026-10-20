@@ -19,6 +19,12 @@
                 <a href="{{ url('/') }}" class="hover:text-amber-400 transition-colors {{ request()->is('/') ? 'text-amber-400 font-semibold' : '' }}">{{ __('Home') }}</a>
                 <a href="{{ route('housing-schemes') }}" class="hover:text-amber-400 transition-colors">{{ __('Housing Schemes') }}</a>
                 <a href="{{ route('available-plots') }}" class="hover:text-amber-400 transition-colors">{{ __('Available Plots') }}</a>
+                <a href="{{ route('blog.index') }}" 
+                   wire:navigate 
+                   class="block text-slate-200 font-medium hover:text-amber-400">
+          
+                    <span>{{ __('Our Blog') }}</span>
+                </a>
                 <a href="{{ route('about-us') }}" class="hover:text-amber-400 transition-colors">{{ __('About Us') }}</a>
                 <a href="{{ route('contact') }}" class="hover:text-amber-400 transition-colors">{{ __('Contact') }}</a>
             </nav>
@@ -115,6 +121,12 @@
         <a href="{{ url('/') }}" class="block text-slate-200 font-medium hover:text-amber-400">{{ __('Home') }}</a>
         <a href="{{ route('housing-schemes') }}" class="block text-slate-200 font-medium hover:text-amber-400">{{ __('Housing Schemes') }}</a>
         <a href="{{ route('available-plots') }}" class="block text-slate-200 font-medium hover:text-amber-400">{{ __('Available Plots') }}</a>
+        <a href="{{ route('blog.index') }}" 
+           wire:navigate 
+           class="block text-slate-200 font-medium hover:text-amber-400">
+  
+            <span>{{ __('Our Blog') }}</span>
+        </a>
         <a href="{{ route('about-us') }}" class="block text-slate-200 font-medium hover:text-amber-400">{{ __('About Us') }}</a>
         <a href="{{ route('contact') }}" class="block text-slate-200 font-medium hover:text-amber-400">{{ __('Contact') }}</a>
         

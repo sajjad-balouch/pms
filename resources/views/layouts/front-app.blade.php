@@ -26,9 +26,9 @@
         /* Jameel Noori Nastaleeq Web Font */
         @font-face {
             font-family: 'Jameel Noori Nastaleeq';
-            src: url('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff2') format('woff2'),
-                 url('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff') format('woff'),
-                 url('public/fonts/Jameel_Noori_Nastaleeq_Regular.ttf') format('truetype');
+            src: url(asset('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff2')) format('woff2'),
+                 url(asset('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff')) format('woff'),
+                 url(asset('public/fonts/Jameel_Noori_Nastaleeq_Regular.ttf')) format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap;

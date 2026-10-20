@@ -49,6 +49,9 @@ use App\Livewire\Agent\DealerExchange;
 use App\Livewire\Agent\PosterMaker;
 use App\Livewire\Agent\CommissionLedger;
 use App\Livewire\Agent\RegistryTaxCalculator;
+use App\Livewire\Admin\ManagePosts;
+use App\Livewire\Pages\BlogIndex;
+use App\Livewire\Pages\BlogShow;
 
 // Public Routes
 Route::get('/', function () {
@@ -79,7 +82,8 @@ Route::middleware(['web'])->group(function () {
     Route::get('/about-us', AboutUs::class)->name('about-us');
     Route::get('/contact', ContactUs::class)->name('contact');
 
-    
+    Route::get('/blog', BlogIndex::class)->name('blog.index');
+    Route::get('/blog/{slug}', BlogShow::class)->name('blog.show');
 
 });
 
@@ -127,6 +131,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/analytics', PageAnalytics::class)->name('analytics');
 
         Route::get('/whatsapp-marketing', WhatsAppMarketing::class)->name('whatsapp.marketing');
+
+        Route::get('/posts', ManagePosts::class)->name('posts');
 
     });
 

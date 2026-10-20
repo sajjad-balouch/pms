@@ -23,12 +23,12 @@
                             <p class="text-xs font-bold text-amber-400">{{ $agent->agency_tagline }}</p>
                         </div>
                         <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-full mx-auto sm:mx-0">
-                            <i class="fa-solid fa-badge-check"></i> تصدیق شدہ ایجنٹ
+                            <i class="fa-solid fa-badge-check"></i> Verified Agent
                         </span>
                     </div>
 
                     <p class="text-xs text-slate-400 leading-relaxed max-w-xl">
-                        {{ $agent->about_agency ?: 'آپ کا بااعتماد ریئل اسٹیٹ مشیر۔ ہم بہترین اور قانونی طور پر کلیئر پلاٹس و مکانات فراہم کرتے ہیں۔' }}
+                        {{ $agent->about_agency ?: 'Your trusted real estate advisor. We provide premium, legally verified plots, houses, and commercial properties.' }}
                     </p>
 
                     <!-- Contact & Location Icons -->
@@ -52,7 +52,7 @@
                 <!-- 1. Download vCard -->
                 <button type="button" wire:click="downloadVCard" class="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-sm">
                     <i class="fa-solid fa-address-book text-amber-400"></i>
-                    <span>فون میں نمبر محفوظ کریں (vCard)</span>
+                    <span>Save Contact (vCard)</span>
                 </button>
 
                 <!-- 2. WhatsApp Direct -->
@@ -60,16 +60,16 @@
                     $cleanPhone = preg_replace('/[^0-9]/', '', $agent->phone);
                     if (str_starts_with($cleanPhone, '0')) $cleanPhone = '92' . substr($cleanPhone, 1);
                 @endphp
-                <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode('السلام علیکم! میں نے آپ کا آسان زمین پروفائل کارڈ دیکھا ہے۔ مجھے پراپرٹی کے سلسلے میں معلومات درکار ہیں۔') }}" target="_blank"
+                <a href="https://wa.me/{{ $cleanPhone }}?text={{ urlencode('Hello! I viewed your profile on AssanZameen and would like to inquire about your property listings.') }}" target="_blank"
                    class="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 cursor-pointer">
                     <i class="fa-brands fa-whatsapp text-sm"></i>
-                    <span>ڈائریکٹ واٹس ایپ کریں</span>
+                    <span>Direct WhatsApp</span>
                 </a>
 
                 <!-- 3. Direct Phone Call -->
                 <a href="tel:{{ $agent->phone }}" class="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer">
                     <i class="fa-solid fa-phone text-xs"></i>
-                    <span>کال ملائیں ({{ $agent->phone }})</span>
+                    <span>Call Now ({{ $agent->phone }})</span>
                 </a>
             </div>
         </div>
@@ -79,9 +79,9 @@
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h2 class="text-lg font-black text-white flex items-center gap-2">
                     <i class="fa-solid fa-house-chimney text-amber-400"></i>
-                    <span>ایجنسی کی دستیاب پراپرٹیز ({{ count($properties) }})</span>
+                    <span>Agency Available Properties ({{ count($properties) }})</span>
                 </h2>
-                <span class="text-xs text-slate-400">100% تصدیق شدہ لسٹنگز</span>
+                <span class="text-xs text-slate-400">100% Verified Listings</span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -107,20 +107,20 @@
                                     <i class="fa-solid fa-location-dot text-slate-500 text-[11px]"></i>
                                     <span class="truncate">{{ $property->location }}</span>
                                 </div>
-                                <div class="text-xs font-semibold text-slate-300">رقبہ: <span class="text-amber-400">{{ $property->area_size }}</span></div>
+                                <div class="text-xs font-semibold text-slate-300">Area: <span class="text-amber-400">{{ $property->area_size }}</span></div>
                             </div>
                         </div>
 
                         <div class="p-4 pt-0 border-t border-slate-800/80 mt-2 flex items-center justify-between">
                             <span class="text-sm font-black text-emerald-400 font-mono">PKR {{ number_format($property->price) }}</span>
                             <a href="{{ url('/property/' . $property->id) }}" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/30 rounded-lg text-xs font-bold transition">
-                                تفصیل دیکھیں
+                                View Details
                             </a>
                         </div>
                     </div>
                 @empty
                     <div class="col-span-full p-10 text-center text-slate-500 bg-slate-900/40 rounded-2xl border border-slate-800">
-                        فی الوقت اس ایجنسی کی کوئی فعال پراپرٹی لسٹ نہیں ہے۔
+                        Currently, there are no active property listings available for this agency.
                     </div>
                 @endforelse
             </div>
