@@ -28,4 +28,10 @@ class Post extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(PostReview::class, 'post_id')->where('is_approved', true);
+    }
+
 }
