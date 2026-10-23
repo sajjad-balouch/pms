@@ -26,9 +26,9 @@
         /* Jameel Noori Nastaleeq Web Font */
         @font-face {
             font-family: 'Jameel Noori Nastaleeq';
-            src: url('{{ asset('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff2') }}') format('woff2'),
-                 url('{{ asset('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff') }}') format('woff'),
-                 url('{{ asset('public/fonts/Jameel_Noori_Nastaleeq_Regular.ttf') }}') format('truetype');
+            src: url('{{ asset("public/fonts/Jameel_Noori_Nastaleeq_Regular.woff2") }}') format('woff2'),
+                 url("{{ asset('public/fonts/Jameel_Noori_Nastaleeq_Regular.woff') }}") format('woff'),
+                 url("{{ asset('public/fonts/Jameel_Noori_Nastaleeq_Regular.ttf') }}") format('truetype');
             font-weight: normal;
             font-style: normal;
             font-display: swap;
@@ -42,7 +42,7 @@
         body {
             background-color: #070a12 !important;
             color: #f8fafc !important;
-            font-family: {{ app()->getLocale() == 'ur' ? "var(--font-ur)" : "var(--font-en)" }} !important;
+            font-family: {{ app()->getLocale() == 'ur' ? "var(--font-ur)" : "var(--font-en)" }};
             -webkit-font-smoothing: antialiased;
         }
 

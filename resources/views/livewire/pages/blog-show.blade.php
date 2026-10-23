@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-8" style="font-family: Jameel Noori Nastaleeq; direction: rtl;">
+<div class="min-h-screen bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-8" style="font-family: Jameel Noori Nastaleeq;">
     <div class="max-w-4xl mx-auto space-y-8">
 
         <!-- Top Breadcrumbs -->
@@ -18,7 +18,7 @@
             <h1 class="text-3xl sm:text-5xl font-black text-white leading-tight">
                 {{ $post->title }}
             </h1>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-4 gap-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-4 gap-2" style="direction: rtl;">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs">
                         {{ strtoupper(substr($post->author->name ?? 'A', 0, 1)) }}
