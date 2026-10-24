@@ -55,12 +55,12 @@ class ManageUsers extends Component
     {
         $this->selectedUser = User::findOrFail($userId);
 
-        // 1. Properties (agent_id migration key ke mutabiq)
+        // 1. Properties
         $this->userProperties = Property::where('agent_id', $userId)
             ->latest()
             ->get();
 
-        // 2. Towns / Housing Schemes with complete Plots aggregation & details
+        // 2. Towns / Housing Schemes
         $this->userTowns = Town::where('user_id', $userId)
             ->with(['plots'])
             ->withCount([
@@ -117,7 +117,6 @@ class ManageUsers extends Component
         $this->selectedTownName = $town->name;
         $this->selectedTownPlots = $town->plots;
 
-        // Pehle activity modal ko close karein taake stacking/overlap issue na ho
         $this->showActivityModal = false;
         $this->showPlotsModal = true;
     }
@@ -193,6 +192,45 @@ class ManageUsers extends Component
         session()->flash('status', 'User ka password kamyabi se change ho gaya hai.');
         $this->showPasswordModal = false;
         $this->reset(['selectedUserId', 'new_password']);
+    }
+
+    // --- DELETE USER SAFELY ---
+    public function deleteUser($userId)
+    {
+        if ($userId === auth()->id()) {
+            session()->flash('error', 'Aap apne active admin account ko delete nahi kar sakte!');
+            return;
+        }
+
+        $user = User::findOrFail($userId);
+
+        try {
+            DB::transaction(function () use ($user, $userId) {
+                // 1. Leads delete/cleanup
+                DB::table('leads')->where('agent_id', $userId)->delete();
+
+                // 2. Property unlocks & wallet records
+                DB::table('property_unlocks')->where('user_id', $userId)->delete();
+                DB::table('wallet_transactions')->where('user_id', $userId)->delete();
+
+                // 3. User ki Properties delete karein
+                Property::where('agent_id', $userId)->delete();
+
+                // 4. Towns aur unke plots delete karein
+                $towns = Town::where('user_id', $userId)->get();
+                foreach ($towns as $town) {
+                    DB::table('plots')->where('town_id', $town->id)->delete();
+                    $town->delete();
+                }
+
+                // 5. User account delete
+                $user->delete();
+            });
+
+            session()->flash('status', 'User aur uska tamam data hamesha ke liye delete kar diya gaya hai.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'User delete karte waqt issue aaya: ' . $e->getMessage());
+        }
     }
 
     public function render()

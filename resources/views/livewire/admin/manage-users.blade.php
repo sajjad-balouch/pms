@@ -94,23 +94,32 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
+                                <div class="flex items-center justify-end gap-1.5">
                                     <button wire:click="viewUserActivity({{ $user->id }})" 
                                             title="View Complete Activity"
-                                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 transition border border-slate-700">
-                                        <i class="fa-solid fa-chart-line mr-1 text-sky-400"></i> Activity
+                                            class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 transition border border-slate-700">
+                                        <i class="fa-solid fa-chart-line text-sky-400"></i>
                                     </button>
 
                                     <button wire:click="openPasswordModal({{ $user->id }})" 
                                             title="Change Password"
-                                            class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 transition border border-slate-700">
-                                        <i class="fa-solid fa-key mr-1 text-amber-400"></i> Password
+                                            class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-200 hover:bg-slate-700 transition border border-slate-700">
+                                        <i class="fa-solid fa-key text-amber-400"></i>
                                     </button>
 
                                     @if ($user->id !== auth()->id())
                                         <button wire:click="toggleBlock({{ $user->id }})" 
-                                                class="px-3 py-1.5 rounded-xl text-xs font-bold transition border {{ $user->is_approved ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-600 hover:text-white' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-600 hover:text-white' }}">
-                                            {{ $user->is_approved ? 'Block' : 'Unblock' }}
+                                                title="{{ $user->is_approved ? 'Block User' : 'Unblock User' }}"
+                                                class="px-2.5 py-1.5 rounded-xl text-xs font-bold transition border {{ $user->is_approved ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-600 hover:text-slate-950' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-600 hover:text-white' }}">
+                                            <i class="fa-solid {{ $user->is_approved ? 'fa-user-lock' : 'fa-user-check' }}"></i>
+                                        </button>
+
+                                        <!-- Delete User Button with Confirmation -->
+                                        <button wire:click="deleteUser({{ $user->id }})" 
+                                                wire:confirm="Kya aap waqai is user ko delete karna chahte hain? Iska tamam record (schemes, plots, properties, wallet) hamesha ke liye khatam ho jayega!"
+                                                title="Delete User Permanently"
+                                                class="px-2.5 py-1.5 rounded-xl text-xs font-bold transition border bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-600 hover:text-white">
+                                            <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     @endif
                                 </div>
@@ -228,7 +237,6 @@
                     
                     @forelse($userTowns as $town)
                         <div class="p-5 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-4">
-                            <!-- Town Info Header -->
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
                                 <div>
                                     <h3 class="text-base font-extrabold text-white flex items-center gap-2">
@@ -248,7 +256,6 @@
                                 </button>
                             </div>
 
-                            <!-- Plots Metrics Grid -->
                             <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                                 <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
                                     <span class="text-[10px] text-slate-400 uppercase font-bold block">Total Plots</span>
@@ -349,83 +356,81 @@
     @endif
 
     <!-- MODAL: DETAILED TOWN PLOTS MODAL -->
-    <!-- MODAL: DETAILED TOWN PLOTS MODAL -->
-@if ($showPlotsModal)
-    @teleport('body')
-        <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-            <!-- Modal Box -->
-            <div class="bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 max-w-4xl w-full max-h-[85vh] overflow-y-auto space-y-4 relative z-[100000]">
-                
-                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div>
-                        <h3 class="text-lg font-black text-white flex items-center gap-2">
-                            <i class="fa-solid fa-map-pin text-amber-400"></i>
-                            {{ $selectedTownName }} - Plots Inventory
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Is town scheme ke tamam plots, status, aur installment plans ki detail.</p>
+    @if ($showPlotsModal)
+        @teleport('body')
+            <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+                <div class="bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-800 max-w-4xl w-full max-h-[85vh] overflow-y-auto space-y-4 relative z-[100000]">
+                    
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div>
+                            <h3 class="text-lg font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-map-pin text-amber-400"></i>
+                                {{ $selectedTownName }} - Plots Inventory
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Is town scheme ke tamam plots, status, aur installment plans ki detail.</p>
+                        </div>
+                        <button wire:click="$set('showPlotsModal', false)" class="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800">
+                            <i class="fa-solid fa-xmark text-base"></i>
+                        </button>
                     </div>
-                    <button wire:click="$set('showPlotsModal', false)" class="text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800">
-                        <i class="fa-solid fa-xmark text-base"></i>
-                    </button>
-                </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-950 uppercase text-slate-400 font-bold border-b border-slate-800">
-                            <tr>
-                                <th class="px-4 py-3">Plot #</th>
-                                <th class="px-4 py-3">Block</th>
-                                <th class="px-4 py-3">Type</th>
-                                <th class="px-4 py-3">Size</th>
-                                <th class="px-4 py-3">Total Price</th>
-                                <th class="px-4 py-3">Advance</th>
-                                <th class="px-4 py-3">Installments</th>
-                                <th class="px-4 py-3 text-right">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800/60">
-                            @forelse($selectedTownPlots as $plot)
-                                <tr class="hover:bg-slate-800/40">
-                                    <td class="px-4 py-3 font-extrabold text-white">#{{ $plot->plot_number }}</td>
-                                    <td class="px-4 py-3 text-slate-300">{{ $plot->block_name ?? 'Main' }}</td>
-                                    <td class="px-4 py-3 uppercase font-semibold text-slate-400">{{ $plot->type }}</td>
-                                    <td class="px-4 py-3 font-semibold text-amber-400">{{ $plot->size }}</td>
-                                    <td class="px-4 py-3 font-bold text-white">PKR {{ number_format($plot->total_price) }}</td>
-                                    <td class="px-4 py-3 text-slate-300">PKR {{ number_format($plot->down_payment) }}</td>
-                                    <td class="px-4 py-3 text-slate-400">{{ $plot->total_installments }} Months</td>
-                                    <td class="px-4 py-3 text-right">
-                                        @php
-                                            $statusBadge = match($plot->status) {
-                                                'available' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                                                'booked' => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                                                'sold' => 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-                                                default => 'bg-slate-800 text-slate-300',
-                                            };
-                                        @endphp
-                                        <span class="uppercase text-[9px] font-extrabold px-2 py-0.5 rounded border {{ $statusBadge }}">
-                                            {{ $plot->status }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 uppercase text-slate-400 font-bold border-b border-slate-800">
                                 <tr>
-                                    <td colspan="8" class="px-4 py-6 text-center text-slate-500">Is scheme mein filhal koi plot added nahi hai.</td>
+                                    <th class="px-4 py-3">Plot #</th>
+                                    <th class="px-4 py-3">Block</th>
+                                    <th class="px-4 py-3">Type</th>
+                                    <th class="px-4 py-3">Size</th>
+                                    <th class="px-4 py-3">Total Price</th>
+                                    <th class="px-4 py-3">Advance</th>
+                                    <th class="px-4 py-3">Installments</th>
+                                    <th class="px-4 py-3 text-right">Status</th>
                                 </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60">
+                                @forelse($selectedTownPlots as $plot)
+                                    <tr class="hover:bg-slate-800/40">
+                                        <td class="px-4 py-3 font-extrabold text-white">#{{ $plot->plot_number }}</td>
+                                        <td class="px-4 py-3 text-slate-300">{{ $plot->block_name ?? 'Main' }}</td>
+                                        <td class="px-4 py-3 uppercase font-semibold text-slate-400">{{ $plot->type }}</td>
+                                        <td class="px-4 py-3 font-semibold text-amber-400">{{ $plot->size }}</td>
+                                        <td class="px-4 py-3 font-bold text-white">PKR {{ number_format($plot->total_price) }}</td>
+                                        <td class="px-4 py-3 text-slate-300">PKR {{ number_format($plot->down_payment) }}</td>
+                                        <td class="px-4 py-3 text-slate-400">{{ $plot->total_installments }} Months</td>
+                                        <td class="px-4 py-3 text-right">
+                                            @php
+                                                $statusBadge = match($plot->status) {
+                                                    'available' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                                                    'booked' => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                                                    'sold' => 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+                                                    default => 'bg-slate-800 text-slate-300',
+                                                };
+                                            @endphp
+                                            <span class="uppercase text-[9px] font-extrabold px-2 py-0.5 rounded border {{ $statusBadge }}">
+                                                {{ $plot->status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="px-4 py-6 text-center text-slate-500">Is scheme mein filhal koi plot added nahi hai.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
 
-                <div class="flex justify-end pt-3 border-t border-slate-800">
-                    <button wire:click="$set('showPlotsModal', false)" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
-                        Back to Activity
-                    </button>
-                </div>
+                    <div class="flex justify-end pt-3 border-t border-slate-800">
+                        <button wire:click="$set('showPlotsModal', false)" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
+                            Back to Activity
+                        </button>
+                    </div>
 
+                </div>
             </div>
-        </div>
-    @endteleport
-@endif
+        @endteleport
+    @endif
 
     <!-- MODAL: CREATE NEW USER -->
     @if ($showCreateModal)
