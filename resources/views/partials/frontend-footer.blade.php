@@ -69,10 +69,18 @@
                     $footerPages = \App\Models\Page::where('is_active', true)->get();
                 @endphp
                 @foreach($footerPages as $fPage)
+                    @if($fPage->slug != 'about-us')
                     <a href="{{ route('dynamic.page', $fPage->slug) }}" class="hover:text-amber-400 transition-colors">
                         {{ __($fPage->title) }}
                     </a>
+                    @endif
                 @endforeach
+                <a href="{{ route('about-us') }}" class="hover:text-amber-400 transition-colors">
+                        {{ __('About Us') }}
+                </a>
+                <a href="{{ route('contact') }}" class="hover:text-amber-400 transition-colors">
+                        {{ __('Contact Us') }}
+                </a>
             </div>
         </div>
     </div>

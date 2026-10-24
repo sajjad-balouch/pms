@@ -52,6 +52,9 @@ use App\Livewire\Agent\RegistryTaxCalculator;
 use App\Livewire\Admin\ManagePosts;
 use App\Livewire\Pages\BlogIndex;
 use App\Livewire\Pages\BlogShow;
+use App\Livewire\Tools\PropertyLegalScanner;
+use App\Livewire\Tools\RegistryTaxCalculator as UserTax;
+use App\Livewire\Tools\PatwariLandConverter;
 
 // Public Routes
 Route::get('/', function () {
@@ -84,6 +87,18 @@ Route::middleware(['web'])->group(function () {
 
     Route::get('/blog', BlogIndex::class)->name('blog.index');
     Route::get('/blog/{slug}', BlogShow::class)->name('blog.show');
+
+    /**
+     * Tools
+     * 
+     * */
+    Route::get('/tools/legal-scanner', PropertyLegalScanner::class)->name('tools.legal-scanner');
+    Route::get('/tools/registry-tax-calculator', UserTax::class)->name('tools.tax-calculator');
+    Route::get('/tools/patwari-land-converter', PatwariLandConverter::class)->name('tools.land-converter');
+    /**
+     * Tools end
+     * 
+     * */
 
 });
 
