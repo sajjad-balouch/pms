@@ -58,6 +58,7 @@ use App\Livewire\Tools\PatwariLandConverter;
 use App\Livewire\Tools\BayanaDeedGenerator;
 use App\Livewire\Tools\SocietyNocDirectory;
 use App\Livewire\Tools\InheritanceCalculator;
+use App\Livewire\Tools\RentAgreementGenerator;
 
 // Public Routes
 Route::get('/', function () {
@@ -101,6 +102,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/tools/bayana-deed-generator', BayanaDeedGenerator::class)->name('tools.bayana-generator');
     Route::get('/tools/society-noc-directory', SocietyNocDirectory::class)->name('tools.society-directory');
     Route::get('/tools/inheritance-calculator', InheritanceCalculator::class)->name('tools.inheritance-calculator');
+    Route::get('/tools/rent-agreement-generator', RentAgreementGenerator::class)->name('tools.rent-generator');
     /**
      * Tools end
      * 

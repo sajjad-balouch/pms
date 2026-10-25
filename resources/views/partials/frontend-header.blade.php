@@ -139,6 +139,22 @@
                                 <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">شرعی احکام، پٹوار تقسیم و حصہ داران</p>
                             </div>
                         </a>
+                        <!-- Tool 7: Rent Agreement Generator (Active Route) -->
+                        <a href="{{ route('tools.rent-generator') }}" wire:navigate 
+                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.rent-generator') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}">
+                            <div class="w-9 h-9 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-file-contract"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">کرایہ نامہ میکر (Rent Agreement)</span>
+                                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">پنجاب ٹیننسی ایکٹ و اسٹامپ ریڈی معاہدہ</p>
+                            </div>
+                        </a>
+                        
+                        
                     </div>
                 </div>
 
@@ -317,6 +333,14 @@
                     <span class="flex items-center gap-2">
                         <i class="fa-solid fa-building-circle-check text-purple-400 w-4 text-center"></i>
                         <span> وراثت حصص  </span>
+                    </span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
+                </a>
+                <!-- Rent writer -->
+                <a href="{{ route('tools.rent-generator') }}" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-900 text-xs text-slate-300">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-building-circle-check text-purple-400 w-4 text-center"></i>
+                        <span> کریہ نامہ </span>
                     </span>
                     <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
                 </a>
