@@ -55,6 +55,9 @@ use App\Livewire\Pages\BlogShow;
 use App\Livewire\Tools\PropertyLegalScanner;
 use App\Livewire\Tools\RegistryTaxCalculator as UserTax;
 use App\Livewire\Tools\PatwariLandConverter;
+use App\Livewire\Tools\BayanaDeedGenerator;
+use App\Livewire\Tools\SocietyNocDirectory;
+use App\Livewire\Tools\InheritanceCalculator;
 
 // Public Routes
 Route::get('/', function () {
@@ -95,6 +98,9 @@ Route::middleware(['web'])->group(function () {
     Route::get('/tools/legal-scanner', PropertyLegalScanner::class)->name('tools.legal-scanner');
     Route::get('/tools/registry-tax-calculator', UserTax::class)->name('tools.tax-calculator');
     Route::get('/tools/patwari-land-converter', PatwariLandConverter::class)->name('tools.land-converter');
+    Route::get('/tools/bayana-deed-generator', BayanaDeedGenerator::class)->name('tools.bayana-generator');
+    Route::get('/tools/society-noc-directory', SocietyNocDirectory::class)->name('tools.society-directory');
+    Route::get('/tools/inheritance-calculator', InheritanceCalculator::class)->name('tools.inheritance-calculator');
     /**
      * Tools end
      * 

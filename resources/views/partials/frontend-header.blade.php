@@ -53,7 +53,7 @@
                         
                         <!-- Tool 1: AI Wakeel (Active Route) -->
                         <a href="{{ route('tools.legal-scanner') }}" wire:navigate 
-                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.legal-scanner') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}">
+                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.legal-scanner') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}" style="font-family: Noto Nastaliq Urdu">
                             <div class="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-shield-halved"></i>
                             </div>
@@ -68,7 +68,7 @@
 
                        <!-- Tool 2: Registry & FBR Tax Calculator (Active Route) -->
                         <a href="{{ route('tools.tax-calculator') }}" wire:navigate 
-                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.tax-calculator') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}">
+                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.tax-calculator') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}" style="font-family: Noto Nastaliq Urdu">
                             <div class="w-9 h-9 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-calculator"></i>
                             </div>
@@ -83,7 +83,7 @@
 
                         <!-- Tool 3: Patwari Land Converter (Active Route) -->
                         <a href="{{ route('tools.land-converter') }}" wire:navigate 
-                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.land-converter') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}">
+                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.land-converter') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}" style="font-family: Noto Nastaliq Urdu">
                             <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-ruler-combined"></i>
                             </div>
@@ -96,31 +96,47 @@
                             </div>
                         </a>
 
-                        <!-- Tool 4: Legal Bayana Deed Generator -->
-                        <a href="#" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-all group">
+                        <!-- Tool 4: Legal Bayana Deed Generator (Active Route) -->
+                        <a href="{{ route('tools.bayana-generator') }}" wire:navigate 
+                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.bayana-generator') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}" style="font-family: Noto Nastaliq Urdu">
                             <div class="w-9 h-9 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-file-signature"></i>
                             </div>
                             <div class="flex-grow">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">اقرار نامہ بیعانہ میکر</span>
-                                    <span class="text-[9px] font-semibold text-slate-500">Soon</span>
+                                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live</span>
                                 </div>
                                 <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">قانونی اسٹامپ پیپر ڈرافٹ جنریٹر</p>
                             </div>
                         </a>
 
-                        <!-- Tool 5: Society NOC Verification -->
-                        <a href="#" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-800/80 transition-all group">
+                        <!-- Tool 5: Society NOC Verification (Active Route) -->
+                        <a href="{{ route('tools.society-directory') }}" wire:navigate 
+                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.society-directory') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}" style="font-family: Noto Nastaliq Urdu">
                             <div class="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-building-circle-check"></i>
                             </div>
                             <div class="flex-grow">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">سوسائٹی NOC ڈائریکٹری</span>
-                                    <span class="text-[9px] font-semibold text-slate-500">Soon</span>
+                                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live</span>
                                 </div>
-                                <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">LDA, RDA, FDA اپروول تصدیق</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">TMA, LDA, RDA منظور شدہ و غیر قانونی اسکیمیں</p>
+                            </div>
+                        </a>
+                        <!-- Tool 6: Islamic Inheritance Calculator (Active Route) -->
+                        <a href="{{ route('tools.inheritance-calculator') }}" wire:navigate 
+                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.inheritance-calculator') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}" style="font-family: Noto Nastaliq Urdu">
+                            <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-scale-unbalanced-flip"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">وراثت و ترکہ تقسیم کیلکولیٹر</span>
+                                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">شرعی احکام، پٹوار تقسیم و حصہ داران</p>
                             </div>
                         </a>
                     </div>
@@ -275,26 +291,36 @@
                         <i class="fa-solid fa-ruler-combined text-emerald-400 w-4 text-center"></i>
                         <span>پٹواری اراضی کنورٹر</span>
                     </span>
-                    <span class="text-[9px] text-slate-500">Soon</span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
                 </a>
 
                 <!-- Bayana Deed Maker -->
-                <a href="#" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-900 text-xs text-slate-300">
+                <a href="{{ route('tools.bayana-generator') }}" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-900 text-xs text-slate-300">
                     <span class="flex items-center gap-2">
                         <i class="fa-solid fa-file-signature text-indigo-400 w-4 text-center"></i>
                         <span>اقرار نامہ بیعانہ میکر</span>
                     </span>
-                    <span class="text-[9px] text-slate-500">Soon</span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
                 </a>
 
+                
                 <!-- NOC Directory -->
-                <a href="#" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-900 text-xs text-slate-300">
+                <a href="{{ route('tools.society-directory') }}" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-900 text-xs text-slate-300">
                     <span class="flex items-center gap-2">
                         <i class="fa-solid fa-building-circle-check text-purple-400 w-4 text-center"></i>
                         <span>سوسائٹی NOC ڈائریکٹری</span>
                     </span>
-                    <span class="text-[9px] text-slate-500">Soon</span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
                 </a>
+                <!-- Inheritance calculator -->
+                <a href="{{ route('tools.inheritance-calculator') }}" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-900 text-xs text-slate-300">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-building-circle-check text-purple-400 w-4 text-center"></i>
+                        <span> وراثت حصص  </span>
+                    </span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
+                </a>
+
             </div>
         </div>
 
