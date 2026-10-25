@@ -9,7 +9,7 @@
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <script src="https://quge5.com/88/tag.min.js" data-zone="302019" async data-cfasync="false"></script>
     <!-- Google Fonts for English -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
