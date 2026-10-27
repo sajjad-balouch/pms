@@ -153,6 +153,34 @@
                                 <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">پنجاب ٹیننسی ایکٹ و اسٹامپ ریڈی معاہدہ</p>
                             </div>
                         </a>
+                        <!-- Tool 7: Zakat Calculator (Active Route) -->
+                        <a href="{{ route('tools.zakat-calculator') }}" wire:navigate 
+                           class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.zakat-calculator') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}">
+                            <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
+                                <i class="fa-solid fa-hand-holding-heart"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">شرعی زکوٰۃ کیلکولیٹر</span>
+                                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">پلاٹ، نقدی، سونا و مالِ تجارت کا شرعی حساب</p>
+                            </div>
+                        </a>
+                        <!-- Tool 8: Free ATS CV Maker (Active Route) -->
+                    <a href="{{ route('tools.cv-maker') }}" wire:navigate 
+                       class="flex items-start gap-3 p-2.5 rounded-xl transition-all group {{ request()->routeIs('tools.cv-maker') ? 'bg-amber-500/15 border border-amber-500/30' : 'hover:bg-slate-800/80' }}">
+                        <div class="w-9 h-9 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0 text-sm group-hover:scale-105 transition-transform">
+                            <i class="fa-solid fa-file-user"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">پیشہ ورانہ سی وی میکر</span>
+                                <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">ATS فرینڈلی، لائیو پیش نظارہ و A4 پرنٹ</p>
+                        </div>
+                    </a>
                         
                         
                     </div>
@@ -341,6 +369,22 @@
                     <span class="flex items-center gap-2">
                         <i class="fa-solid fa-building-circle-check text-purple-400 w-4 text-center"></i>
                         <span> کریہ نامہ </span>
+                    </span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
+                </a>
+                <!-- Zakat caculator -->
+                <a href="{{ route('tools.zakat-calculator') }}" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-900 text-xs text-slate-300">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-building-circle-check text-purple-400 w-4 text-center"></i>
+                        <span> ثکات نصاب  </span>
+                    </span>
+                    <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
+                </a>
+                <!-- CV Maker-->
+                <a href="{{ route('tools.cv-maker') }}" class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-900 text-xs text-slate-300">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-building-circle-check text-purple-400 w-4 text-center"></i>
+                        <span> سی وی میکر   </span>
                     </span>
                     <span class="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Live</span>
                 </a>
