@@ -4,8 +4,13 @@ namespace App\Livewire\TownOwner;
 
 use App\Models\City;
 use App\Models\Town;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -13,6 +18,11 @@ use Livewire\WithPagination;
 class ManageTowns extends Component
 {
     use WithPagination, WithFileUploads;
+
+    // Shared hosting par jahan URL mein /public lagta hai wahan 'public/' set karein, warna ''
+    const MEDIA_URL_PREFIX = 'public/';
+
+    const MAX_GALLERY_IMAGES = 20;
 
     public $name, $location, $total_area, $noc_number, $google_map_url;
     public $editingTownId = null;
@@ -22,121 +32,136 @@ class ManageTowns extends Component
     public $city_search = '';
     public $selected_city_name = '';
 
-    // New Features: Map & Gallery Uploads
+    // Map & Gallery Uploads (existing media is always read from the DB, never from these props)
     public $new_master_plan_map;
-    public $existing_master_plan_map = null;
     public $new_gallery_images = [];
-    public $existing_gallery_images = [];
+    public $uploadIteration = 0;
+
+    // Table search
+    #[Url(except: '')]
+    public $search = '';
 
     protected function rules()
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required', 'string', 'max:255',
+                Rule::unique('towns', 'name')->where('user_id', Auth::id())->ignore($this->editingTownId),
+            ],
             'location' => 'required|string|max:255',
-            'city_id' => 'required|exists:cities,id',
+            'city_id' => ['required', Rule::exists('cities', 'id')->where('is_active', 1)],
             'total_area' => 'nullable|string|max:100',
             'noc_number' => 'nullable|string|max:100',
             'google_map_url' => 'nullable|url|max:500',
-            'new_master_plan_map' => 'nullable|image|max:5120', // Max 5MB
-            'new_gallery_images.*' => 'nullable|image|max:3072', // Max 3MB each
+            'new_master_plan_map' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120', // Max 5MB
+            'new_gallery_images' => 'array|max:10',
+            'new_gallery_images.*' => 'image|mimes:jpg,jpeg,png,webp|max:3072', // Max 3MB each
         ];
     }
 
     protected $messages = [
+        'name.unique' => 'Is naam ki scheme pehle se maujood hai.',
         'city_id.required' => 'City select karna zaroori hai.',
+        'city_id.exists' => 'Select ki gayi city active nahi hai.',
         'new_master_plan_map.max' => 'Town map ka size 5MB se zyada na ho.',
+        'new_master_plan_map.mimes' => 'Map sirf JPG, PNG ya WEBP format mein ho.',
+        'new_gallery_images.max' => 'Ek waqt mein zyada se zyada 10 images upload karein.',
         'new_gallery_images.*.max' => 'Gallery image ka size 3MB se zyada na ho.',
+        'new_gallery_images.*.mimes' => 'Gallery images sirf JPG, PNG ya WEBP format mein hon.',
     ];
 
-    public function selectCity($id, $name)
+    // Validate files as soon as they are picked, not only on submit
+    public function updatedNewMasterPlanMap()
     {
-        $this->city_id = $id;
-        $this->selected_city_name = $name;
+        $this->validate(Arr::only($this->rules(), ['new_master_plan_map']));
+    }
+
+    public function updatedNewGalleryImages()
+    {
+        $this->validate(Arr::only($this->rules(), ['new_gallery_images', 'new_gallery_images.*']));
+    }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function selectCity($id)
+    {
+        // Name comes from the DB, not from the browser
+        $city = City::where('is_active', 1)->find($id);
+        if (! $city) {
+            return;
+        }
+
+        $this->city_id = $city->id;
+        $this->selected_city_name = $city->name;
         $this->city_search = '';
         $this->resetValidation('city_id');
     }
 
-    public function createTown()
+    public function removeNewGalleryImage($index)
+    {
+        $images = $this->new_gallery_images;
+        unset($images[$index]);
+        $this->new_gallery_images = array_values($images);
+    }
+
+    public function saveTown()
     {
         $this->validate();
 
-        $cityName = $this->selected_city_name ?: City::find($this->city_id)?->name;
+        $town = $this->editingTownId
+            ? $this->ownedTown($this->editingTownId)
+            : new Town(['user_id' => Auth::id()]);
 
-        if ($this->editingTownId) {
-            $town = Town::where('user_id', Auth::id())->findOrFail($this->editingTownId);
+        $oldMap = $town->master_plan_map;
+        $gallery = is_array($town->gallery_images) ? $town->gallery_images : [];
 
-            // 1. Handle Master Plan Map Upload
-            $mapPath = $this->existing_master_plan_map;
-            if ($this->new_master_plan_map) {
-                if ($mapPath && File::exists(public_path($mapPath))) {
-                    File::delete(public_path($mapPath));
-                }
-
-                $targetDir = public_path('town_maps');
-                if (!File::isDirectory($targetDir)) {
-                    File::makeDirectory($targetDir, 0755, true, true);
-                }
-
-                $mapName = 'map_' . time() . '_' . uniqid() . '.' . $this->new_master_plan_map->getClientOriginalExtension();
-                $destination = $targetDir . DIRECTORY_SEPARATOR . $mapName;
-
-                copy($this->new_master_plan_map->getRealPath(), $destination);
-                
-                $mapPath = 'town_maps/' . $mapName;
-            }
-
-            // 2. Handle Gallery Images Upload
-            $galleryPaths = $this->existing_gallery_images ?? [];
-            if (!empty($this->new_gallery_images)) {
-                $galleryDir = public_path('town_galleries');
-                if (!File::isDirectory($galleryDir)) {
-                    File::makeDirectory($galleryDir, 0755, true, true);
-                }
-
-                foreach ($this->new_gallery_images as $image) {
-                    $imgName = 'gallery_' . time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                    $destination = $galleryDir . DIRECTORY_SEPARATOR . $imgName;
-
-                    copy($image->getRealPath(), $destination);
-                    $galleryPaths[] = 'town_galleries/' . $imgName;
-                }
-            }
-
-            $town->update([
-                'name' => $this->name,
-                'location' => $this->location,
-                'city_id' => $this->city_id,
-                'city' => $cityName,
-                'google_map_url' => $this->google_map_url,
-                'master_plan_map' => $mapPath,
-                'gallery_images' => $galleryPaths,
-                'total_area' => $this->total_area,
-                'noc_number' => $this->noc_number,
-            ]);
-
-            session()->flash('success', 'ٹاؤن کی تمام تفصیلات، میپ اور گیلری اپ ڈیٹ ہو گئی ہیں۔');
-        } else {
-            Town::create([
-                'user_id' => Auth::id(),
-                'name' => $this->name,
-                'location' => $this->location,
-                'city_id' => $this->city_id,
-                'city' => $cityName,
-                'google_map_url' => $this->google_map_url,
-                'total_area' => $this->total_area,
-                'noc_number' => $this->noc_number,
-            ]);
-
-            session()->flash('success', 'نیا ٹاؤن رجسٹر ہو گیا ہے۔ میپ اور گیلری ایڈٹ سیکشن سے شامل کریں۔');
+        if (count($gallery) + count($this->new_gallery_images) > self::MAX_GALLERY_IMAGES) {
+            $this->addError('new_gallery_images', 'Ek scheme mein zyada se zyada ' . self::MAX_GALLERY_IMAGES . ' gallery images ho sakti hain.');
+            return;
         }
+
+        $newMap = $this->new_master_plan_map
+            ? $this->storeImage($this->new_master_plan_map, 'town_maps', 'map')
+            : null;
+
+        foreach ($this->new_gallery_images as $image) {
+            $gallery[] = $this->storeImage($image, 'town_galleries', 'gallery');
+        }
+
+        $isNew = ! $town->exists;
+
+        $town->fill([
+            'name' => $this->name,
+            'location' => $this->location,
+            'city_id' => $this->city_id,
+            'city' => City::find($this->city_id)?->name,
+            'google_map_url' => $this->google_map_url,
+            'master_plan_map' => $newMap ?? $oldMap,
+            'gallery_images' => $gallery ?: null,
+            'total_area' => $this->total_area,
+            'noc_number' => $this->noc_number,
+        ])->save();
+
+        // Remove the old map only after the new one is saved successfully
+        if ($newMap && $oldMap) {
+            $this->deleteFile($oldMap);
+        }
+
+        session()->flash('success', $isNew
+            ? 'نیا ٹاؤن رجسٹر ہو گیا ہے۔'
+            : 'ٹاؤن کی تمام تفصیلات، میپ اور گیلری اپ ڈیٹ ہو گئی ہیں۔');
 
         $this->cancelEdit();
     }
 
     public function editTown($id)
     {
-        $town = Town::where('user_id', Auth::id())->with('city')->findOrFail($id);
+        $town = $this->ownedTown($id);
 
+        $this->resetValidation();
         $this->editingTownId = $town->id;
         $this->name = $town->name;
         $this->location = $town->location;
@@ -145,115 +170,172 @@ class ManageTowns extends Component
         $this->noc_number = $town->noc_number;
 
         $this->city_id = $town->city_id;
-        $this->selected_city_name = $town->city?->name ?? $town->city ?? '';
+        $this->selected_city_name = City::find($town->city_id)?->name ?? $town->city ?? '';
         $this->city_search = '';
 
-        // Load Existing Media
-        $this->existing_master_plan_map = $town->master_plan_map;
-        $this->existing_gallery_images = is_array($town->gallery_images) ? $town->gallery_images : [];
         $this->new_master_plan_map = null;
         $this->new_gallery_images = [];
+        $this->uploadIteration++;
+
+        $this->dispatch('town-form-opened');
     }
 
     public function deleteMasterPlanMap()
     {
-        if ($this->editingTownId && $this->existing_master_plan_map) {
-            if (File::exists(public_path($this->existing_master_plan_map))) {
-                File::delete(public_path($this->existing_master_plan_map));
-            }
+        if (! $this->editingTownId) {
+            return;
+        }
 
-            Town::where('id', $this->editingTownId)->update(['master_plan_map' => null]);
-            $this->existing_master_plan_map = null;
+        $town = $this->ownedTown($this->editingTownId);
+        if ($town->master_plan_map) {
+            $this->deleteFile($town->master_plan_map);
+            $town->update(['master_plan_map' => null]);
             session()->flash('success', 'Town master plan map delete kar diya gaya.');
         }
     }
 
     public function deleteGalleryImage($index)
     {
-        if (isset($this->existing_gallery_images[$index])) {
-            $fileToDelete = $this->existing_gallery_images[$index];
+        if (! $this->editingTownId) {
+            return;
+        }
 
-            if (File::exists(public_path($fileToDelete))) {
-                File::delete(public_path($fileToDelete));
-            }
+        $town = $this->ownedTown($this->editingTownId);
+        $gallery = is_array($town->gallery_images) ? $town->gallery_images : [];
 
-            unset($this->existing_gallery_images[$index]);
-            $this->existing_gallery_images = array_values($this->existing_gallery_images);
+        if (isset($gallery[$index])) {
+            $this->deleteFile($gallery[$index]);
+            unset($gallery[$index]);
+            $gallery = array_values($gallery);
 
-            if ($this->editingTownId) {
-                Town::where('id', $this->editingTownId)->update([
-                    'gallery_images' => $this->existing_gallery_images,
-                ]);
-            }
-
+            $town->update(['gallery_images' => $gallery ?: null]);
             session()->flash('success', 'Gallery image delete kar di gayi.');
         }
     }
 
-    // New: Remove All Gallery Images like Town Map
     public function deleteAllGalleryImages()
     {
-        if ($this->editingTownId && !empty($this->existing_gallery_images)) {
-            foreach ($this->existing_gallery_images as $file) {
-                if (File::exists(public_path($file))) {
-                    File::delete(public_path($file));
-                }
-            }
-
-            Town::where('id', $this->editingTownId)->update(['gallery_images' => null]);
-            $this->existing_gallery_images = [];
-            session()->flash('success', 'Tamam gallery images remove kar di gayi hain.');
+        if (! $this->editingTownId) {
+            return;
         }
+
+        $town = $this->ownedTown($this->editingTownId);
+        foreach ((array) $town->gallery_images as $file) {
+            $this->deleteFile($file);
+        }
+
+        $town->update(['gallery_images' => null]);
+        session()->flash('success', 'Tamam gallery images remove kar di gayi hain.');
     }
 
     public function cancelEdit()
     {
-        $this->editingTownId = null;
         $this->reset([
-            'name', 'location', 'city_id', 'city_search', 'selected_city_name',
+            'editingTownId', 'name', 'location', 'city_id', 'city_search', 'selected_city_name',
             'google_map_url', 'total_area', 'noc_number',
-            'new_master_plan_map', 'existing_master_plan_map',
-            'new_gallery_images', 'existing_gallery_images'
+            'new_master_plan_map', 'new_gallery_images',
         ]);
+        $this->uploadIteration++;
         $this->resetValidation();
     }
 
     public function deleteTown($id)
     {
-        $town = Town::where('user_id', Auth::id())->findOrFail($id);
+        $town = $this->ownedTown($id);
 
-        if ($this->editingTownId === $id) {
+        // Booked/sold plots ke saath scheme delete nahi ho sakti (customers ka record khatam ho jayega)
+        if ($town->plots()->whereIn('status', ['booked', 'sold'])->exists()) {
+            session()->flash('error', 'Is scheme mein booked/sold plots hain, is liye ye delete nahi ho sakti.');
+            return;
+        }
+
+        if ($this->editingTownId == $id) {
             $this->cancelEdit();
         }
 
-        // Clean up stored files
-        if ($town->master_plan_map && File::exists(public_path($town->master_plan_map))) {
-            File::delete(public_path($town->master_plan_map));
+        $files = array_filter(array_merge([$town->master_plan_map], (array) $town->gallery_images));
+
+        DB::transaction(function () use ($town) {
+            $town->plots()->delete();
+            $town->delete();
+        });
+
+        // Files are removed only after the DB delete succeeded
+        foreach ($files as $file) {
+            $this->deleteFile($file);
         }
 
-        if (is_array($town->gallery_images)) {
-            foreach ($town->gallery_images as $img) {
-                if (File::exists(public_path($img))) {
-                    File::delete(public_path($img));
-                }
-            }
-        }
-
-        $town->delete();
         session()->flash('success', 'ٹاؤن اور تمام میڈیا ریکارڈ ختم کر دیا گیا ہے۔');
     }
 
     public function render()
     {
-        $citiesQuery = City::query()->where('is_active', 1);
+        $editingTown = $this->editingTownId
+            ? Town::where('user_id', Auth::id())->find($this->editingTownId)
+            : null;
 
-        if ($this->city_search) {
-            $citiesQuery->where('name', 'like', '%' . $this->city_search . '%');
+        if ($this->editingTownId && ! $editingTown) {
+            $this->cancelEdit();
         }
 
+        $search = trim($this->search);
+
+        $towns = Town::where('user_id', Auth::id())
+            ->withCount([
+                'plots',
+                'plots as sold_plots_count' => fn ($q) => $q->whereIn('status', ['booked', 'sold']),
+            ])
+            ->when($search !== '', fn ($q) => $q->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('location', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('noc_number', 'like', "%{$search}%");
+            }))
+            ->latest()
+            ->paginate(10);
+
+        $cities = City::where('is_active', 1)
+            ->when($this->city_search, fn ($q) => $q->where('name', 'like', '%' . $this->city_search . '%'))
+            ->orderBy('name')
+            ->take(25)
+            ->get(['id', 'name']);
+
         return view('livewire.town-owner.manage-towns', [
-            'towns' => Town::where('user_id', Auth::id())->with('city')->latest()->paginate(10),
-            'cities' => $citiesQuery->orderBy('name')->take(25)->get(),
+            'towns' => $towns,
+            'cities' => $cities,
+            'editingTown' => $editingTown,
+            'existingGallery' => is_array($editingTown?->gallery_images) ? $editingTown->gallery_images : [],
+            'maxGallery' => self::MAX_GALLERY_IMAGES,
+            'mediaUrl' => fn ($path) => asset(self::MEDIA_URL_PREFIX . $path),
         ])->layout('layouts.app');
+    }
+
+    protected function ownedTown($id): Town
+    {
+        return Town::where('user_id', Auth::id())->findOrFail($id);
+    }
+
+    protected function storeImage($file, string $dir, string $prefix): string
+    {
+        $targetDir = public_path($dir);
+        File::ensureDirectoryExists($targetDir, 0755);
+
+        // Extension comes from the real MIME type, never from the user's file name (blocks shell.php uploads)
+        $fileName = $prefix . '_' . now()->format('YmdHis') . '_' . Str::random(10) . '.' . $file->extension();
+        File::copy($file->getRealPath(), $targetDir . DIRECTORY_SEPARATOR . $fileName);
+
+        return $dir . '/' . $fileName;
+    }
+
+    protected function deleteFile(?string $path): void
+    {
+        // Only touch files inside our own media folders
+        if (! $path || str_contains($path, '..') || ! Str::startsWith($path, ['town_maps/', 'town_galleries/'])) {
+            return;
+        }
+
+        if (File::exists(public_path($path))) {
+            File::delete(public_path($path));
+        }
     }
 }

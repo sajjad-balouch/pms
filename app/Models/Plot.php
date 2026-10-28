@@ -10,15 +10,15 @@ class Plot extends Model
     use HasFactory;
 
     protected $fillable = [
-        'town_id',
-        'plot_number',
-        'block_name',
-        'type',
-        'size',
-        'total_price',
-        'down_payment',
-        'total_installments',
-        'status',
+        'town_id', 'customer_id', 'plot_number', 'block_name', 'type', 'size',
+        'rate_per_marla', 'base_price', 'features',
+        'total_price', 'down_payment', 'total_installments', 'status', 'booked_at', 'sold_at',
+    ];
+
+    protected $casts = [
+        'features' => 'array',
+        'booked_at' => 'date',
+        'sold_at' => 'date',
     ];
 
     public function town()
@@ -26,9 +26,29 @@ class Plot extends Model
         return $this->belongsTo(Town::class);
     }
 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
     public function installments()
     {
         return $this->hasMany(Installment::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(PlotBooking::class);
+    }
+
+    public function activeBooking()
+    {
+        return $this->hasOne(PlotBooking::class)->where('status', 'active')->latestOfMany();
+    }
+
+    public function transfers()
+    {
+        return $this->hasMany(PlotTransfer::class);
     }
 
 
@@ -50,5 +70,7 @@ class Plot extends Model
             'user_id'   // Town table me Foreign Key (Owner ki ID)
         );
     }
+
+    
     
 }
