@@ -73,6 +73,7 @@ class BookingService
                 'interval_months' => $interval,
                 'first_due_date' => isset($schedule[0]) ? $schedule[0]['due_date']->toDateString() : null,
                 'status' => 'active',
+                'portal_token' => PlotBooking::newPortalToken(),
                 'remarks' => $data['remarks'] ?? null,
             ]);
 
@@ -144,6 +145,7 @@ class BookingService
             $refund = (float) ($data['refund_amount'] ?? 0);
             $booking->update([
                 'status' => 'cancelled',
+                'portal_token' => null, // buyer portal link band
                 'cancelled_at' => now()->toDateString(),
                 'cancel_reason' => $data['cancel_reason'] ?? null,
                 'refund_amount' => $refund,
@@ -186,7 +188,8 @@ class BookingService
                 'remarks' => $data['remarks'] ?? null,
             ]);
 
-            $booking->update(['customer_id' => $to->id]);
+            // Naya owner, naya portal link — purane owner ka link band ho jata hai
+            $booking->update(['customer_id' => $to->id, 'portal_token' => PlotBooking::newPortalToken()]);
             $plot->update(['customer_id' => $to->id]);
 
             Installment::where('plot_booking_id', $booking->id)
@@ -209,7 +212,7 @@ class BookingService
             ->first();
 
         $row = Installment::where('plot_id', $plot->id)
-            ->when($booking, fn ($q) => $q->where('plot_booking_id', $booking->id), fn ($q) => $q->whereNull('plot_booking_id'))
+            ->when($booking, fn ($q) => $q->where('plot_booking_id', $booking->id), fn ($q) => self::scopeUnlinked($q))
             ->toBase()
             ->selectRaw("
                 COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0) AS paid,
@@ -241,21 +244,68 @@ class BookingService
             return $booking;
         }
 
-        $booking = PlotBooking::create([
-            'plot_id' => $plot->id,
-            'customer_id' => $plot->customer_id,
-            'booking_date' => ($plot->booked_at ?? $plot->updated_at ?? now())->toDateString(),
-            'total_price' => $plot->total_price,
-            'discount' => 0,
-            'final_price' => $plot->total_price,
-            'down_payment' => $plot->down_payment ?? 0,
-            'installments_count' => (int) $plot->total_installments,
-            'status' => 'active',
-            'remarks' => 'Legacy booking (auto-created)',
-        ]);
+        return DB::transaction(function () use ($plot) {
+            $customerId = $this->resolveLegacyCustomerId($plot);
 
-        Installment::where('plot_id', $plot->id)->whereNull('plot_booking_id')->update(['plot_booking_id' => $booking->id]);
+            $booking = PlotBooking::create([
+                'plot_id' => $plot->id,
+                'customer_id' => $customerId,
+                'booking_date' => ($plot->booked_at ?? $plot->updated_at ?? now())->toDateString(),
+                'total_price' => $plot->total_price,
+                'discount' => 0,
+                'final_price' => $plot->total_price,
+                'down_payment' => $plot->down_payment ?? 0,
+                'installments_count' => (int) $plot->total_installments,
+                'status' => 'active',
+                'remarks' => 'Legacy booking (auto-created)',
+            ]);
 
-        return $booking;
+            self::scopeUnlinked(Installment::where('plot_id', $plot->id))->update(['plot_booking_id' => $booking->id]);
+
+            if ((int) $plot->customer_id !== (int) $customerId) {
+                $plot->update(['customer_id' => $customerId]);
+            }
+
+            return $booking;
+        });
+    }
+
+    /**
+     * Installments with no booking, or pointing to a booking row that no longer exists
+     * (e.g. after the bookings table was re-created). Cancelled bookings still exist, so their rows are never taken.
+     */
+    public static function scopeUnlinked($query)
+    {
+        return $query->where(fn ($q) => $q->whereNull('plot_booking_id')
+            ->orWhereNotIn('plot_booking_id', PlotBooking::select('id')));
+    }
+
+    /**
+     * The plot's customer if it really exists; otherwise one is rebuilt from the buyer name/phone
+     * saved on its installments (so old bookings still get a customer record).
+     */
+    protected function resolveLegacyCustomerId(Plot $plot): ?int
+    {
+        if ($plot->customer_id && Customer::whereKey($plot->customer_id)->exists()) {
+            return (int) $plot->customer_id;
+        }
+
+        $source = Installment::where('plot_id', $plot->id)
+            ->whereNotNull('buyer_name')
+            ->where('buyer_name', '!=', '')
+            ->latest('id')
+            ->first();
+
+        $ownerId = $plot->town()->value('user_id');
+
+        if (! $source || ! $ownerId) {
+            return null;
+        }
+
+        return Customer::firstOrCreate([
+            'user_id' => $ownerId,
+            'name' => trim($source->buyer_name),
+            'phone' => $source->buyer_phone ? trim($source->buyer_phone) : null,
+        ])->id;
     }
 }

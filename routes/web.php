@@ -7,6 +7,7 @@ use App\Livewire\Auth\Login as NewLogin;
 use App\Livewire\Auth\Register as NewRegister;
 use App\Livewire\Admin\AdminDashboard;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BuyerPortalController;
 use App\Livewire\TownOwner\TownOwnerDashboard;
 use App\Livewire\TownOwner\ManagePlots;
 use App\Livewire\TownOwner\ManageTowns;
@@ -14,6 +15,9 @@ use App\Livewire\TownOwner\ManageInstallments;
 use App\Models\Installment;
 use App\Livewire\TownOwner\ManageEmployees;
 use App\Livewire\TownOwner\ManageExpenses;
+use App\Livewire\TownOwner\RecoveryDesk;
+use App\Livewire\TownOwner\ManageCustomers;
+use App\Http\Controllers\CustomerDocumentController;
 use App\Livewire\Agent\AgentDashboard;
 use App\Livewire\Agent\ManageLeads;
 use App\Livewire\Agent\ManageProperties;
@@ -109,8 +113,15 @@ Route::middleware(['web'])->group(function () {
     Route::get('/tools/cv-maker', CvMaker::class)->name('tools.cv-maker');
     /**
      * Tools end
-     * 
+     *
      * */
+
+    // Buyer Portal (secret link, no login) + allotment QR verification
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/my-plot/{token}', [BuyerPortalController::class, 'show'])->name('portal.show');
+        Route::get('/my-plot/{token}/receipt/{installment}', [BuyerPortalController::class, 'receipt'])->name('portal.receipt');
+        Route::get('/verify/allotment/{booking}/{hash}', [BuyerPortalController::class, 'verify'])->name('portal.verify');
+    });
 
 });
 
@@ -169,11 +180,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/towns', ManageTowns::class)->name('towns');
         Route::get('/towns/{townId}/plots', ManagePlots::class)->name('plots');
         Route::get('/plots/{plotId}/installments', ManageInstallments::class)->name('installments');
-        Route::get('/town-owner/receipt/{installment}', function (Installment $installment) {
-            $installment->load('plot.town');
-            return view('print.receipt', compact('installment'));
-        })->name('receipt.print')->middleware(['auth']);
+        // Ownership is checked in the controller (pehle koi bhi owner id badal kar doosre ki receipt dekh sakta tha)
+        Route::get('/town-owner/receipt/{installment}', [BuyerPortalController::class, 'ownerReceipt'])->name('receipt.print');
+        Route::get('/bookings/{booking}/allotment-letter', [BuyerPortalController::class, 'allotmentLetter'])->name('allotment.letter');
 
+        Route::get('/recovery', RecoveryDesk::class)->name('recovery');
+        Route::get('/customers', ManageCustomers::class)->name('customers');
+        Route::get('/customer-documents/{document}', [CustomerDocumentController::class, 'show'])->name('customer.document');
         Route::get('/employees/{townId?}', ManageEmployees::class)->name('employees');
         Route::get('/expenses/{townId?}', ManageExpenses::class)->name('expenses');
         Route::get('/leads', ManageLeads::class)->name('leads');

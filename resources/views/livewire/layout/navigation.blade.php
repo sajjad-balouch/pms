@@ -80,6 +80,18 @@ new class extends Component
                                 {{ __('My Housing Schemes') }}
                             </x-nav-link>
 
+                            <x-nav-link :href="route('town_owner.customers')" :active="request()->routeIs('town_owner.customers*')" wire:navigate
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.customers*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                <i class="fa-solid fa-address-book mr-2 {{ request()->routeIs('town_owner.customers*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
+                                {{ __('Customers') }}
+                            </x-nav-link>
+
+                            <x-nav-link :href="route('town_owner.recovery')" :active="request()->routeIs('town_owner.recovery*')" wire:navigate
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.recovery*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                <i class="fa-solid fa-phone-volume mr-2 {{ request()->routeIs('town_owner.recovery*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
+                                {{ __('Recovery') }}
+                            </x-nav-link>
+
                             <x-nav-link :href="route('town_owner.employees')" :active="request()->routeIs('town_owner.employees*')" wire:navigate
                                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.employees*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-users mr-2 {{ request()->routeIs('town_owner.employees*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
@@ -341,6 +353,12 @@ new class extends Component
                 @if($role === 'town_owner')
                     <a href="{{ route('town_owner.towns') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.towns*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
                         <i class="fa-solid fa-building text-amber-400"></i> {{ __('My Housing Schemes') }}
+                    </a>
+                    <a href="{{ route('town_owner.customers') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.customers*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
+                        <i class="fa-solid fa-address-book text-amber-400"></i> {{ __('Customers') }}
+                    </a>
+                    <a href="{{ route('town_owner.recovery') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.recovery*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
+                        <i class="fa-solid fa-phone-volume text-amber-400"></i> {{ __('Recovery Desk') }}
                     </a>
                     <a href="{{ route('town_owner.employees') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.employees*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
                         <i class="fa-solid fa-users text-amber-400"></i> {{ __('Employees Management') }}

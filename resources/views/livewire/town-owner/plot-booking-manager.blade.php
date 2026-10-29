@@ -236,7 +236,10 @@
                             @if ($plot->status === 'available')
                                 <button type="button" wire:click="switchAction('book')" class="bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 px-4 py-2 rounded-xl text-xs font-bold">📝 Book this Plot</button>
                             @else
-                                <a href="{{ route('town_owner.installments', $plot->id) }}" wire:navigate class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 px-4 py-2 rounded-xl text-xs font-bold">💳 Installments</a>
+                                <a href="{{ route('town_owner.installments', $plot->id) }}" wire:navigate class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 px-4 py-2 rounded-xl text-xs font-bold">💳 Installments & Portal Link</a>
+                                @if ($summary['booking'] ?? null)
+                                    <a href="{{ route('town_owner.allotment.letter', $summary['booking']->id) }}" target="_blank" class="bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 px-4 py-2 rounded-xl text-xs font-bold">📄 Allotment Letter</a>
+                                @endif
                                 <button type="button" wire:click="switchAction('transfer')" class="bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 px-4 py-2 rounded-xl text-xs font-bold">🔁 Transfer</button>
                                 <button type="button" wire:click="switchAction('cancel')" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 px-4 py-2 rounded-xl text-xs font-bold">⛔ Cancel Booking</button>
                             @endif

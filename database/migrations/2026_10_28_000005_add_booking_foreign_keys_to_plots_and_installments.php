@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -43,13 +44,30 @@ return new class extends Migration
             });
         }
 
-        Schema::table('plots', function (Blueprint $table) {
-            $table->foreign('customer_id')->references('id')->on('customers')->nullOnDelete();
-        });
+        // Foreign key pehle se ho (dobara chalne par) to skip
+        if (! $this->hasForeignKey('plots', 'customer_id')) {
+            Schema::table('plots', function (Blueprint $table) {
+                $table->foreign('customer_id')->references('id')->on('customers')->nullOnDelete();
+            });
+        }
 
-        Schema::table('installments', function (Blueprint $table) {
-            $table->foreign('plot_booking_id')->references('id')->on('plot_bookings')->nullOnDelete();
-        });
+        if (! $this->hasForeignKey('installments', 'plot_booking_id')) {
+            Schema::table('installments', function (Blueprint $table) {
+                $table->foreign('plot_booking_id')->references('id')->on('plot_bookings')->nullOnDelete();
+            });
+        }
+    }
+
+    // Simple KEY_COLUMN_USAGE lookup — Schema::getForeignKeys() joins referential_constraints,
+    // which crashes MariaDB 10.4 (XAMPP) on this server.
+    private function hasForeignKey(string $table, string $column): bool
+    {
+        return (bool) DB::selectOne(
+            'SELECT 1 FROM information_schema.KEY_COLUMN_USAGE
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? AND REFERENCED_TABLE_NAME IS NOT NULL
+             LIMIT 1',
+            [$table, $column]
+        );
     }
 
     public function down(): void

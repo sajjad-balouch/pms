@@ -2,153 +2,203 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Http\Controllers\BuyerPortalController;
 use App\Models\Installment;
 use App\Models\Plot;
+use App\Models\PlotBooking;
+use App\Services\BookingService;
+use App\Support\WhatsApp;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class ManageInstallments extends Component
 {
-    public $plot;
-    public $buyer_name = '';
-    public $buyer_phone = '';
-    public $total_price = 0;
+    #[Locked]
+    public $plotId;
+
+    // Receive payment form
+    public $receivingId = null;
+    public $received_date = '';
+    public $received_remarks = '';
+
+    // Last received installment (shows "send receipt on WhatsApp")
+    public $justPaidId = null;
+
+    protected $messages = [
+        'received_date.before_or_equal' => 'Aage ki tareekh par wusooli darj nahi ho sakti.',
+    ];
 
     public function mount($plotId)
     {
-        $this->plot = Plot::with(['town', 'installments'])->findOrFail($plotId);
-        
-        $this->total_price = $this->plot->total_price ?? 0;
+        // Pehle koi bhi town owner kisi bhi plot ki qistein dekh/badal sakta tha
+        $this->plotId = $this->ownedPlotQuery()->findOrFail($plotId)->id;
+    }
 
-        // اگر پہلے سے کوئی انسٹالمنٹ موجود ہو تو براہِ راست buyer_name اور buyer_phone کالم سے ڈیٹا حاصل کریں
-        $firstInstallment = $this->plot->installments->first();
-        if ($firstInstallment) {
-            $this->buyer_name = $firstInstallment->buyer_name ?? '';
-            $this->buyer_phone = $firstInstallment->buyer_phone ?? '';
+    #[Computed]
+    public function plot()
+    {
+        return $this->ownedPlotQuery()->with(['town', 'customer'])->findOrFail($this->plotId);
+    }
+
+    #[On('plot-booking-updated')]
+    public function bookingUpdated($message = null, $type = 'success')
+    {
+        unset($this->plot);
+
+        if ($message) {
+            session()->flash($type === 'error' ? 'error' : 'success', $message);
         }
     }
 
-    /**
-     * Generate Monthly Installment Plan
-     */
-    public function generateInstallmentPlan()
+    public function startReceive($id)
+    {
+        $installment = $this->ledgerQuery()->whereIn('status', BookingService::UNPAID)->findOrFail($id);
+
+        $this->resetValidation();
+        $this->receivingId = $installment->id;
+        $this->received_date = today()->toDateString();
+        $this->received_remarks = '';
+    }
+
+    public function cancelReceive()
+    {
+        $this->reset(['receivingId', 'received_date', 'received_remarks']);
+        $this->resetValidation();
+    }
+
+    public function confirmReceive()
     {
         $this->validate([
-            'buyer_name' => 'required|string|max:255',
-            'buyer_phone' => 'required|string|max:20',
+            'received_date' => 'required|date|before_or_equal:today',
+            'received_remarks' => 'nullable|string|max:500',
         ]);
 
-        $this->plot->update([
-            'status' => 'booked',
-        ]);
-
-        $plotPrice = $this->plot->total_price ?? 0;
-        $downPayment = $this->plot->down_payment ?? 0;
-
-        $remainingAmount = $plotPrice - $downPayment;
-        $totalInstallments = $this->plot->total_installments ?? 1;
-        $perInstallmentAmount = $remainingAmount > 0 ? ($remainingAmount / $totalInstallments) : 0;
-
-        for ($i = 1; $i <= $totalInstallments; $i++) {
-            Installment::create([
-                'plot_id' => $this->plot->id,
-                'buyer_name' => $this->buyer_name,
-                'buyer_phone' => $this->buyer_phone,
-                'installment_number' => $i,
-                'amount' => $perInstallmentAmount,
-                'due_date' => Carbon::now()->addMonths($i),
-                'status' => 'pending',
-                'remarks' => null,
-            ]);
-        }
-
-        $this->plot->refresh();
-
-        session()->flash('success', 'قسطوار شیڈول اور خریدار کی تفصیلات کامیابی سے درج کر لی گئی ہیں۔');
-    }
-
-    /**
-     * Mark Whole Plot as Full Paid (Direct Sale with Buyer details saved in columns)
-     */
-    public function markAsFullPaid()
-    {
-        // 1. خریدار کا نام اور فون والڈیٹ کریں
-        $this->validate([
-            'buyer_name' => 'required|string|max:255',
-            'buyer_phone' => 'required|string|max:20',
-        ]);
-
-        $plotPrice = $this->plot->total_price ?? $this->total_price ?? 0;
-
-        // 2. تمام پینڈنگ اقساط کو ڈیلیٹ کریں
-        Installment::where('plot_id', $this->plot->id)->where('status', 'pending')->delete();
-
-        // 3. اگر پہلے سے انٹری ہے تو اپڈیٹ کریں ورنہ نئ انٹری بنائیں (buyer_name اور buyer_phone کے کالمز میں سیو کریں)
-        $fullInstallment = Installment::where('plot_id', $this->plot->id)->first();
-
-        if (!$fullInstallment) {
-            Installment::create([
-                'plot_id' => $this->plot->id,
-                'buyer_name' => $this->buyer_name,
-                'buyer_phone' => $this->buyer_phone,
-                'installment_number' => 1,
-                'amount' => $plotPrice,
-                'due_date' => now(),
-                'paid_date' => now(),
-                'status' => 'paid',
-                'remarks' => 'Direct Full Cash Payment',
-            ]);
-        } else {
-            $fullInstallment->update([
-                'buyer_name' => $this->buyer_name,
-                'buyer_phone' => $this->buyer_phone,
-                'amount' => $plotPrice,
-                'paid_date' => now(),
-                'status' => 'paid',
-                'remarks' => 'Direct Full Cash Payment',
-            ]);
-        }
-
-        // 4. پلاٹ کا سٹیٹس Sold کر دیں
-        $this->plot->update([
-            'status' => 'sold',
-        ]);
-
-        $this->plot->refresh();
-
-        session()->flash('success', 'خریدار کی تفصیلات اور مکمل ادائیگی کامیابی سے کالمز میں محفوظ ہو گئی ہے۔');
-    }
-
-    /**
-     * Mark a single installment as Paid
-     */
-    public function markAsPaid($installmentId)
-    {
-        $installment = Installment::where('plot_id', $this->plot->id)->findOrFail($installmentId);
+        $installment = $this->ledgerQuery()->whereIn('status', BookingService::UNPAID)->findOrFail($this->receivingId);
 
         $installment->update([
             'status' => 'paid',
-            'paid_date' => now(),
+            'paid_date' => $this->received_date,
+            'remarks' => $this->received_remarks ? trim($this->received_remarks) : $installment->remarks,
         ]);
 
-        $pendingCount = Installment::where('plot_id', $this->plot->id)->where('status', 'pending')->count();
-        if ($pendingCount === 0) {
-            $this->plot->update(['status' => 'sold']);
+        // Sab qistein clear => plot Sold
+        if (! $this->ledgerQuery()->whereIn('status', BookingService::UNPAID)->exists() && $this->plot->status === 'booked') {
+            $this->plot->update(['status' => 'sold', 'sold_at' => today()->toDateString()]);
         }
 
-        $this->plot->refresh();
+        $label = $installment->installment_number == 0 ? 'Down payment' : "قسط #{$installment->installment_number}";
+        session()->flash('success', "{$label} کی وصولی کامیابی سے درج ہو گئی۔");
 
-        session()->flash('success', "قسط #{$installment->installment_number} کی وصولی کامیابی سے درج ہو گئی۔");
+        $this->justPaidId = $installment->id;
+        $this->cancelReceive();
+        unset($this->plot);
+    }
+
+    public function undoPayment($id)
+    {
+        $installment = $this->ledgerQuery()->where('status', 'paid')->findOrFail($id);
+
+        $installment->update(['status' => 'pending', 'paid_date' => null]);
+
+        if ($this->plot->status === 'sold') {
+            $this->plot->update(['status' => 'booked', 'sold_at' => null]);
+        }
+
+        if ($this->justPaidId == $installment->id) {
+            $this->justPaidId = null;
+        }
+
+        unset($this->plot);
+        session()->flash('success', 'Wusooli wapas le li gayi — qist dobara pending hai.');
+    }
+
+    // Purani (feature se pehle ki) booking ke liye booking record + portal link banana
+    public function enablePortal()
+    {
+        if (! in_array($this->plot->status, ['booked', 'sold'], true)) {
+            return;
+        }
+
+        app(BookingService::class)->activeBookingFor($this->plot)->portalUrl();
+        session()->flash('success', 'Buyer portal link tayyar hai.');
     }
 
     public function render()
     {
-        $installments = $this->plot->installments()->orderBy('installment_number')->get();
-        $nextDue = $installments->where('status', 'pending')->sortBy('due_date')->first();
+        $plot = $this->plot;
+        $booking = $this->activeBooking();
+        $installments = $this->ledgerQuery()->orderBy('installment_number')->orderBy('due_date')->get();
+        $stats = BuyerPortalController::ledgerStats($installments);
+
+        $first = $installments->first();
+        $buyerName = $booking?->customer?->name ?? $first?->buyer_name;
+        $buyerPhone = $booking?->customer?->phone ?? $first?->buyer_phone;
+        $portalUrl = $booking?->portalUrl();
+        $greeting = 'Assalam o Alaikum' . ($buyerName ? " {$buyerName}" : '');
+        $place = "{$plot->town->name} — Plot #{$plot->plot_number}";
+
+        // Ready WhatsApp messages per installment
+        $whatsapp = [];
+        foreach ($installments as $i) {
+            $what = $i->installment_number == 0 ? 'down payment' : "qist #{$i->installment_number}";
+            $amount = 'Rs. ' . number_format((float) $i->amount);
+
+            if ($i->status === 'paid') {
+                $balanceAfter = $stats['remaining'];
+                $message = "{$greeting}, {$place}: aap ki {$what} {$amount} " . Carbon::parse($i->paid_date)->format('d M Y')
+                    . " ko wusool ho gayi. Shukriya! Baqi raqam: Rs. " . number_format($balanceAfter) . '.'
+                    . ($booking?->portal_token ? ' Receipt: ' . route('portal.receipt', [$booking->portal_token, $i->id]) : '');
+            } else {
+                $due = Carbon::parse($i->due_date);
+                $message = "{$greeting}, {$place}: aap ki {$what} {$amount} " . $due->format('d M Y')
+                    . ($due->isPast() && ! $due->isToday() ? ' ko due thi aur abhi tak ada nahi hui. Barah-e-karam jald ada karein.' : ' ko due hai.')
+                    . ($portalUrl ? " Apna hisaab yahan dekhein: {$portalUrl}" : '');
+            }
+
+            $whatsapp[$i->id] = WhatsApp::url($buyerPhone, $message);
+        }
 
         return view('livewire.town-owner.manage-installments', [
+            'plot' => $plot,
+            'booking' => $booking,
             'installments' => $installments,
-            'nextDue' => $nextDue,
+            'stats' => $stats,
+            'buyerName' => $buyerName,
+            'buyerPhone' => $buyerPhone,
+            'portalUrl' => $portalUrl,
+            'portalShare' => $portalUrl
+                ? WhatsApp::url($buyerPhone, "{$greeting}, {$place} — aap ke plot ka mukammal hisaab, qistein aur receipts is link par dekhein: {$portalUrl}")
+                : null,
+            'whatsapp' => $whatsapp,
+            'receiving' => $this->receivingId ? $installments->firstWhere('id', (int) $this->receivingId) : null,
+            'justPaid' => $this->justPaidId ? $installments->firstWhere('id', (int) $this->justPaidId) : null,
         ])->layout('layouts.app');
+    }
+
+    protected function ownedPlotQuery()
+    {
+        return Plot::whereHas('town', fn ($q) => $q->where('user_id', Auth::id()));
+    }
+
+    protected function activeBooking(): ?PlotBooking
+    {
+        return PlotBooking::with('customer')
+            ->where('plot_id', $this->plotId)
+            ->where('status', 'active')
+            ->latest('id')
+            ->first();
+    }
+
+    // Current booking's installments (legacy rows have no booking id)
+    protected function ledgerQuery()
+    {
+        $booking = $this->activeBooking();
+
+        return Installment::where('plot_id', $this->plotId)
+            ->when($booking, fn ($q) => $q->where('plot_booking_id', $booking->id), fn ($q) => BookingService::scopeUnlinked($q));
     }
 }

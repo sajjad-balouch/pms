@@ -95,7 +95,7 @@
                     <p class="text-sm text-red-400/80">Total overdue amount: <span class="font-bold">Rs. {{ number_format($overdueAmount) }}</span></p>
                 </div>
             </div>
-            <a href="#overdue" class="text-sm font-bold text-red-300 hover:text-red-200 underline underline-offset-4">View list ↓</a>
+            <a href="{{ route('town_owner.recovery') }}" wire:navigate class="text-sm font-bold text-red-300 hover:text-red-200 underline underline-offset-4">📞 Recovery Desk kholein →</a>
         </div>
     @endif
 
