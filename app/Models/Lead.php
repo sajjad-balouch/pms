@@ -16,6 +16,7 @@ class Lead extends Model
         'agent_id',
         'town_id',
         'plot_id',
+        'property_id',
         'client_name',
         'client_phone',
         'client_email',
@@ -27,6 +28,12 @@ class Lead extends Model
         'last_whatsapp_at',  // Last WhatsApp outreach timestamp
         'notes',
     ];
+
+    // Listing jis se lead aayi (portal contact unlock)
+    public function property()
+    {
+        return $this->belongsTo(Property::class);
+    }
 
     /**
      * Get the town/scheme associated with the lead.

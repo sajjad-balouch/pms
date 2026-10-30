@@ -22,3 +22,6 @@ public/build
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Old duplicate user migrations moved aside (do not deploy)
+/database/migrations_duplicate_backup

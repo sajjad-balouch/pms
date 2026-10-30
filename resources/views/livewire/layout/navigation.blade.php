@@ -74,35 +74,53 @@ new class extends Component
 
                         <!-- Town Owner Menu Items -->
                         @if($role === 'town_owner')
+                            @if (\App\Support\Tenant::can('towns'))
                             <x-nav-link :href="route('town_owner.towns')" :active="request()->routeIs('town_owner.towns*')" wire:navigate
                                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.towns*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-building mr-2 {{ request()->routeIs('town_owner.towns*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('My Housing Schemes') }}
                             </x-nav-link>
+                            @endif
 
+                            @if (\App\Support\Tenant::can('customers'))
                             <x-nav-link :href="route('town_owner.customers')" :active="request()->routeIs('town_owner.customers*')" wire:navigate
                                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.customers*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-address-book mr-2 {{ request()->routeIs('town_owner.customers*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Customers') }}
                             </x-nav-link>
+                            @endif
 
+                            @if (\App\Support\Tenant::can('recovery'))
                             <x-nav-link :href="route('town_owner.recovery')" :active="request()->routeIs('town_owner.recovery*')" wire:navigate
                                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.recovery*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-phone-volume mr-2 {{ request()->routeIs('town_owner.recovery*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Recovery') }}
                             </x-nav-link>
+                            @endif
 
+                            @if (\App\Support\Tenant::can('employees'))
                             <x-nav-link :href="route('town_owner.employees')" :active="request()->routeIs('town_owner.employees*')" wire:navigate
                                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.employees*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-users mr-2 {{ request()->routeIs('town_owner.employees*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Employees') }}
                             </x-nav-link>
+                            @endif
 
+                            @if (\App\Support\Tenant::can('expenses'))
                             <x-nav-link :href="route('town_owner.expenses')" :active="request()->routeIs('town_owner.expenses*')" wire:navigate
                                 class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.expenses*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
                                 <i class="fa-solid fa-receipt mr-2 {{ request()->routeIs('town_owner.expenses*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
                                 {{ __('Expenses') }}
                             </x-nav-link>
+                            @endif
+
+                            @if (\App\Support\Tenant::isOwner())
+                            <x-nav-link :href="route('town_owner.team')" :active="request()->routeIs('town_owner.team*')" wire:navigate
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs('town_owner.team*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                <i class="fa-solid fa-user-shield mr-2 {{ request()->routeIs('town_owner.team*') ? 'text-amber-400' : 'text-slate-400' }}"></i>
+                                {{ __('Team') }}
+                            </x-nav-link>
+                            @endif
                         @endif
 
                         <!-- Agent Menu Items -->
@@ -284,7 +302,14 @@ new class extends Component
             </div>
 
             <!-- Right Side Profile Settings / Public Links -->
-            <div class="hidden lg:flex lg:items-center lg:ms-6">
+            <div class="hidden lg:flex lg:items-center lg:ms-6 gap-3">
+                <!-- Language switcher -->
+                <div class="flex items-center bg-slate-800/70 border border-slate-700/70 rounded-xl p-1 text-xs" role="group" aria-label="Language">
+                    <a href="{{ route('lang.switch', 'en') }}" lang="en"
+                       class="px-2.5 py-1 rounded-lg font-bold transition-all {{ app()->getLocale() === 'en' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">EN</a>
+                    <a href="{{ route('lang.switch', 'ur') }}" lang="ur"
+                       class="px-2.5 py-1 rounded-lg font-bold transition-all {{ app()->getLocale() === 'ur' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">اردو</a>
+                </div>
                 @auth
                     <x-dropdown align="right" width="56" contentClasses="py-0 !bg-transparent border-0 shadow-none">
                         <x-slot name="trigger">
@@ -305,7 +330,7 @@ new class extends Component
                         <x-slot name="content">
                             <div class="p-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-1 w-56">
                                 <div class="px-3 py-2 border-b border-slate-800/80">
-                                    <p class="text-xs text-slate-400">Signed in as</p>
+                                    <p class="text-xs text-slate-400">{{ __('Signed in as') }}</p>
                                     <p class="text-xs font-bold text-white truncate">{{ auth()->user()->email }}</p>
                                 </div>
 
@@ -351,21 +376,36 @@ new class extends Component
                 </a>
 
                 @if($role === 'town_owner')
+                    @if (\App\Support\Tenant::can('towns'))
                     <a href="{{ route('town_owner.towns') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.towns*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
                         <i class="fa-solid fa-building text-amber-400"></i> {{ __('My Housing Schemes') }}
                     </a>
+                    @endif
+                    @if (\App\Support\Tenant::can('customers'))
                     <a href="{{ route('town_owner.customers') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.customers*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
                         <i class="fa-solid fa-address-book text-amber-400"></i> {{ __('Customers') }}
                     </a>
+                    @endif
+                    @if (\App\Support\Tenant::can('recovery'))
                     <a href="{{ route('town_owner.recovery') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.recovery*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
                         <i class="fa-solid fa-phone-volume text-amber-400"></i> {{ __('Recovery Desk') }}
                     </a>
+                    @endif
+                    @if (\App\Support\Tenant::can('employees'))
                     <a href="{{ route('town_owner.employees') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.employees*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
                         <i class="fa-solid fa-users text-amber-400"></i> {{ __('Employees Management') }}
                     </a>
+                    @endif
+                    @if (\App\Support\Tenant::can('expenses'))
                     <a href="{{ route('town_owner.expenses') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.expenses*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
                         <i class="fa-solid fa-receipt text-amber-400"></i> {{ __('Town Expenses') }}
                     </a>
+                    @endif
+                    @if (\App\Support\Tenant::isOwner())
+                    <a href="{{ route('town_owner.team') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs('town_owner.team*') ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
+                        <i class="fa-solid fa-user-shield text-amber-400"></i> {{ __('My Team') }}
+                    </a>
+                    @endif
                 @endif
 
                 @if($role === 'agent')
@@ -455,6 +495,11 @@ new class extends Component
                         <div class="font-bold text-sm text-white">{{ auth()->user()->name }}</div>
                         <div class="text-xs text-slate-400">{{ auth()->user()->email }}</div>
                     </div>
+                </div>
+
+                <div class="flex items-center gap-2 px-4 mb-2 text-xs" role="group" aria-label="Language">
+                    <a href="{{ route('lang.switch', 'en') }}" lang="en" class="flex-1 text-center py-2 rounded-xl font-bold {{ app()->getLocale() === 'en' ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300' }}">English</a>
+                    <a href="{{ route('lang.switch', 'ur') }}" lang="ur" class="flex-1 text-center py-2 rounded-xl font-bold {{ app()->getLocale() === 'ur' ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300' }}">اردو</a>
                 </div>
 
                 <button wire:click="logout" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-rose-400 hover:bg-rose-500/10 cursor-pointer">

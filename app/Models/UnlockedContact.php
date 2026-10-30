@@ -12,6 +12,7 @@ class UnlockedContact extends Model
     protected $fillable = [
         'user_id',
         'unlocked_user_id',
+        'plot_id', // was missing, so plot unlocks silently lost the plot
         'expires_at',
     ];
 

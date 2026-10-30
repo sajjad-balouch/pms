@@ -145,7 +145,7 @@ class PropertyManagement extends Component
             'edit_description' => 'nullable|string',
             'edit_status' => 'required|string',
             'edit_is_active' => 'required|string',
-            'new_images.*' => 'nullable|image|max:3072',
+            'new_images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
         ]);
 
         $property = Property::findOrFail($this->editPropertyId);
@@ -160,7 +160,7 @@ class PropertyManagement extends Component
             }
 
             foreach ($this->new_images as $photo) {
-                $filename = 'prop_' . time() . '_' . Str::random(8) . '.' . $photo->getClientOriginalExtension();
+                $filename = 'prop_' . time() . '_' . Str::random(8) . '.' . $photo->extension() /* real MIME type, never the user file name */;
                 
                 // Direct public folder copy/move
                 copy($photo->getRealPath(), $destinationPath . DIRECTORY_SEPARATOR . $filename);

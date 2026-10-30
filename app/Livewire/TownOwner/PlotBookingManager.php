@@ -2,6 +2,7 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Support\Tenant;
 use App\Models\Customer;
 use App\Models\Plot;
 use App\Models\PlotBooking;
@@ -128,7 +129,7 @@ class PlotBookingManager extends Component
 
     public function selectCustomer($id)
     {
-        $customer = Customer::where('user_id', Auth::id())->find($id);
+        $customer = Customer::where('user_id', Tenant::ownerId())->find($id);
         if ($customer) {
             $this->selectedCustomerId = $customer->id;
             $this->customerSearch = '';
@@ -265,7 +266,7 @@ class PlotBookingManager extends Component
         if (in_array($this->action, ['book', 'transfer'], true) && $this->customerMode === 'existing') {
             $search = trim($this->customerSearch);
 
-            $data['customerResults'] = Customer::where('user_id', Auth::id())
+            $data['customerResults'] = Customer::where('user_id', Tenant::ownerId())
                 ->when($search !== '', fn ($q) => $q->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
                         ->orWhere('cnic', 'like', "%{$search}%")
@@ -276,7 +277,7 @@ class PlotBookingManager extends Component
                 ->get();
 
             $data['selectedCustomer'] = $this->selectedCustomerId
-                ? Customer::where('user_id', Auth::id())->find($this->selectedCustomerId)
+                ? Customer::where('user_id', Tenant::ownerId())->find($this->selectedCustomerId)
                 : null;
         }
 
@@ -301,14 +302,14 @@ class PlotBookingManager extends Component
     {
         if ($this->customerMode === 'existing') {
             return [
-                'selectedCustomerId' => ['required', Rule::exists('customers', 'id')->where('user_id', Auth::id())],
+                'selectedCustomerId' => ['required', Rule::exists('customers', 'id')->where('user_id', Tenant::ownerId())],
             ];
         }
 
         return [
             'c_name' => 'required|string|max:255',
             'c_father_name' => 'nullable|string|max:255',
-            'c_cnic' => ['nullable', 'regex:/^\d{5}-\d{7}-\d$/', Rule::unique('customers', 'cnic')->where('user_id', Auth::id())],
+            'c_cnic' => ['nullable', 'regex:/^\d{5}-\d{7}-\d$/', Rule::unique('customers', 'cnic')->where('user_id', Tenant::ownerId())],
             'c_phone' => ['required', 'regex:/^[0-9+\-\s]{10,15}$/'],
             'c_address' => 'nullable|string|max:500',
         ];
@@ -317,11 +318,11 @@ class PlotBookingManager extends Component
     protected function resolveCustomer(): Customer
     {
         if ($this->customerMode === 'existing') {
-            return Customer::where('user_id', Auth::id())->findOrFail($this->selectedCustomerId);
+            return Customer::where('user_id', Tenant::ownerId())->findOrFail($this->selectedCustomerId);
         }
 
         return Customer::create([
-            'user_id' => Auth::id(),
+            'user_id' => Tenant::ownerId(),
             'name' => trim($this->c_name),
             'father_name' => $this->c_father_name ? trim($this->c_father_name) : null,
             'cnic' => $this->c_cnic ?: null,
@@ -347,7 +348,7 @@ class PlotBookingManager extends Component
     protected function ownedPlot($id): Plot
     {
         return Plot::where('town_id', $this->townId)
-            ->whereHas('town', fn ($q) => $q->where('user_id', Auth::id()))
+            ->whereHas('town', fn ($q) => $q->where('user_id', Tenant::ownerId()))
             ->findOrFail($id);
     }
 

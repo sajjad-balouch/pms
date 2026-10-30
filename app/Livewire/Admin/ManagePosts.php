@@ -44,7 +44,7 @@ class ManagePosts extends Component
             'tags' => 'nullable|string|max:255',
             'read_time' => 'required|numeric|min:1',
             'status' => 'required|in:published,draft',
-            'new_image' => 'nullable|image|max:3072',
+            'new_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
         ];
     }
 
@@ -90,7 +90,7 @@ class ManagePosts extends Component
                 if (!File::exists($destination)) {
                     File::makeDirectory($destination, 0755, true);
                 }
-                $filename = time() . '_' . uniqid() . '.' . $this->new_image->getClientOriginalExtension();
+                $filename = time() . '_' . uniqid() . '.' . $this->new_image->extension() /* real MIME type, never the user file name */;
                 copy($this->new_image->getRealPath(), $destination . DIRECTORY_SEPARATOR . $filename);
                 $imagePath = 'blog_images/' . $filename;
             }

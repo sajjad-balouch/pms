@@ -11,13 +11,13 @@
             <div>
                 <h2 class="text-2xl font-black text-white flex items-center gap-2">
                     <i class="fa-solid fa-file-contract text-emerald-400"></i>
-                    <span>Bayana Agreement & Token Receipt Generator</span>
+                    <span>{{ __('Bayana Agreement & Token Receipt Generator') }}</span>
                 </h2>
-                <p class="text-xs text-slate-400 mt-1">Instant print and PDF-ready document with legal terms and conditions</p>
+                <p class="text-xs text-slate-400 mt-1">{{ __('Instant print and PDF-ready document with legal terms and conditions') }}</p>
             </div>
             <div>
                 <span class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-full">
-                    <i class="fa-solid fa-stamp mr-1"></i> Legal Draft Ready
+                    <i class="fa-solid fa-stamp mr-1"></i> {{ __('Legal Draft Ready') }}
                 </span>
             </div>
         </div>
@@ -27,18 +27,18 @@
             <!-- Type and Dates -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-b border-slate-700/80 pb-5">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Document Type</label>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ __('Document Type') }}</label>
                     <select wire:model="agreementType" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                        <option value="bayana">Formal Bayana Agreement</option>
-                        <option value="token">Token Receipt / Advance Bayana</option>
+                        <option value="bayana">{{ __('Formal Bayana Agreement') }}</option>
+                        <option value="token">{{ __('Token Receipt / Advance Bayana') }}</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Agreement Date</label>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ __('Agreement Date') }}</label>
                     <input type="date" wire:model="agreementDate" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Final Payment / Registry Due Date</label>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ __('Final Payment / Registry Due Date') }}</label>
                     <input type="date" wire:model="finalPaymentDate" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                 </div>
             </div>
@@ -49,19 +49,19 @@
                 <!-- First Party: Seller -->
                 <div class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-700/60">
                     <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center gap-1.5 border-b border-slate-800 pb-2">
-                        <i class="fa-solid fa-user-tag"></i> First Party (Seller / Owner)
+                        <i class="fa-solid fa-user-tag"></i> {{ __('First Party (Seller / Owner)') }}
                     </h3>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Seller Full Name *</label>
-                        <input type="text" wire:model="sellerName" placeholder="e.g. Muhammad Aslam S/O Abdul Rasheed" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Seller Full Name') }} *</label>
+                        <input type="text" wire:model="sellerName" placeholder="{{ __('e.g. Muhammad Aslam S/O Abdul Rasheed') }}" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                         @error('sellerName') <span class="text-rose-400 text-[10px] mt-0.5 block">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">National Identity Card (CNIC)</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('National Identity Card (CNIC)') }}</label>
                         <input type="text" wire:model="sellerCnic" placeholder="33100-xxxxxxx-x" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Mobile Number</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Mobile Number') }}</label>
                         <input type="text" wire:model="sellerPhone" placeholder="03001234567" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                     </div>
                 </div>
@@ -69,19 +69,19 @@
                 <!-- Second Party: Buyer -->
                 <div class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-700/60">
                     <h3 class="text-xs font-bold text-emerald-400 uppercase flex items-center gap-1.5 border-b border-slate-800 pb-2">
-                        <i class="fa-solid fa-user-check"></i> Second Party (Buyer)
+                        <i class="fa-solid fa-user-check"></i> {{ __('Second Party (Buyer)') }}
                     </h3>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Buyer Full Name *</label>
-                        <input type="text" wire:model="buyerName" placeholder="e.g. Tariq Javed S/O Nazir Ahmed" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Buyer Full Name') }} *</label>
+                        <input type="text" wire:model="buyerName" placeholder="{{ __('e.g. Tariq Javed S/O Nazir Ahmed') }}" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                         @error('buyerName') <span class="text-rose-400 text-[10px] mt-0.5 block">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">National Identity Card (CNIC)</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('National Identity Card (CNIC)') }}</label>
                         <input type="text" wire:model="buyerCnic" placeholder="33100-xxxxxxx-x" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Mobile Number</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Mobile Number') }}</label>
                         <input type="text" wire:model="buyerPhone" placeholder="03007654321" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                     </div>
                 </div>
@@ -91,21 +91,21 @@
             <!-- Property Description -->
             <div class="space-y-3 border-b border-slate-700/80 pb-5">
                 <h3 class="text-xs font-bold text-indigo-400 uppercase flex items-center gap-1.5">
-                    <i class="fa-solid fa-map-location-dot"></i> Property & Plot Details
+                    <i class="fa-solid fa-map-location-dot"></i> {{ __('Property & Plot Details') }}
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Property Title / Details *</label>
-                        <input type="text" wire:model="propertyTitle" placeholder="e.g. House No. 12, Street No. 4" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Property Title / Details') }} *</label>
+                        <input type="text" wire:model="propertyTitle" placeholder="{{ __('e.g. House No. 12, Street No. 4') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                         @error('propertyTitle') <span class="text-rose-400 text-[10px] mt-0.5 block">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Society / Mauza / Town</label>
-                        <input type="text" wire:model="schemeName" placeholder="e.g. Canal City" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Society / Mauza / Town') }}</label>
+                        <input type="text" wire:model="schemeName" placeholder="{{ __('e.g. Canal City') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Area & Size *</label>
-                        <input type="text" wire:model="areaSize" placeholder="e.g. 5 Marla (1125 Sq Ft)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Area & Size') }} *</label>
+                        <input type="text" wire:model="areaSize" placeholder="{{ __('e.g. 5 Marla (1125 Sq Ft)') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                         @error('areaSize') <span class="text-rose-400 text-[10px] mt-0.5 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
@@ -114,36 +114,36 @@
             <!-- Financials -->
             <div class="space-y-3 border-b border-slate-700/80 pb-5">
                 <h3 class="text-xs font-bold text-amber-400 uppercase flex items-center gap-1.5">
-                    <i class="fa-solid fa-coins"></i> Financial Terms & Amounts (PKR)
+                    <i class="fa-solid fa-coins"></i> {{ __('Financial Terms & Amounts (PKR)') }}
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Total Agreed Price *</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Total Agreed Price') }} *</label>
                         <input type="number" wire:model.live.debounce.300ms="totalDealAmount" placeholder="5000000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                         @error('totalDealAmount') <span class="text-rose-400 text-[10px] mt-0.5 block">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Paid Bayana / Advance Amount *</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Paid Bayana / Advance Amount') }} *</label>
                         <input type="number" wire:model.live.debounce.300ms="bayanaAmount" placeholder="500000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-emerald-400 font-bold focus:outline-none focus:border-indigo-500">
                         @error('bayanaAmount') <span class="text-rose-400 text-[10px] mt-0.5 block">{{ $message }}</span> @enderror
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Remaining Balance Due</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Remaining Balance Due') }}</label>
                         <input type="text" readonly value="PKR {{ number_format($remainingAmount) }}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-400 font-bold font-mono">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Payment Method</label>
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Payment Method') }}</label>
                         <select wire:model="paymentMethod" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                            <option value="cash">Cash in Hand</option>
-                            <option value="cheque">Bank Cheque / Pay Order</option>
-                            <option value="online">Online Transfer</option>
+                            <option value="cash">{{ __('Cash in Hand') }}</option>
+                            <option value="cheque">{{ __('Bank Cheque / Pay Order') }}</option>
+                            <option value="online">{{ __('Online Transfer') }}</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Cheque Number / Bank Details (If applicable)</label>
-                        <input type="text" wire:model="chequeDetails" placeholder="e.g. HBL Cheque No. 98765432" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">{{ __('Cheque Number / Bank Details (If applicable)') }}</label>
+                        <input type="text" wire:model="chequeDetails" placeholder="{{ __('e.g. HBL Cheque No. 98765432') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
                     </div>
                 </div>
             </div>
@@ -151,16 +151,16 @@
             <!-- Witnesses -->
             <div class="space-y-3">
                 <h3 class="text-xs font-bold text-slate-300 uppercase flex items-center gap-1.5">
-                    <i class="fa-solid fa-users"></i> Witnesses Details (Optional)
+                    <i class="fa-solid fa-users"></i> {{ __('Witnesses Details (Optional)') }}
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model="witness1Name" placeholder="Witness 1 Name" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                        <input type="text" wire:model="witness1Cnic" placeholder="Witness 1 CNIC" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <input type="text" wire:model="witness1Name" placeholder="{{ __('Witness 1 Name') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <input type="text" wire:model="witness1Cnic" placeholder="{{ __('Witness 1 CNIC') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model="witness2Name" placeholder="Witness 2 Name" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                        <input type="text" wire:model="witness2Cnic" placeholder="Witness 2 CNIC" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <input type="text" wire:model="witness2Name" placeholder="{{ __('Witness 2 Name') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <input type="text" wire:model="witness2Cnic" placeholder="{{ __('Witness 2 CNIC') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
                     </div>
                 </div>
             </div>
@@ -168,7 +168,7 @@
             <div class="flex justify-end pt-4">
                 <button type="submit" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer">
                     <i class="fa-solid fa-eye"></i>
-                    <span>Generate Agreement & Preview Print</span>
+                    <span>{{ __('Generate Agreement & Preview Print') }}</span>
                 </button>
             </div>
         </form>

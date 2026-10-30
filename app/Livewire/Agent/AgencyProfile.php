@@ -31,7 +31,7 @@ class AgencyProfile extends Component
         $this->name = $user->name;
         $this->username = $user->id;
         $this->agency_name = $user->agency_name ?: $user->name . ' Real Estate';
-        $this->agency_tagline = $user->agency_tagline ?: 'آپ کا بااعتماد ریئل اسٹیٹ پارٹنر';
+        $this->agency_tagline = $user->agency_tagline ?: __('Your trusted real estate partner');
         $this->phone = $user->phone;
         $this->city_name = $user->city_name;
         $this->office_address = $user->office_address;
@@ -49,10 +49,11 @@ class AgencyProfile extends Component
             'agency_name' => 'required|string|max:100',
             'phone' => 'required|string|max:20',
             'city_name' => 'nullable|string|max:50',
-            'new_logo' => 'nullable|image|max:2048',
+            'new_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $logoPath = $this->existing_logo;
+        // Current logo from the DB, not from the browser
+        $logoPath = $user->agency_logo;
 
         if ($this->new_logo) {
             $destination = public_path('agency_logos');
@@ -60,7 +61,8 @@ class AgencyProfile extends Component
                 File::makeDirectory($destination, 0755, true);
             }
 
-            $filename = time() . '_' . uniqid() . '.' . $this->new_logo->getClientOriginalExtension();
+            // Extension from the real MIME type, never from the user's file name (blocks shell.php uploads)
+            $filename = time() . '_' . uniqid() . '.' . $this->new_logo->extension();
             copy($this->new_logo->getRealPath(), $destination . DIRECTORY_SEPARATOR . $filename);
             $logoPath = 'agency_logos/' . $filename;
         }
@@ -77,7 +79,7 @@ class AgencyProfile extends Component
             'agency_logo' => $logoPath,
         ]);
 
-        session()->flash('message', 'آپ کا ڈیجیٹل کارڈ اور پروفائل کامیابی سے محفوظ ہو گیا!');
+        session()->flash('message', __('Your digital card and profile have been saved!'));
         $this->existing_logo = $logoPath;
         $this->new_logo = null;
     }

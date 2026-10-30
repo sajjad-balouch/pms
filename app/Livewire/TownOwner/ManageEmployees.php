@@ -2,6 +2,7 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Support\Tenant;
 use App\Models\Employee;
 use App\Models\EmployeeSalary;
 use App\Models\Town;
@@ -63,13 +64,13 @@ class ManageEmployees extends Component
     #[Computed]
     public function towns()
     {
-        return Town::where('user_id', Auth::id())->orderBy('name')->get(['id', 'name']);
+        return Town::where('user_id', Tenant::ownerId())->orderBy('name')->get(['id', 'name']);
     }
 
     #[Computed]
     public function town()
     {
-        return $this->townId !== '' ? Town::where('user_id', Auth::id())->find($this->townId) : null;
+        return $this->townId !== '' ? Town::where('user_id', Tenant::ownerId())->find($this->townId) : null;
     }
 
     public function updatedTownId()

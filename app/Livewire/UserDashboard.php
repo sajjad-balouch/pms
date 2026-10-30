@@ -50,7 +50,7 @@ class UserDashboard extends Component
 
         $method = PaymentMethod::findOrFail($this->selectedMethodId);
         $destinationPath = public_path('ss');
-        $imageName = time() . '_' . uniqid() . '.' . $this->screenshot->getClientOriginalExtension();
+        $imageName = time() . '_' . uniqid() . '.' . $this->screenshot->extension() /* real MIME type, never the user file name */;
         copy($this->screenshot->getRealPath(), $destinationPath . '/' . $imageName);
 
         WalletTransaction::create([

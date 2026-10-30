@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Tenant;
 use App\Models\Installment;
 use App\Models\PlotBooking;
 use App\Services\BookingService;
@@ -53,7 +54,7 @@ class BuyerPortalController extends Controller
     public function allotmentLetter(PlotBooking $booking)
     {
         $booking->load(['plot.town.user', 'customer']);
-        abort_unless((int) $booking->plot?->town?->user_id === (int) Auth::id(), 403);
+        abort_unless((int) $booking->plot?->town?->user_id === (int) Tenant::ownerId(), 403);
 
         return view('print.allotment-letter', ['booking' => $booking]);
     }
@@ -61,7 +62,7 @@ class BuyerPortalController extends Controller
     public function ownerReceipt(Installment $installment)
     {
         $installment->load('plot.town', 'booking');
-        abort_unless((int) $installment->plot?->town?->user_id === (int) Auth::id(), 403);
+        abort_unless((int) $installment->plot?->town?->user_id === (int) Tenant::ownerId(), 403);
         abort_unless($installment->status === 'paid', 404);
 
         return $this->renderReceipt($installment, $installment->booking, true);

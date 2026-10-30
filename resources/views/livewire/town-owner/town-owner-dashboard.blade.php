@@ -85,6 +85,36 @@
         </div>
     </div>
 
+    <!-- Today's summary (send on WhatsApp) -->
+    <div class="bg-gradient-to-r from-emerald-900/30 to-gray-900/80 p-5 rounded-2xl border border-emerald-500/20 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1">
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Aaj ki wasooli</p>
+                <p class="text-xl font-black text-emerald-400">Rs. {{ number_format($daily['collected']) }}</p>
+                <p class="text-[11px] text-gray-500">{{ $daily['collected_count'] }} entries</p>
+            </div>
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Aaj due (baqi)</p>
+                <p class="text-xl font-black text-amber-400">Rs. {{ number_format($daily['due_today']) }}</p>
+            </div>
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Aaj ke kharche</p>
+                <p class="text-xl font-black text-rose-400">Rs. {{ number_format($daily['spent']) }}</p>
+            </div>
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Nayi bookings</p>
+                <p class="text-xl font-black text-white">{{ $daily['booked'] }}</p>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            @if ($daily['to_self'])
+                <a href="{{ $daily['to_self'] }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 px-3 py-2 rounded-xl text-xs font-bold">💬 Khulasa mujhe bhejein</a>
+            @endif
+            <a href="{{ $daily['share'] }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 px-3 py-2 rounded-xl text-xs font-bold">↗ Partner / group ko share</a>
+            <a href="{{ route('town_owner.recovery') }}" wire:navigate class="inline-flex items-center gap-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 px-3 py-2 rounded-xl text-xs font-bold">📞 Recovery Desk</a>
+        </div>
+    </div>
+
     <!-- Overdue Alert Banner -->
     @if ($overdueCount > 0)
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-red-500/10 border border-red-500/30 text-red-300 px-5 py-4 rounded-2xl">
@@ -182,8 +212,11 @@
 
         <div class="bg-gray-900/60 p-5 rounded-2xl border border-gray-800/80 shadow-lg relative overflow-hidden">
             <div class="absolute top-0 left-0 w-1 h-full bg-red-600"></div>
-            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Total Outflow (Expenses + Salary)</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Total Outflow (Expenses + Salary + Refunds)</p>
             <p class="text-2xl font-black text-red-400 mt-2">Rs. {{ number_format($totalOutflow) }}</p>
+            @if ($totalRefunds > 0)
+                <p class="text-xs text-gray-500 mt-1">Booking refunds: Rs. {{ number_format($totalRefunds) }}</p>
+            @endif
         </div>
 
         <div class="bg-gray-900/60 p-5 rounded-2xl border border-gray-800/80 shadow-lg relative overflow-hidden">
@@ -192,7 +225,12 @@
             <p class="text-2xl font-black {{ $netProfit >= 0 ? 'text-teal-400' : 'text-red-400' }} mt-2">
                 {{ $netProfit < 0 ? '-' : '' }}Rs. {{ number_format(abs($netProfit)) }}
             </p>
-            <p class="text-xs text-gray-500 mt-1">{{ $netProfit >= 0 ? 'Profit' : 'Loss' }}</p>
+            <p class="text-xs text-gray-500 mt-1">
+                {{ $netProfit >= 0 ? 'Profit' : 'Loss' }}
+                @if ($transferFees > 0)
+                    · incl. transfer fees Rs. {{ number_format($transferFees) }}
+                @endif
+            </p>
         </div>
     </div>
 

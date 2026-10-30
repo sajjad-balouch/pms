@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\AdminLog;
 use App\Models\User;
 use App\Models\Property;
 use App\Models\Town;
+use App\Models\WalletTransaction;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Hash;
@@ -15,6 +17,15 @@ class ManageUsers extends Component
     use WithPagination;
 
     public $search = '';
+    public $roleFilter = '';
+    public $statusFilter = ''; // approved | blocked
+
+    // Wallet adjustment modal
+    public $showWalletModal = false;
+    public $walletUserId = null;
+    public $walletDirection = 'credit'; // credit | debit
+    public $walletAmount = '';
+    public $walletReason = '';
 
     // Create User Modal States & Fields
     public $showCreateModal = false;
@@ -43,7 +54,21 @@ class ManageUsers extends Component
     public $selectedTownName = '';
     public $showPlotsModal = false;
 
-    protected $queryString = ['search' => ['except' => '']];
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'roleFilter' => ['except' => '', 'as' => 'role'],
+        'statusFilter' => ['except' => '', 'as' => 'status'],
+    ];
+
+    public function updatingRoleFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatusFilter()
+    {
+        $this->resetPage();
+    }
 
     public function updatingSearch()
     {
@@ -139,7 +164,7 @@ class ManageUsers extends Component
             'password' => 'required|min:8',
         ]);
 
-        User::create([
+        $created = User::create([
             'name'        => $this->name,
             'email'       => $this->email,
             'phone'       => $this->phone,
@@ -148,7 +173,8 @@ class ManageUsers extends Component
             'is_approved' => true,
         ]);
 
-        session()->flash('status', 'Naya user kamyabi se add ho gaya hai!');
+        AdminLog::record('user.created', $created, 'Created ' . $created->role . ' account: ' . $created->email);
+        session()->flash('status', __('New user added successfully!'));
         $this->showCreateModal = false;
         $this->reset(['name', 'email', 'phone', 'role', 'password']);
     }
@@ -159,14 +185,15 @@ class ManageUsers extends Component
         $user = User::findOrFail($userId);
         
         if ($user->id === auth()->id()) {
-            session()->flash('error', 'Aap apne account ko block nahi kar sakte!');
+            session()->flash('error', __('You cannot block your own account!'));
             return;
         }
 
         $user->is_approved = !$user->is_approved;
         $user->save();
 
-        $statusMessage = $user->is_approved ? 'User ko kamyabi se unblock kar diya gaya hai.' : 'User ko block kar diya gaya hai.';
+        AdminLog::record($user->is_approved ? 'user.unblocked' : 'user.blocked', $user, ($user->is_approved ? 'Unblocked ' : 'Blocked ') . $user->email);
+        $statusMessage = $user->is_approved ? __('User unblocked successfully.') : __('User has been blocked.');
         session()->flash('status', $statusMessage);
     }
 
@@ -189,7 +216,8 @@ class ManageUsers extends Component
         $user->password = Hash::make($this->new_password);
         $user->save();
 
-        session()->flash('status', 'User ka password kamyabi se change ho gaya hai.');
+        AdminLog::record('user.password_changed', $user, 'Changed password for ' . $user->email);
+        session()->flash('status', __('User password changed successfully.'));
         $this->showPasswordModal = false;
         $this->reset(['selectedUserId', 'new_password']);
     }
@@ -197,12 +225,30 @@ class ManageUsers extends Component
     // --- DELETE USER SAFELY ---
     public function deleteUser($userId)
     {
-        if ($userId === auth()->id()) {
-            session()->flash('error', 'Aap apne active admin account ko delete nahi kar sakte!');
+        if ((int) $userId === (int) auth()->id()) {
+            session()->flash('error', __('You cannot delete your own admin account!'));
             return;
         }
 
         $user = User::findOrFail($userId);
+
+        // Financial / customer records must never disappear with a click — block the account instead
+        $blockers = array_filter([
+            (float) $user->wallet_balance > 0 ? __('wallet balance Rs. :amount', ['amount' => number_format($user->wallet_balance)]) : null,
+            DB::table('wallet_transactions')->where('user_id', $user->id)->where('status', 'approved')->where('type', 'deposit')->exists() ? __('approved top-up history') : null,
+            Town::where('user_id', $user->id)->whereHas('plots', fn ($q) => $q->whereIn('status', ['booked', 'sold']))->exists() ? __('housing schemes with booked/sold plots') : null,
+            DB::table('customers')->where('user_id', $user->id)->exists() ? __('customer records') : null,
+            $user->role === 'admin' && User::where('role', 'admin')->count() <= 1 ? __('the last admin account') : null,
+        ]);
+
+        if ($blockers) {
+            session()->flash('error', __('This account cannot be deleted because it has :items. Block it instead.', ['items' => implode(', ', $blockers)]));
+            return;
+        }
+
+        AdminLog::record('user.deleted', $user, 'Deleted ' . $user->role . ' account: ' . $user->email, [
+            'name' => $user->name, 'email' => $user->email, 'role' => $user->role,
+        ]);
 
         try {
             DB::transaction(function () use ($user, $userId) {
@@ -227,24 +273,114 @@ class ManageUsers extends Component
                 $user->delete();
             });
 
-            session()->flash('status', 'User aur uska tamam data hamesha ke liye delete kar diya gaya hai.');
+            session()->flash('status', __('User and all their data have been permanently deleted.'));
         } catch (\Exception $e) {
-            session()->flash('error', 'User delete karte waqt issue aaya: ' . $e->getMessage());
+            report($e);
+            session()->flash('error', __('Could not delete the user. Please try again.'));
         }
+    }
+
+    // --- WALLET ADJUSTMENT (manual credit / debit with a reason) ---
+    public function openWalletModal($userId)
+    {
+        $this->walletUserId = User::findOrFail($userId)->id;
+        $this->reset(['walletDirection', 'walletAmount', 'walletReason']);
+        $this->resetValidation();
+        $this->showWalletModal = true;
+    }
+
+    public function adjustWallet()
+    {
+        $this->validate([
+            'walletDirection' => 'required|in:credit,debit',
+            'walletAmount' => 'required|numeric|min:1|max:10000000',
+            'walletReason' => 'required|string|min:5|max:255',
+        ]);
+
+        $amount = round((float) $this->walletAmount, 2);
+
+        $result = DB::transaction(function () use ($amount) {
+            $user = User::whereKey($this->walletUserId)->lockForUpdate()->firstOrFail();
+
+            if ($this->walletDirection === 'debit' && (float) $user->wallet_balance < $amount) {
+                return 'insufficient';
+            }
+
+            $this->walletDirection === 'credit'
+                ? $user->increment('wallet_balance', $amount)
+                : $user->decrement('wallet_balance', $amount);
+
+            $txn = WalletTransaction::create([
+                'user_id' => $user->id,
+                'amount' => $amount,
+                'type' => 'adjustment',
+                'status' => 'approved',
+                'description' => ($this->walletDirection === 'credit' ? 'Admin credit: ' : 'Admin debit: ') . $this->walletReason,
+                'admin_note' => $this->walletDirection,
+                'approved_at' => now(),
+                'processed_by' => auth()->id(),
+            ]);
+
+            AdminLog::record('wallet.' . $this->walletDirection, $user, ucfirst($this->walletDirection) . ' Rs. ' . number_format($amount) . ' — ' . $this->walletReason, [
+                'amount' => $amount,
+                'balance_after' => (float) $user->fresh()->wallet_balance,
+                'transaction_id' => $txn->id,
+            ]);
+
+            return 'ok';
+        });
+
+        if ($result === 'insufficient') {
+            $this->addError('walletAmount', __('Debit is more than the wallet balance.'));
+            return;
+        }
+
+        $this->showWalletModal = false;
+        $this->reset(['walletUserId', 'walletAmount', 'walletReason']);
+        session()->flash('status', __('Wallet updated successfully.'));
+    }
+
+    // --- EXPORT (current filters) ---
+    public function exportCsv()
+    {
+        $query = $this->filteredQuery();
+        AdminLog::record('users.exported', null, 'Exported users CSV', ['role' => $this->roleFilter, 'status' => $this->statusFilter, 'search' => $this->search]);
+
+        return response()->streamDownload(function () use ($query) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['ID', 'Name', 'Email', 'Phone', 'Role', 'Approved', 'Wallet Balance', 'Joined']);
+            $query->chunk(500, function ($users) use ($out) {
+                foreach ($users as $u) {
+                    fputcsv($out, [$u->id, $u->name, $u->email, $u->phone, $u->role, $u->is_approved ? 'Yes' : 'No', $u->wallet_balance, $u->created_at?->format('Y-m-d')]);
+                }
+            });
+            fclose($out);
+        }, 'users-' . now()->format('Y-m-d') . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    protected function filteredQuery()
+    {
+        $search = trim($this->search);
+
+        return User::query()
+            ->when($search !== '', fn ($q) => $q->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            }))
+            ->when(in_array($this->roleFilter, ['admin', 'user', 'town_owner', 'agent'], true), fn ($q) => $q->where('role', $this->roleFilter))
+            ->when($this->statusFilter === 'approved', fn ($q) => $q->where('is_approved', true))
+            ->when($this->statusFilter === 'blocked', fn ($q) => $q->where('is_approved', false))
+            ->latest();
     }
 
     public function render()
     {
-        $users = User::where(function ($query) {
-            $query->where('name', 'like', '%' . $this->search . '%')
-                ->orWhere('email', 'like', '%' . $this->search . '%')
-                ->orWhere('phone', 'like', '%' . $this->search . '%');
-        })
-        ->latest()
-        ->paginate(10);
-
         return view('livewire.admin.manage-users', [
-            'users' => $users
+            'users' => $this->filteredQuery()->paginate(10),
+            'roleCounts' => User::selectRaw('role, COUNT(*) AS n')->groupBy('role')->pluck('n', 'role'),
+            'walletUser' => $this->walletUserId ? User::find($this->walletUserId) : null,
         ])->layout('layouts.admin-app');
     }
 }

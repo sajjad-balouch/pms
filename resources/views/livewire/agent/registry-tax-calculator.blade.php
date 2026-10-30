@@ -5,16 +5,16 @@
         <div>
             <h2 class="text-2xl font-black text-white flex items-center gap-2">
                 <i class="fa-solid fa-stamp text-amber-400"></i>
-                <span>Punjab Revenue Official Fee Schedule Calculator</span>
+                <span>{{ __('Punjab Revenue Official Fee Schedule Calculator') }}</span>
             </h2>
             <p class="text-xs text-slate-400 mt-1">
-                Comprehensive computation of Stamp Duty, 3% unapproved map fee, FBR (236-C/K), PLRA charges, and custom deed expenses
+                {{ __('Comprehensive computation of Stamp Duty, 3% unapproved map fee, FBR (236-C/K), PLRA charges, and custom deed expenses') }}
             </p>
         </div>
 
         <div class="flex items-center gap-2">
             <span class="px-3.5 py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black rounded-xl">
-                <i class="fa-solid fa-calculator mr-1"></i> Grand Total Enabled
+                <i class="fa-solid fa-calculator mr-1"></i> {{ __('Grand Total Enabled') }}
             </span>
         </div>
     </div>
@@ -28,27 +28,27 @@
             <div class="border-b border-slate-700/80 pb-3 flex justify-between items-center">
                 <span class="text-xs font-bold text-white uppercase flex items-center gap-1.5">
                     <i class="fa-solid fa-sliders text-indigo-400"></i>
-                    <span>Property & Tax Parameters</span>
+                    <span>{{ __('Property & Tax Parameters') }}</span>
                 </span>
-                <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-bold">Updated Rates</span>
+                <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-bold">{{ __('Updated Rates') }}</span>
             </div>
 
             <!-- Property Value -->
             <div>
-                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Valuation / DC Rate (PKR) *</label>
+                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ __('Valuation / DC Rate (PKR)') }} *</label>
                 <input type="number" wire:model.live.debounce.150ms="propertyValue" placeholder="5000000"
                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-amber-500 font-mono">
-                <span class="text-[11px] text-slate-400 mt-1 block">Enter official DC or FBR valuation of the property.</span>
+                <span class="text-[11px] text-slate-400 mt-1 block">{{ __('Enter official DC or FBR valuation of the property.') }}</span>
             </div>
 
             <!-- Qisam (Property / Transfer Type) -->
             <div>
-                <label class="block text-[11px] font-bold text-amber-400 uppercase mb-1">Land / Document Type</label>
+                <label class="block text-[11px] font-bold text-amber-400 uppercase mb-1">{{ __('Land / Document Type') }}</label>
                 <select wire:model.live="propertyType" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-bold">
-                    <option value="urban_residential">Stamp Duty Urban Area / Residential (1%)</option>
-                    <option value="rural_zari">Stamp Duty Rural / Agricultural (1%)</option>
-                    <option value="mukhtarnama_blood">Power of Attorney - Blood Relation (Rs. 3,025 Flat)</option>
-                    <option value="mukhtarnama_general">Power of Attorney - Valuation Table (2%)</option>
+                    <option value="urban_residential">{{ __('Stamp Duty Urban Area / Residential (1%)') }}</option>
+                    <option value="rural_zari">{{ __('Stamp Duty Rural / Agricultural (1%)') }}</option>
+                    <option value="mukhtarnama_blood">{{ __('Power of Attorney - Blood Relation (Rs. 3,025 Flat)') }}</option>
+                    <option value="mukhtarnama_general">{{ __('Power of Attorney - Valuation Table (2%)') }}</option>
                 </select>
             </div>
 
@@ -57,8 +57,8 @@
                 <label class="flex items-center gap-2.5 cursor-pointer">
                     <input type="checkbox" wire:model.live="isMapUnapproved" class="rounded bg-slate-800 border-slate-600 text-rose-500 focus:ring-0">
                     <div>
-                        <span class="text-xs font-bold {{ $isMapUnapproved ? 'text-rose-400' : 'text-slate-200' }}">Building map is unapproved (Stamp Duty 3%)</span>
-                        <span class="text-[10px] text-slate-400 block">Stamp Duty increases from 1% to 3% if building layout/map is not approved.</span>
+                        <span class="text-xs font-bold {{ $isMapUnapproved ? 'text-rose-400' : 'text-slate-200' }}">{{ __('Building map is unapproved (Stamp Duty 3%)') }}</span>
+                        <span class="text-[10px] text-slate-400 block">{{ __('Stamp Duty increases from 1% to 3% if building layout/map is not approved.') }}</span>
                     </div>
                 </label>
             </div>
@@ -67,38 +67,38 @@
             <div>
                 <label class="flex items-center gap-2 cursor-pointer p-3 bg-slate-900/80 border border-slate-700 rounded-xl text-xs font-semibold text-slate-300">
                     <input type="checkbox" wire:model.live="hasTmaTax" class="rounded bg-slate-800 border-slate-600 text-amber-500 focus:ring-0">
-                    <span>Include TMA Tax (1%) (Town Committee / Municipal Limits)</span>
+                    <span>{{ __('Include TMA Tax (1%) (Town Committee / Municipal Limits)') }}</span>
                 </label>
             </div>
 
             <!-- Filer Status (Buyer & Seller) -->
             <div class="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                    <label class="block text-[11px] font-bold text-emerald-400 uppercase mb-1">Buyer (236-K)</label>
+                    <label class="block text-[11px] font-bold text-emerald-400 uppercase mb-1">{{ __('Buyer (236-K)') }}</label>
                     <select wire:model.live="buyerFilerStatus" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold">
-                        <option value="filer">Filer (1.25%)</option>
-                        <option value="non_filer">Non-Filer (10.5% - 18.5%)</option>
+                        <option value="filer">{{ __('Filer (1.25%)') }}</option>
+                        <option value="non_filer">{{ __('Non-Filer (10.5% - 18.5%)') }}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-bold text-rose-400 uppercase mb-1">Seller (236-C)</label>
+                    <label class="block text-[11px] font-bold text-rose-400 uppercase mb-1">{{ __('Seller (236-C)') }}</label>
                     <select wire:model.live="sellerFilerStatus" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 font-bold">
-                        <option value="filer">Filer (2.75%)</option>
-                        <option value="non_filer">Non-Filer (11.5%)</option>
+                        <option value="filer">{{ __('Filer (2.75%)') }}</option>
+                        <option value="non_filer">{{ __('Non-Filer (11.5%)') }}</option>
                     </select>
                 </div>
             </div>
 
             <!-- Extra / Custom Miscellaneous Expenses Input -->
             <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 space-y-2">
-                <span class="text-[11px] font-bold text-amber-400 uppercase block">Additional / Miscellaneous Expenses (Custom)</span>
+                <span class="text-[11px] font-bold text-amber-400 uppercase block">{{ __('Additional / Miscellaneous Expenses (Custom)') }}</span>
                 
-                <input type="text" wire:model.live.debounce.300ms="extraExpensesName" placeholder="Description e.g. Legal & Patwari Fee" 
+                <input type="text" wire:model.live.debounce.300ms="extraExpensesName" placeholder="{{ __('Description e.g. Legal & Patwari Fee') }}" 
                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-amber-500">
                 
                 <div class="relative">
-                    <span class="absolute left-3 top-2 text-xs text-slate-500 font-mono">PKR</span>
+                    <span class="absolute left-3 top-2 text-xs text-slate-500 font-mono">{{ __('PKR') }}</span>
                     <input type="number" wire:model.live.debounce.150ms="extraExpensesAmount" placeholder="0" 
                            class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-12 pr-3 py-1.5 text-xs text-white font-mono font-bold focus:outline-none focus:border-amber-500">
                 </div>
@@ -113,10 +113,10 @@
                 <div>
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-receipt text-emerald-400"></i>
-                        <span>Official Fee Challan & Expense Slip</span>
+                        <span>{{ __('Official Fee Challan & Expense Slip') }}</span>
                     </h3>
                     <p class="text-[11px] text-slate-400">
-                        Itemized breakdown for Buyer, Seller, and Combined Grand Total
+                        {{ __('Itemized breakdown for Buyer, Seller, and Combined Grand Total') }}
                     </p>
                 </div>
 
@@ -147,7 +147,7 @@
                         "
                         class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer">
                     <i class="fa-brands fa-whatsapp text-sm"></i>
-                    <span>Copy WhatsApp Slip</span>
+                    <span>{{ __('Copy WhatsApp Slip') }}</span>
                 </button>
             </div>
 
@@ -157,9 +157,9 @@
                 <!-- Stamp Duty -->
                 <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 flex justify-between items-center">
                     <div>
-                        <span class="font-bold text-white block">1. Stamp Duty — {{ $stampDutyPercent }}%</span>
+                        <span class="font-bold text-white block">1. {{ __('Stamp Duty') }} — {{ $stampDutyPercent }}%</span>
                         <span class="text-[10px] text-slate-500">
-                            {{ $isMapUnapproved ? '3% Stamp Duty applied for unapproved building map' : 'Standard 1% residential / rural agricultural duty' }}
+                            {{ $isMapUnapproved ? __('3% Stamp Duty applied for unapproved building map') : __('Standard 1% residential / rural agricultural duty') }}
                         </span>
                     </div>
                     <span class="font-bold text-amber-400 font-mono text-sm">PKR {{ number_format($stampDuty) }}</span>
@@ -168,8 +168,8 @@
                 <!-- TMA Tax -->
                 <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 flex justify-between items-center">
                     <div>
-                        <span class="font-bold text-white block">2. TMA Tax — {{ $hasTmaTax ? '1%' : '0%' }}</span>
-                        <span class="text-[10px] text-slate-500">Town committee or municipal corporation local council fee</span>
+                        <span class="font-bold text-white block">2. {{ __('TMA Tax') }} — {{ $hasTmaTax ? '1%' : '0%' }}</span>
+                        <span class="text-[10px] text-slate-500">{{ __('Town committee or municipal corporation local council fee') }}</span>
                     </div>
                     <span class="font-bold text-slate-200 font-mono text-sm">PKR {{ number_format($tmaTax) }}</span>
                 </div>
@@ -177,8 +177,8 @@
                 <!-- Buyer FBR 236-K -->
                 <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 flex justify-between items-center">
                     <div>
-                        <span class="font-bold text-white block">3. FBR Advance Tax 236-K (Buyer) — {{ $buyerFbrPercent }}%</span>
-                        <span class="text-[10px] text-slate-500">{{ $buyerFilerStatus === 'filer' ? 'Active Filer (1.25%)' : 'Non-Filer Slabs (10.5% - 18.5%)' }}</span>
+                        <span class="font-bold text-white block">3. {{ __('FBR Advance Tax 236-K (Buyer)') }} — {{ $buyerFbrPercent }}%</span>
+                        <span class="text-[10px] text-slate-500">{{ $buyerFilerStatus === 'filer' ? __('Active Filer (1.25%)') : __('Non-Filer Slabs (10.5% - 18.5%)') }}</span>
                     </div>
                     <span class="font-bold text-rose-400 font-mono text-sm">PKR {{ number_format($buyerFbrTax) }}</span>
                 </div>
@@ -186,8 +186,8 @@
                 <!-- PLRA Charges -->
                 <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 flex justify-between items-center">
                     <div>
-                        <span class="font-bold text-white block">4. PLRA Charges</span>
-                        <span class="text-[10px] text-slate-500">{{ $propertyValue <= 3000000 ? 'Flat Rs. 3,300 up to 3 Million' : '0.1% for valuations above 3 Million' }}</span>
+                        <span class="font-bold text-white block">4. {{ __('PLRA Charges') }}</span>
+                        <span class="text-[10px] text-slate-500">{{ $propertyValue <= 3000000 ? __('Flat Rs. 3,300 up to 3 Million') : __('0.1% for valuations above 3 Million') }}</span>
                     </div>
                     <span class="font-bold text-indigo-400 font-mono text-sm">PKR {{ number_format($plraCharges) }}</span>
                 </div>
@@ -195,8 +195,8 @@
                 <!-- Registration Charges -->
                 <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 flex justify-between items-center">
                     <div>
-                        <span class="font-bold text-white block">5. Registration Charges</span>
-                        <span class="text-[10px] text-slate-500">{{ $propertyValue <= 500000 ? 'Up to 500k: Rs. 500' : 'Above 500k: Rs. 1,000' }}</span>
+                        <span class="font-bold text-white block">5. {{ __('Registration Charges') }}</span>
+                        <span class="text-[10px] text-slate-500">{{ $propertyValue <= 500000 ? __('Up to 500k: Rs. 500') : __('Above 500k: Rs. 1,000') }}</span>
                     </div>
                     <span class="font-bold text-slate-200 font-mono text-sm">PKR {{ number_format($registrationCharges) }}</span>
                 </div>
@@ -205,18 +205,18 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div class="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800 flex justify-between items-center">
                         <div>
-                            <span class="font-bold text-white block text-[11px]">Comparison Fee</span>
-                            <span class="text-[10px] text-slate-500">Official verification fee</span>
+                            <span class="font-bold text-white block text-[11px]">{{ __('Comparison Fee') }}</span>
+                            <span class="text-[10px] text-slate-500">{{ __('Official verification fee') }}</span>
                         </div>
-                        <span class="font-bold text-slate-300 font-mono text-xs">PKR 100</span>
+                        <span class="font-bold text-slate-300 font-mono text-xs">{{ __('PKR 100') }}</span>
                     </div>
 
                     <div class="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800 flex justify-between items-center">
                         <div>
-                            <span class="font-bold text-white block text-[11px]">Mutation / Misc Fee</span>
-                            <span class="text-[10px] text-slate-500">Patwari & Land Record Center</span>
+                            <span class="font-bold text-white block text-[11px]">{{ __('Mutation / Misc Fee') }}</span>
+                            <span class="text-[10px] text-slate-500">{{ __('Patwari & Land Record Center') }}</span>
                         </div>
-                        <span class="font-bold text-slate-300 font-mono text-xs">PKR 600</span>
+                        <span class="font-bold text-slate-300 font-mono text-xs">{{ __('PKR 600') }}</span>
                     </div>
                 </div>
 
@@ -225,7 +225,7 @@
                 <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 flex justify-between items-center">
                     <div>
                         <span class="font-bold text-amber-400 block">{{ $extraExpensesName ?: 'Additional Miscellaneous Expenses' }}</span>
-                        <span class="text-[10px] text-slate-400">Custom or court miscellaneous expenses</span>
+                        <span class="text-[10px] text-slate-400">{{ __('Custom or court miscellaneous expenses') }}</span>
                     </div>
                     <span class="font-bold text-amber-400 font-mono text-sm">PKR {{ number_format($extraExpensesAmount) }}</span>
                 </div>
@@ -236,8 +236,8 @@
             <!-- Buyer Total Card -->
             <div class="p-4 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl flex justify-between items-center">
                 <div>
-                    <span class="text-xs text-emerald-300 font-bold uppercase block">Total Buyer Expenses (Purchaser Total)</span>
-                    <span class="text-[10px] text-slate-400">Including Stamp Duty, TMA, FBR 236-K, and government fees</span>
+                    <span class="text-xs text-emerald-300 font-bold uppercase block">{{ __('Total Buyer Expenses (Purchaser Total)') }}</span>
+                    <span class="text-[10px] text-slate-400">{{ __('Including Stamp Duty, TMA, FBR 236-K, and government fees') }}</span>
                 </div>
                 <div class="text-xl font-black text-emerald-400 font-mono">
                     PKR {{ number_format($totalBuyerExpenses) }}
@@ -247,8 +247,8 @@
             <!-- Seller Total Card (FBR 236-C) -->
             <div class="p-3.5 bg-rose-950/30 border border-rose-500/30 rounded-2xl flex justify-between items-center">
                 <div>
-                    <span class="text-xs text-rose-300 font-bold uppercase block">Seller Tax Liability (236-C)</span>
-                    <span class="text-[10px] text-slate-400">Rate: {{ $sellerFbrPercent }}% (Payable by seller / owner)</span>
+                    <span class="text-xs text-rose-300 font-bold uppercase block">{{ __('Seller Tax Liability (236-C)') }}</span>
+                    <span class="text-[10px] text-slate-400">{{ __('Rate: :percent% (payable by seller / owner)', ['percent' => $sellerFbrPercent]) }}</span>
                 </div>
                 <div class="text-lg font-black text-rose-400 font-mono">
                     PKR {{ number_format($totalSellerExpenses) }}
@@ -258,8 +258,8 @@
             <!-- Combined Grand Total (Buyer + Seller) -->
             <div class="p-4 bg-gradient-to-r from-amber-500/20 via-slate-900 to-amber-500/20 border-2 border-amber-400/50 rounded-2xl flex justify-between items-center shadow-xl">
                 <div>
-                    <span class="text-xs text-amber-300 font-black uppercase tracking-wider block">Combined Deal Grand Total</span>
-                    <span class="text-[10px] text-slate-300">All buyer registration expenses + seller tax combined</span>
+                    <span class="text-xs text-amber-300 font-black uppercase tracking-wider block">{{ __('Combined Deal Grand Total') }}</span>
+                    <span class="text-[10px] text-slate-300">{{ __('All buyer registration expenses + seller tax combined') }}</span>
                 </div>
                 <div class="text-2xl font-black text-amber-400 font-mono">
                     PKR {{ number_format($grandTotalDealExpenses) }}

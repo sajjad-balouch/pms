@@ -17,6 +17,7 @@ use App\Livewire\TownOwner\ManageEmployees;
 use App\Livewire\TownOwner\ManageExpenses;
 use App\Livewire\TownOwner\RecoveryDesk;
 use App\Livewire\TownOwner\ManageCustomers;
+use App\Livewire\TownOwner\ManageTeam;
 use App\Http\Controllers\CustomerDocumentController;
 use App\Livewire\Agent\AgentDashboard;
 use App\Livewire\Agent\ManageLeads;
@@ -171,11 +172,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/whatsapp-marketing', WhatsAppMarketing::class)->name('whatsapp.marketing');
 
         Route::get('/posts', ManagePosts::class)->name('posts');
+        Route::get('/activity-log', \App\Livewire\Admin\ActivityLog::class)->name('activity-log');
 
     });
 
     // Town Owner Routes
-    Route::middleware(['role:town_owner'])->prefix('town-owner')->name('town_owner.')->group(function () {
+    Route::middleware(['role:town_owner', 'town.can'])->prefix('town-owner')->name('town_owner.')->group(function () {
+        Route::get('/team', ManageTeam::class)->name('team');
         Route::get('/dashboard', TownOwnerDashboard::class)->name('dashboard');
         Route::get('/towns', ManageTowns::class)->name('towns');
         Route::get('/towns/{townId}/plots', ManagePlots::class)->name('plots');

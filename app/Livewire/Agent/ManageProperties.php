@@ -6,7 +6,9 @@ use App\Models\City;
 use App\Models\Property;
 use App\Models\Town;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -14,6 +16,9 @@ use Livewire\WithPagination;
 class ManageProperties extends Component
 {
     use WithPagination, WithFileUploads;
+
+    const MAX_IMAGES = 15;
+    const STALE_DAYS = 30; // itne din se update na hui listing "purani" dikhegi
 
     public $search = '';
     public $typeFilter = '';
@@ -61,7 +66,7 @@ class ManageProperties extends Component
         'google_map_url' => 'nullable|url|max:500',
         'description' => 'nullable|string',
         'status' => 'required|in:available,under_offer,sold,rented',
-        'new_images.*' => 'nullable|image|max:2048',
+        'new_images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ];
 
     // ==========================================
@@ -70,23 +75,23 @@ class ManageProperties extends Component
 
     public function shareListingOnWhatsApp($propertyId)
     {
-        $property = Property::with(['city', 'town'])->findOrFail($propertyId);
+        $property = $this->ownedQuery()->with(['city', 'town'])->findOrFail($propertyId);
         $agentName = Auth::user()->name;
-        $cityName = $property->city?->name ?? $property->town?->city?->name ?? 'Pakistan';
-        $propertyUrl = url('/property/' . $property->id);
+        $cityName = $property->city?->name ?? $property->town?->city ?? 'Pakistan';
+        $propertyUrl = route('property.details', $property->id); // was /property/{id}, which returned 404
         $mapUrl = !empty($property->google_map_url) 
             ? $property->google_map_url 
             : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($property->location . ', ' . $cityName);
 
         $text = "🏢 *{$property->title}*\n\n"
-              . "🔹 *نوعیت:* " . ucfirst($property->property_type) . " (" . str_replace('_', ' ', $property->purpose) . ")\n"
-              . "🔹 *رقبہ:* {$property->area_size}\n"
-              . "🔹 *ڈیمانڈ قیمت:* PKR " . number_format($property->price) . "\n"
-              . "📍 *لوکیشن:* {$property->location}، {$cityName}\n\n"
-              . "🗺️ *گوگل میپ لوکیشن:*\n{$mapUrl}\n\n"
-              . "📸 *تصاویر اور مکمل تفصیلات:*\n{$propertyUrl}\n\n"
-              . "👤 *رابطہ برائے ڈیل:* {$agentName}\n"
-              . "⚡ پیشکش بذریعہ AssanZameen.com";
+              . "🔹 *" . __('Type') . ":* " . __(ucfirst($property->property_type)) . " (" . __(ucwords(str_replace('_', ' ', $property->purpose))) . ")\n"
+              . "🔹 *" . __('Area') . ":* {$property->area_size}\n"
+              . "🔹 *" . __('Demand Price') . ":* PKR " . number_format($property->price) . "\n"
+              . "📍 *" . __('Location') . ":* {$property->location}, {$cityName}\n\n"
+              . "🗺️ *" . __('Google Maps Location') . ":*\n{$mapUrl}\n\n"
+              . "📸 *" . __('Photos & Full Details') . ":*\n{$propertyUrl}\n\n"
+              . "👤 *" . __('Contact for Deal') . ":* {$agentName}\n"
+              . "⚡ " . __('Offered via AssanZameen.com');
 
         $encoded = urlencode($text);
         $this->dispatch('trigger-whatsapp', 
@@ -97,20 +102,20 @@ class ManageProperties extends Component
 
     public function sendLocationPin($propertyId)
     {
-        $property = Property::with(['city', 'town'])->findOrFail($propertyId);
-        $cityName = $property->city?->name ?? $property->town?->city?->name ?? 'علاقہ';
+        $property = $this->ownedQuery()->with(['city', 'town'])->findOrFail($propertyId);
+        $cityName = $property->city?->name ?? $property->town?->city ?? '';
 
-        $mapUrl = !empty($property->google_map_url) 
-            ? $property->google_map_url 
+        $mapUrl = !empty($property->google_map_url)
+            ? $property->google_map_url
             : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($property->location . ', ' . $cityName);
 
-        $text = "📍 *پراپرٹی لوکیشن میپ (Google Maps Pin)*\n\n"
+        $text = "📍 *" . __('Property Location (Google Maps Pin)') . "*\n\n"
               . "🏢 *{$property->title}*\n"
-              . "📐 رقبہ: {$property->area_size}\n"
-              . "📌 پتہ: {$property->location}، {$cityName}\n\n"
-              . "موقع پر پہنچنے کے لیے نیچے دیے گئے لنک پر کلک کریں:\n"
+              . "📐 " . __('Area') . ": {$property->area_size}\n"
+              . "📌 " . __('Address') . ": {$property->location}" . ($cityName ? ", {$cityName}" : '') . "\n\n"
+              . __('Tap the link below to reach the site:') . "\n"
               . "🗺️ {$mapUrl}\n\n"
-              . "رابطہ: " . Auth::user()->name;
+              . __('Contact') . ": " . Auth::user()->name;
 
         $encoded = urlencode($text);
         $this->dispatch('trigger-whatsapp', 
@@ -121,7 +126,7 @@ class ManageProperties extends Component
 
     public function openFollowUpModal($propertyId)
     {
-        $this->selectedPropertyForFollowup = Property::with(['city', 'town'])->findOrFail($propertyId);
+        $this->selectedPropertyForFollowup = $this->ownedQuery()->with(['city', 'town'])->findOrFail($propertyId);
         $this->client_name = '';
         $this->client_phone = '';
         $this->followup_type = 'site_visit';
@@ -137,34 +142,28 @@ class ManageProperties extends Component
         ]);
 
         $prop = $this->selectedPropertyForFollowup;
+        abort_unless($prop && (int) $prop->agent_id === (int) Auth::id(), 403);
         $agentName = Auth::user()->name;
-        $cityName = $prop->city?->name ?? $prop->town?->city?->name ?? 'علاقہ';
+        $cityName = $prop->city?->name ?? $prop->town?->city ?? '';
 
-        $msg = "";
+        // Message language follows the panel language (English default, Urdu when switched)
+        $vars = [
+            'client' => $this->client_name,
+            'title' => $prop->title,
+            'area' => $prop->area_size,
+            'location' => trim($prop->location . ($cityName ? ', ' . $cityName : '')),
+            'price' => number_format($prop->price),
+            'agent' => $agentName,
+        ];
 
-        if ($this->followup_type === 'site_visit') {
-            $msg = "السلام علیکم {$this->client_name} صاحب!\n\n"
-                 . "امید ہے آپ خیریت سے ہوں گے۔ آپ نے پراپرٹی:\n"
-                 . "🏢 *{$prop->title}* ({$prop->area_size})\n"
-                 . "📍 لوکیشن: {$prop->location}، {$cityName}\n\n"
-                 . "میں دلچسپی ظاہر کی تھی۔ کیا ہم آج شام یا کل کے لیے موقع وزٹ (Site Visit) شیڈول کر لیں تاکہ آپ خود آکر موقع دیکھ سکیں؟\n\n"
-                 . "رابطہ: {$agentName}\nAssanZameen.com";
-        } elseif ($this->followup_type === 'token_reminder') {
-            $msg = "السلام علیکم {$this->client_name} صاحب!\n\n"
-                 . "پراپرٹی *{$prop->title}* کے حوالے سے آپ کی آفر پر مالک سے بات ہوئی ہے۔\n"
-                 . "چند مزید خریدار بھی اس پراپرٹی میں گہری دلچسپی لے رہے ہیں۔ اگر آپ ڈیل فائنل کرنا چاہتے ہیں تو برائے مہربانی ٹوکن ایڈوانس کے لیے آج رابطہ کریں۔\n\n"
-                 . "ڈیمانڈ: PKR " . number_format($prop->price) . "\n"
-                 . "رابطہ: {$agentName}";
-        } elseif ($this->followup_type === 'price_offer') {
-            $msg = "السلام علیکم {$this->client_name} صاحب!\n\n"
-                 . "پراپرٹی *{$prop->title}* کی قیمت پر بات چیت کے لیے مالک (Owner) ملاقات پر آمادہ ہیں۔\n"
-                 . "کیا آپ آج آفس تشریف لا سکتے ہیں تاکہ حتمی ڈیل کلوز کی جا سکے؟\n\n"
-                 . "مقام: {$prop->location}\n"
-                 . "رابطہ: {$agentName}";
-        }
+        $msg = match ($this->followup_type) {
+            'token_reminder' => __("Assalam o Alaikum :client!\n\nWe spoke to the owner about your offer on *:title*.\nA few more buyers are also very interested in this property. If you want to finalise the deal, please contact us today for the token advance.\n\nDemand: PKR :price\nContact: :agent", $vars),
+            'price_offer' => __("Assalam o Alaikum :client!\n\nThe owner of *:title* is ready to meet to discuss the price.\nCan you visit the office today so we can close the deal?\n\nLocation: :location\nContact: :agent", $vars),
+            default => __("Assalam o Alaikum :client!\n\nHope you are well. You showed interest in:\n🏢 *:title* (:area)\n📍 Location: :location\n\nShall we schedule a site visit this evening or tomorrow so you can see it yourself?\n\nContact: :agent\nAssanZameen.com", $vars),
+        };
 
         if (!empty($this->custom_note)) {
-            $msg .= "\n\n📌 *اضافی نوٹ:* " . $this->custom_note;
+            $msg .= "\n\n📌 *" . __('Note') . ":* " . $this->custom_note;
         }
 
         $cleanPhone = preg_replace('/[^0-9]/', '', $this->client_phone);
@@ -226,26 +225,30 @@ class ManageProperties extends Component
     {
         $this->validate();
 
-        $imagePaths = is_array($this->existing_images) ? $this->existing_images : [];
+        // Edit sirf apni listing ki — pehle property_id badal kar kisi aur ki listing apne naam ho sakti thi
+        $property = $this->property_id ? $this->ownedQuery()->findOrFail($this->property_id) : new Property();
 
-        if (!empty($this->new_images)) {
+        // Existing images always from the DB, never from the browser
+        $imagePaths = is_array($property->images) ? $property->images : [];
+
+        if (count($imagePaths) + count($this->new_images) > self::MAX_IMAGES) {
+            $this->addError('new_images', __('A listing can have at most :max photos.', ['max' => self::MAX_IMAGES]));
+            return;
+        }
+
+        if (! empty($this->new_images)) {
             $destinationPath = public_path('property_images');
-
-            if (!File::exists($destinationPath)) {
-                File::makeDirectory($destinationPath, 0755, true);
-            }
+            File::ensureDirectoryExists($destinationPath, 0755);
 
             foreach ($this->new_images as $image) {
-                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                $targetFile = $destinationPath . DIRECTORY_SEPARATOR . $imageName;
-
-                copy($image->getRealPath(), $targetFile);
+                // Extension from the real MIME type, never from the user's file name (blocks shell.php uploads)
+                $imageName = time() . '_' . Str::random(12) . '.' . $image->extension();
+                File::copy($image->getRealPath(), $destinationPath . DIRECTORY_SEPARATOR . $imageName);
                 $imagePaths[] = 'property_images/' . $imageName;
             }
         }
 
-        Property::updateOrCreate(
-            ['id' => $this->property_id],
+        $property->fill(
             [
                 'agent_id' => Auth::id(),
                 'city_id' => $this->city_id,
@@ -261,9 +264,9 @@ class ManageProperties extends Component
                 'images' => $imagePaths,
                 'status' => $this->status,
             ]
-        );
+        )->save();
 
-        session()->flash('message', $this->property_id ? 'پراپرٹی کامیابی کے ساتھ اپ ڈیٹ ہو گئی۔' : 'نئی پراپرٹی کامیابی سے لسٹ ہو گئی۔');
+        session()->flash('message', $this->property_id ? __('Property updated successfully.') : __('New property listed successfully.'));
         $this->isModalOpen = false;
         $this->resetForm();
     }
@@ -274,7 +277,7 @@ class ManageProperties extends Component
 
         $this->property_id = $property->id;
         $this->city_id = $property->city_id;
-        $this->selected_city_name = $property->city ?? $property->town?->city ?? '';
+        $this->selected_city_name = $property->city?->name ?? $property->town?->city ?? '';
         $this->town_id = $property->town_id;
         $this->title = $property->title;
         $this->property_type = $property->property_type;
@@ -293,45 +296,68 @@ class ManageProperties extends Component
 
     public function deleteImage($index)
     {
-        if (isset($this->existing_images[$index])) {
-            $imageToDelete = $this->existing_images[$index];
-            $fullPath = public_path($imageToDelete);
-
-            if (File::exists($fullPath)) {
-                File::delete($fullPath);
-            }
-
-            unset($this->existing_images[$index]);
-            $this->existing_images = array_values($this->existing_images);
-
-            if ($this->property_id) {
-                Property::where('id', $this->property_id)->update([
-                    'images' => $this->existing_images
-                ]);
-            }
+        if (! $this->property_id) {
+            return;
         }
+
+        // Image list from the DB — pehle browser ki bheji list se koi bhi file (../.env) mitwai ja sakti thi
+        $property = $this->ownedQuery()->findOrFail($this->property_id);
+        $images = is_array($property->images) ? $property->images : [];
+
+        if (isset($images[$index])) {
+            $this->deleteImageFile($images[$index]);
+            unset($images[$index]);
+            $images = array_values($images);
+
+            $property->update(['images' => $images]);
+            $this->existing_images = $images;
+        }
+    }
+
+    // Listing ko "fresh" karna — list mein upar aati hai aur purani hone ka alert hat jata hai
+    public function refreshListing($id)
+    {
+        $this->ownedQuery()->findOrFail($id)->touch();
+        session()->flash('message', __('Listing refreshed.'));
     }
 
     public function delete($id)
     {
-        $property = Property::where('agent_id', Auth::id())->findOrFail($id);
-        
-        if (!empty($property->images) && is_array($property->images)) {
-            foreach ($property->images as $imgPath) {
-                $file = public_path($imgPath);
-                if (File::exists($file)) {
-                    File::delete($file);
-                }
-            }
+        $property = $this->ownedQuery()->findOrFail($id);
+
+        foreach ((array) $property->images as $imgPath) {
+            $this->deleteImageFile($imgPath);
         }
 
         $property->delete();
-        session()->flash('message', 'پراپرٹی حذف کر دی گئی۔');
+        session()->flash('message', __('Property deleted.'));
+    }
+
+    protected function ownedQuery()
+    {
+        return Property::where('agent_id', Auth::id());
+    }
+
+    protected function deleteImageFile($path): void
+    {
+        // Only files inside our own folder
+        if (! is_string($path) || str_contains($path, '..') || ! Str::startsWith($path, 'property_images/')) {
+            return;
+        }
+
+        if (File::exists(public_path($path))) {
+            File::delete(public_path($path));
+        }
     }
 
     public function render()
     {
-        $query = Property::where('agent_id', Auth::id())->with(['town', 'city']);
+        // Listing analytics: views (properties.views_count), paid contact unlocks, and leads from the listing
+        $query = $this->ownedQuery()
+            ->with(['town', 'city'])
+            ->addSelect(['properties.*'])
+            ->selectSub(DB::table('property_unlocks')->selectRaw('COUNT(*)')->whereColumn('property_unlocks.property_id', 'properties.id'), 'unlocks_count')
+            ->selectSub(DB::table('leads')->selectRaw('COUNT(*)')->whereColumn('leads.property_id', 'properties.id'), 'leads_count');
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -361,7 +387,8 @@ class ManageProperties extends Component
             : collect();
 
         return view('livewire.agent.manage-properties', [
-            'properties' => $query->latest()->paginate(10),
+            'properties' => $query->latest('updated_at')->paginate(10),
+            'staleDays' => self::STALE_DAYS,
             'cities' => $citiesQuery->orderBy('name')->take(20)->get(),
             'towns' => $towns,
         ])->layout('layouts.app');

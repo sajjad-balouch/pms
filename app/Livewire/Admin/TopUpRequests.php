@@ -4,8 +4,10 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\AdminLog;
 use App\Models\WalletTransaction;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class TopUpRequests extends Component
@@ -18,7 +20,6 @@ class TopUpRequests extends Component
     public $rejectionReason = '';
     public $showRejectModal = false;
 
-    protected $paginationTheme = 'bootstrap';
 
     public function updatingSearch()
     {
@@ -33,35 +34,43 @@ class TopUpRequests extends Component
     // Approve Top-Up Request
     public function approve($transactionId)
     {
-        DB::transaction(function () use ($transactionId) {
+        $approved = DB::transaction(function () use ($transactionId) {
             $transaction = WalletTransaction::where('id', $transactionId)
+                ->where('type', 'deposit')
                 ->where('status', 'pending')
                 ->lockForUpdate()
                 ->first();
 
-            if (!$transaction) {
-                session()->flash('error', 'Transaction not found or already processed.');
-                return;
+            if (! $transaction) {
+                return null;
             }
 
-            // Update Transaction Status
             $transaction->update([
                 'status' => 'approved',
                 'approved_at' => now(),
+                'processed_by' => Auth::id(),
             ]);
 
-            // Increment User Wallet Balance
-            $user = User::findOrFail($transaction->user_id);
-            $user->increment('wallet_balance', $transaction->amount);
+            User::whereKey($transaction->user_id)->lockForUpdate()->firstOrFail()->increment('wallet_balance', $transaction->amount);
+
+            AdminLog::record('topup.approved', $transaction, 'Approved top-up of Rs. ' . number_format($transaction->amount) . ' for user #' . $transaction->user_id, [
+                'amount' => (float) $transaction->amount,
+                'user_id' => $transaction->user_id,
+            ]);
+
+            return $transaction;
         });
 
-        session()->flash('success', 'Top-up request approved and wallet balance updated!');
+        // Pehle "approved" ka message hamesha aata tha, chahe request pehle hi process ho chuki ho
+        $approved
+            ? session()->flash('success', __('Top-up request approved and wallet balance updated!'))
+            : session()->flash('error', __('Transaction not found or already processed.'));
     }
 
     // Open Reject Modal
     public function openRejectModal($transactionId)
     {
-        $this->selectedTransaction = WalletTransaction::findOrFail($transactionId);
+        $this->selectedTransaction = WalletTransaction::where('type', 'deposit')->where('status', 'pending')->findOrFail($transactionId);
         $this->rejectionReason = '';
         $this->showRejectModal = true;
     }
@@ -73,15 +82,36 @@ class TopUpRequests extends Component
             'rejectionReason' => 'required|string|min:5|max:255',
         ]);
 
-        if ($this->selectedTransaction && $this->selectedTransaction->status === 'pending') {
-            $this->selectedTransaction->update([
+        // Re-read with a lock: an approve in another tab must not be overwritten by a stale reject
+        $rejected = DB::transaction(function () {
+            $transaction = WalletTransaction::whereKey($this->selectedTransaction?->id)
+                ->where('type', 'deposit')
+                ->where('status', 'pending')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $transaction) {
+                return null;
+            }
+
+            $transaction->update([
                 'status' => 'rejected',
                 'admin_note' => $this->rejectionReason,
                 'rejected_at' => now(),
+                'processed_by' => Auth::id(),
             ]);
 
-            session()->flash('success', 'Top-up request rejected successfully.');
-        }
+            AdminLog::record('topup.rejected', $transaction, 'Rejected top-up of Rs. ' . number_format($transaction->amount) . ': ' . $this->rejectionReason, [
+                'amount' => (float) $transaction->amount,
+                'user_id' => $transaction->user_id,
+            ]);
+
+            return $transaction;
+        });
+
+        $rejected
+            ? session()->flash('success', __('Top-up request rejected successfully.'))
+            : session()->flash('error', __('Transaction not found or already processed.'));
 
         $this->showRejectModal = false;
         $this->reset(['selectedTransaction', 'rejectionReason']);

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Support\Tenant;
 use App\Models\Customer;
 use App\Models\CustomerDocument;
 use App\Models\Installment;
@@ -135,7 +136,7 @@ class ManageCustomers extends Component
             'c_father_name' => 'nullable|string|max:255',
             'c_cnic' => [
                 'nullable', 'regex:/^\d{5}-\d{7}-\d$/',
-                Rule::unique('customers', 'cnic')->where('user_id', Auth::id())->ignore($customer?->id),
+                Rule::unique('customers', 'cnic')->where('user_id', Tenant::ownerId())->ignore($customer?->id),
             ],
             'c_phone' => ['required', 'regex:/^[0-9+\-\s]{10,15}$/'],
             'c_address' => 'nullable|string|max:500',
@@ -151,7 +152,7 @@ class ManageCustomers extends Component
 
         DB::transaction(function () use (&$customer, $data, $isNew) {
             if ($isNew) {
-                $customer = Customer::create($data + ['user_id' => Auth::id()]);
+                $customer = Customer::create($data + ['user_id' => Tenant::ownerId()]);
                 return;
             }
 
@@ -225,7 +226,7 @@ class ManageCustomers extends Component
 
     public function deleteDocument($id)
     {
-        $doc = CustomerDocument::whereHas('customer', fn ($q) => $q->where('user_id', Auth::id()))->findOrFail($id);
+        $doc = CustomerDocument::whereHas('customer', fn ($q) => $q->where('user_id', Tenant::ownerId()))->findOrFail($id);
 
         Storage::disk(CustomerDocument::DISK)->delete($doc->path);
         $doc->delete();
@@ -322,7 +323,7 @@ class ManageCustomers extends Component
 
     protected function ownedQuery()
     {
-        return Customer::where('customers.user_id', Auth::id());
+        return Customer::where('customers.user_id', Tenant::ownerId());
     }
 
     protected function ownedCustomer($id): Customer

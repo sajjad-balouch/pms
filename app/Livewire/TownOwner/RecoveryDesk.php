@@ -2,6 +2,7 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Support\Tenant;
 use App\Models\Installment;
 use App\Models\Plot;
 use App\Models\PlotBooking;
@@ -60,7 +61,7 @@ class RecoveryDesk extends Component
     #[Computed]
     public function towns()
     {
-        return Town::where('user_id', Auth::id())->orderBy('name')->get(['id', 'name']);
+        return Town::where('user_id', Tenant::ownerId())->orderBy('name')->get(['id', 'name']);
     }
 
     public function updatedTownId()
@@ -258,13 +259,13 @@ class RecoveryDesk extends Component
 
     protected function ownedPlotQuery()
     {
-        return Plot::whereHas('town', fn ($q) => $q->where('user_id', Auth::id()))
+        return Plot::whereHas('town', fn ($q) => $q->where('user_id', Tenant::ownerId()))
             ->when($this->townId !== '', fn ($q) => $q->where('town_id', $this->townId));
     }
 
     protected function ownedPlot($id): Plot
     {
-        return Plot::whereHas('town', fn ($q) => $q->where('user_id', Auth::id()))->findOrFail($id);
+        return Plot::whereHas('town', fn ($q) => $q->where('user_id', Tenant::ownerId()))->findOrFail($id);
     }
 
     protected function activeBookingId($plotId): ?int

@@ -120,7 +120,15 @@
         <div class="bg-gray-900/80 rounded-2xl border border-gray-800/80 shadow-2xl overflow-hidden">
             <div class="p-6 border-b border-gray-800/80 flex justify-between items-center">
                 <h3 class="text-lg font-extrabold text-white flex items-center gap-2"><span>📋</span> Installments Schedule</h3>
-                <span class="text-xs text-gray-400">{{ $stats['paid_count'] }}/{{ $stats['count'] }} paid</span>
+                <div class="flex items-center gap-3">
+                    @if ($totalLateFees > 0)
+                        <span class="text-xs text-orange-300">Late fees: Rs. {{ number_format($totalLateFees) }}</span>
+                    @endif
+                    <span class="text-xs text-gray-400">{{ $stats['paid_count'] }}/{{ $stats['count'] }} paid</span>
+                    @if ($unpaidRegular->isNotEmpty())
+                        <button type="button" wire:click="openReschedule" class="inline-flex items-center gap-1 bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/30 px-3 py-1.5 rounded-xl text-xs font-bold">🔁 Reschedule</button>
+                    @endif
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -156,7 +164,15 @@
                                         <span class="block text-[11px] font-normal">{{ (int) $due->diffInDays(today()) }} din late</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-gray-400 whitespace-nowrap">{{ $inst->paid_date ? \Carbon\Carbon::parse($inst->paid_date)->format('d M, Y') : '-' }}</td>
+                                <td class="px-6 py-4 text-gray-400 whitespace-nowrap">
+                                    {{ $inst->paid_date ? \Carbon\Carbon::parse($inst->paid_date)->format('d M, Y') : '-' }}
+                                    @if ($inst->late_fee > 0)
+                                        <span class="block text-[11px] text-orange-300">+ Rs. {{ number_format($inst->late_fee) }} late fee</span>
+                                    @endif
+                                    @if ($inst->receivedBy)
+                                        <span class="block text-[11px] text-gray-500">by {{ $inst->receivedBy->name }}</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if ($isPaid)
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Paid</span>
@@ -188,6 +204,61 @@
         </div>
     @endif
 
+    <!-- Reschedule Modal -->
+    @if ($showReschedule)
+        <div class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto" x-data x-on:keydown.escape.window="$wire.closeReschedule()">
+            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" wire:click="closeReschedule"></div>
+            <form wire:submit="confirmReschedule" class="relative w-full max-w-lg bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl p-6 space-y-4 my-8">
+                <div>
+                    <h3 class="text-lg font-black text-white">🔁 Reschedule Payment Plan</h3>
+                    <p class="text-sm text-gray-400 mt-1">
+                        {{ $unpaidRegular->count() }} baqi qistein · <span class="font-bold text-amber-400">Rs. {{ number_format($unpaidRegular->sum('amount')) }}</span>
+                        — ye hat kar nayi qiston mein bant jayengi. Paid qistein waisi hi rahengi.
+                    </p>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">New Count *</label>
+                        <input type="number" min="1" max="360" wire:model.live.debounce.400ms="rs_count" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-3 py-2 text-sm">
+                        @error('rs_count') <span class="text-xs text-rose-400 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Every</label>
+                        <select wire:model.live="rs_interval" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-3 py-2 text-sm">
+                            <option value="1">1 month</option>
+                            <option value="3">3 months</option>
+                            <option value="6">6 months</option>
+                            <option value="12">12 months</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">First Due *</label>
+                        <input type="date" min="{{ now()->toDateString() }}" wire:model.live="rs_first_due" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-3 py-2 text-sm [color-scheme:dark]">
+                        @error('rs_first_due') <span class="text-xs text-rose-400 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Reason</label>
+                    <input type="text" wire:model="rs_note" maxlength="255" placeholder="e.g. Customer ki darkhwast par, 6 mahine ki mohlat" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-3 py-2 text-sm placeholder-gray-600">
+                </div>
+
+                @if (count($reschedulePreview))
+                    <div class="bg-gray-950/60 border border-gray-800 rounded-xl p-3 text-xs">
+                        <p class="text-gray-400">
+                            Nayi qist: <span class="font-black text-indigo-400">Rs. {{ number_format($reschedulePreview[0]['amount']) }}</span>
+                            · {{ $reschedulePreview[0]['due_date']->format('d M Y') }} se {{ end($reschedulePreview)['due_date']->format('d M Y') }} tak
+                        </p>
+                    </div>
+                @endif
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" wire:click="closeReschedule" class="bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 font-bold py-2.5 px-5 rounded-xl text-sm">Cancel</button>
+                    <button type="submit" wire:confirm="Purani baqi qistein hat kar naya schedule banega. Continue?" wire:loading.attr="disabled" wire:target="confirmReschedule" class="bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/30 font-bold py-2.5 px-6 rounded-xl text-sm disabled:opacity-50">✓ Reschedule</button>
+                </div>
+            </form>
+        </div>
+    @endif
+
     <!-- Receive Payment Modal -->
     @if ($receiving)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4" x-data x-on:keydown.escape.window="$wire.cancelReceive()">
@@ -203,9 +274,29 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Payment Date *</label>
-                    <input type="date" max="{{ now()->toDateString() }}" wire:model="received_date" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 [color-scheme:dark]">
+                    <input type="date" max="{{ now()->toDateString() }}" wire:model.live="received_date" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 [color-scheme:dark]">
                     @error('received_date') <span class="text-xs text-rose-400 mt-1 block">{{ $message }}</span> @enderror
                 </div>
+                @if ($receiving->installment_number != 0)
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-400">Late Fee (Rs)</label>
+                            @if ($received_late_fee > 0)
+                                <button type="button" wire:click="waiveLateFee" class="text-[11px] font-bold text-amber-400 hover:text-amber-300">Maaf karein (waive)</button>
+                            @endif
+                        </div>
+                        <input type="number" min="0" step="1" wire:model.live.debounce.400ms="received_late_fee" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">
+                        <span class="text-[11px] text-gray-500 block mt-1">
+                            @if ($lateFeePercent > 0)
+                                Town setting: {{ rtrim(rtrim(number_format($lateFeePercent, 2), '0'), '.') }}% har late mahine ka. Suggestion badal sakte hain.
+                            @else
+                                Late fee ki setting Schemes → Edit mein "Late fee % per month" se lagayein.
+                            @endif
+                        </span>
+                        @error('received_late_fee') <span class="text-xs text-rose-400 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                    <p class="text-sm text-gray-300">Kul wusooli: <span class="font-black text-emerald-400">Rs. {{ number_format((float) $receiving->amount + (float) ($received_late_fee ?: 0)) }}</span></p>
+                @endif
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Remarks</label>
                     <input type="text" wire:model="received_remarks" placeholder="e.g. Cash / Bank transfer / Cheque #1234" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder-gray-600">

@@ -54,7 +54,11 @@
             <div class="item"><strong>Remarks:</strong><span>{{ $installment->remarks }}</span></div>
         @endif
 
-        <div class="amount">Rs. {{ number_format($installment->amount) }}</div>
+        @if ($installment->late_fee > 0)
+            <div class="item"><strong>Installment:</strong><span>Rs. {{ number_format($installment->amount) }}</span></div>
+            <div class="item"><strong>Late Fee:</strong><span>Rs. {{ number_format($installment->late_fee) }}</span></div>
+        @endif
+        <div class="amount">Rs. {{ number_format((float) $installment->amount + (float) $installment->late_fee) }}</div>
 
         <div class="item"><strong>Total Paid (to date):</strong><span>Rs. {{ number_format($stats['paid']) }}</span></div>
         <div class="item"><strong>Remaining Balance:</strong><span>Rs. {{ number_format($stats['remaining']) }}</span></div>

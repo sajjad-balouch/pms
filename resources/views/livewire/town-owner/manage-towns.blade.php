@@ -130,6 +130,14 @@
                     <input type="text" wire:model="noc_number" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-gray-600 transition-colors" placeholder="e.g. LDA/NOC/2026-10" />
                     @error('noc_number') <span class="text-rose-400 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
+
+                <!-- Late fee setting -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Late Fee % per month</label>
+                    <input type="number" min="0" max="20" step="0.5" wire:model="late_fee_percent" class="w-full bg-gray-950 border border-gray-800 text-white rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder-gray-600 transition-colors" placeholder="e.g. 2" />
+                    <span class="text-[11px] text-gray-500 block mt-1">Late qist par har mahine ka itna % surcharge suggest hoga (wusooli ke waqt badla ya maaf kiya ja sakta hai). 0 = band.</span>
+                    @error('late_fee_percent') <span class="text-rose-400 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
+                </div>
             </div>
 
             <!-- MEDIA SECTION (available on create and edit) -->

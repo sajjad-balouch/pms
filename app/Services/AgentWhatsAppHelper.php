@@ -18,7 +18,7 @@ class AgentWhatsAppHelper
     {
         $demand = number_format($property->price);
         $cityName = $property->city?->name ?? 'Pakistan';
-        $propUrl = url('/property/' . $property->id);
+        $propUrl = route('property.details', $property->id);
         $mapUrl = $property->google_map_url ?: "https://www.google.com/maps/search/?api=1&query=" . urlencode($property->location . ' ' . $cityName);
 
         return "🏢 *{$property->title}*\n\n"

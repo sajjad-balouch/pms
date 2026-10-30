@@ -132,6 +132,9 @@ class FrontendHome extends Component
                     'expires_at' => Carbon::now()->addMonth(), // 1 Month validity
                 ]
             );
+
+            // Agent / town owner ke CRM mein garam lead
+            \App\Services\LeadCapture::fromUnlock((int) $agentId, $user, ['title' => 'your profile (homepage directory)']);
         });
 
         $this->showUnlockModal = false;

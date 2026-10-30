@@ -10,15 +10,15 @@
         <div>
             <h2 class="text-2xl font-black text-white flex items-center gap-2">
                 <i class="fa-solid fa-palette text-amber-400"></i>
-                <span>Premium Poster Studio (HD Graphic Studio)</span>
+                <span>{{ __('Premium Poster Studio (HD Graphic Studio)') }}</span>
             </h2>
-            <p class="text-xs text-slate-400 mt-1">Design high-impact marketing posters with modern typography and sleek themes</p>
+            <p class="text-xs text-slate-400 mt-1">{{ __('Design high-impact marketing posters with modern typography and sleek themes') }}</p>
         </div>
 
         <button type="button" @click="downloadPoster()" 
                 class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 text-slate-950 font-black text-xs rounded-xl transition flex items-center gap-2 shadow-lg shadow-amber-500/25 cursor-pointer">
             <i class="fa-solid fa-cloud-arrow-down text-sm"></i>
-            <span>Download Poster (Full HD)</span>
+            <span>{{ __('Download Poster (Full HD)') }}</span>
         </button>
     </div>
 
@@ -31,14 +31,14 @@
             <div class="border-b border-slate-700/80 pb-3 flex justify-between items-center">
                 <span class="text-xs font-bold text-white uppercase flex items-center gap-1.5">
                     <i class="fa-solid fa-sliders text-indigo-400"></i>
-                    <span>Poster Editor & Controls</span>
+                    <span>{{ __('Poster Editor & Controls') }}</span>
                 </span>
-                <span class="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">Studio Mode</span>
+                <span class="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">{{ __('Studio Mode') }}</span>
             </div>
 
             <!-- Property Switcher -->
             <div>
-                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Select Property</label>
+                <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ __('Select Property') }}</label>
                 <select wire:change="selectProperty($event.target.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-medium">
                     @foreach($properties as $prop)
                         <option value="{{ $prop->id }}" {{ $selectedPropertyId ==$prop->id ? 'selected' : '' }}>
@@ -50,19 +50,19 @@
 
             <!-- Format Selector -->
             <div>
-                <label class="block text-xs font-bold text-slate-300 uppercase mb-1.5">Format & Size</label>
+                <label class="block text-xs font-bold text-slate-300 uppercase mb-1.5">{{ __('Format & Size') }}</label>
                 <div class="grid grid-cols-2 gap-2">
                     <button type="button" @click="setFormat('status')"
                             :class="format === 'status' ? 'bg-indigo-600 text-white font-black ring-2 ring-indigo-400/30' : 'bg-slate-900 text-slate-400 border border-slate-700'"
                             class="px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-mobile-screen"></i>
-                        <span>WhatsApp Status (9:16)</span>
+                        <span>{{ __('WhatsApp Status (9:16)') }}</span>
                     </button>
                     <button type="button" @click="setFormat('post')"
                             :class="format === 'post' ? 'bg-indigo-600 text-white font-black ring-2 ring-indigo-400/30' : 'bg-slate-900 text-slate-400 border border-slate-700'"
                             class="px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-square"></i>
-                        <span>Facebook Post (Square 1:1)</span>
+                        <span>{{ __('Facebook Post (Square 1:1)') }}</span>
                     </button>
                 </div>
             </div>
@@ -70,55 +70,55 @@
             <!-- Main Tag & Title Inputs -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Highlight Badge</label>
+                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">{{ __('Highlight Badge') }}</label>
                     <input type="text" x-model="customTag" @input="draw()" 
                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-amber-400 font-bold focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Demand Price (PKR)</label>
+                    <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">{{ __('Demand Price (PKR)') }}</label>
                     <input type="text" x-model="price" @input="draw()" 
                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-emerald-400 font-bold font-mono focus:outline-none focus:border-indigo-500">
                 </div>
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Poster Title</label>
+                <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">{{ __('Poster Title') }}</label>
                 <input type="text" x-model="title" @input="draw()" 
                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-bold focus:outline-none focus:border-indigo-500">
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">Location & Sector</label>
+                <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1">{{ __('Location & Sector') }}</label>
                 <input type="text" x-model="location" @input="draw()" 
                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500">
             </div>
 
             <!-- Extra Bullet Highlights -->
             <div class="space-y-2 pt-2 border-t border-slate-700/80">
-                <label class="block text-[11px] font-bold text-amber-400 uppercase">Features & Highlights</label>
-                <input type="text" x-model="feature1" @input="draw()" placeholder="Feature 1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
-                <input type="text" x-model="feature2" @input="draw()" placeholder="Feature 2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
-                <input type="text" x-model="feature3" @input="draw()" placeholder="Feature 3" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                <label class="block text-[11px] font-bold text-amber-400 uppercase">{{ __('Features & Highlights') }}</label>
+                <input type="text" x-model="feature1" @input="draw()" placeholder="{{ __('Feature 1') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                <input type="text" x-model="feature2" @input="draw()" placeholder="{{ __('Feature 2') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                <input type="text" x-model="feature3" @input="draw()" placeholder="{{ __('Feature 3') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
             </div>
 
             <!-- Color Theme Selector -->
             <div>
-                <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1.5">Color Theme</label>
+                <label class="block text-[11px] font-bold text-slate-300 uppercase mb-1.5">{{ __('Color Theme') }}</label>
                 <div class="grid grid-cols-3 gap-2">
                     <button type="button" @click="setTheme('gold')"
                             :class="theme === 'gold' ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-700'"
                             class="p-2 rounded-xl border bg-slate-950 text-xs font-bold text-amber-400 flex items-center justify-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Gold
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> {{ __('Gold') }}
                     </button>
                     <button type="button" @click="setTheme('emerald')"
                             :class="theme === 'emerald' ? 'border-emerald-400 ring-2 ring-emerald-400/20' : 'border-slate-700'"
                             class="p-2 rounded-xl border bg-slate-950 text-xs font-bold text-emerald-400 flex items-center justify-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Emerald
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> {{ __('Emerald') }}
                     </button>
                     <button type="button" @click="setTheme('cyan')"
                             :class="theme === 'cyan' ? 'border-cyan-400 ring-2 ring-cyan-400/20' : 'border-slate-700'"
                             class="p-2 rounded-xl border bg-slate-950 text-xs font-bold text-cyan-400 flex items-center justify-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Cyan
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> {{ __('Cyan') }}
                     </button>
                 </div>
             </div>
@@ -129,7 +129,7 @@
         <div class="lg:col-span-7 bg-slate-900/90 p-6 rounded-3xl border border-slate-800 shadow-2xl flex flex-col items-center justify-center min-h-[580px]">
             <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>HD Live Canvas Preview</span>
+                <span>{{ __('HD Live Canvas Preview') }}</span>
             </div>
 
             <!-- Canvas Container -->
@@ -138,7 +138,7 @@
             </div>
 
             <p class="text-[11px] text-slate-500 mt-3 text-center">
-                Posters are rendered in crisp 1080p Full HD resolution ready for marketing.
+                {{ __('Posters are rendered in crisp 1080p Full HD resolution ready for marketing.') }}
             </p>
         </div>
 

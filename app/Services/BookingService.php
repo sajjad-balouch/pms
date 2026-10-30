@@ -201,6 +201,59 @@ class BookingService
     }
 
     /**
+     * Defaulter ka plan dobara: tamam unpaid (regular) qistein hata kar baqi raqam nayi qiston mein.
+     * Paid qistein aur down payment waisi hi rehti hain.
+     */
+    public function reschedule(PlotBooking $booking, int $count, Carbon $firstDue, int $intervalMonths = 1, ?string $note = null): array
+    {
+        return DB::transaction(function () use ($booking, $count, $firstDue, $intervalMonths, $note) {
+            $booking = PlotBooking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+
+            $unpaid = Installment::where('plot_booking_id', $booking->id)
+                ->whereIn('status', self::UNPAID)
+                ->where('installment_number', '>', 0);
+
+            $balance = (float) (clone $unpaid)->sum('amount');
+            if ($balance <= 0) {
+                throw ValidationException::withMessages(['rs_count' => 'Koi baqi qist nahi jise reschedule kiya ja sake.']);
+            }
+
+            $template = (clone $unpaid)->first();
+            $startNumber = (int) Installment::where('plot_booking_id', $booking->id)->where('status', 'paid')->max('installment_number') + 1;
+            $schedule = self::schedule($balance, $count, $firstDue, $intervalMonths);
+
+            $unpaid->delete();
+
+            $now = now();
+            $remark = 'Rescheduled ' . $now->format('d M Y') . ($note ? ': ' . $note : '');
+            $rows = array_map(fn ($row) => [
+                'plot_id' => $booking->plot_id,
+                'plot_booking_id' => $booking->id,
+                'buyer_name' => $template?->buyer_name,
+                'buyer_phone' => $template?->buyer_phone,
+                'installment_number' => $startNumber + $row['number'] - 1,
+                'amount' => $row['amount'],
+                'due_date' => $row['due_date']->toDateString(),
+                'paid_date' => null,
+                'status' => 'pending',
+                'remarks' => $row['number'] === 1 ? $remark : null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ], $schedule);
+
+            foreach (array_chunk($rows, 200) as $chunk) {
+                Installment::insert($chunk);
+            }
+
+            $booking->update([
+                'remarks' => trim(($booking->remarks ? $booking->remarks . "\n" : '') . $remark . " — Rs. " . number_format($balance) . " in {$count} installments"),
+            ]);
+
+            return ['balance' => $balance, 'count' => count($schedule), 'first_due' => $firstDue->toDateString()];
+        });
+    }
+
+    /**
      * Paid / remaining / overdue figures for the plot's current booking.
      */
     public function summary(Plot $plot): array

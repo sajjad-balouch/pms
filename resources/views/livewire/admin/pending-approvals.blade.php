@@ -5,7 +5,7 @@
         <div class="flex items-center gap-2.5">
             <span class="text-xl">⏳</span>
             <h3 class="text-base font-bold text-white tracking-wide">
-                Pending Approvals <span class="text-xs font-normal text-slate-400 dir-rtl">(منتظر درخواستیں)</span>
+                {{ __('Pending Approvals') }}
             </h3>
         </div>
         
@@ -19,11 +19,11 @@
         <table class="w-full text-left text-xs text-slate-300">
             <thead class="bg-slate-900/80 text-[11px] uppercase text-slate-400 border-b border-slate-800/80 font-black tracking-wider">
                 <tr>
-                    <th class="px-4 py-3.5">نام (Name)</th>
-                    <th class="px-4 py-3.5">ای میل (Email)</th>
-                    <th class="px-4 py-3.5">رول (Role)</th>
-                    <th class="px-4 py-3.5">رجسٹریشن کی تاریخ (Date)</th>
-                    <th class="px-4 py-3.5 text-right">ایکشن (Action)</th>
+                    <th class="px-4 py-3.5">{{ __('Name') }}</th>
+                    <th class="px-4 py-3.5">{{ __('Email') }}</th>
+                    <th class="px-4 py-3.5">{{ __('Role') }}</th>
+                    <th class="px-4 py-3.5">{{ __('Registration Date') }}</th>
+                    <th class="px-4 py-3.5 text-right">{{ __('Action') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-800/60">
@@ -49,7 +49,7 @@
                         <td class="px-4 py-3.5 text-right">
                             <button wire:click="approve({{ $user->id }})" 
                                     class="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-600 hover:text-white text-xs font-bold transition-all duration-200 shadow-sm">
-                                Approve Access
+                                {{ __('Approve Access') }}
                             </button>
                         </td>
                     </tr>
@@ -58,8 +58,8 @@
                         <td colspan="5" class="px-4 py-10 text-center text-slate-400 font-medium">
                             <div class="flex flex-col items-center justify-center gap-2">
                                 <span class="text-2xl">✨</span>
-                                <p class="text-sm text-slate-300 font-semibold dir-rtl">کوئی نئی منظور طلب درخواست موجود نہیں ہے۔</p>
-                                <p class="text-xs text-slate-500">All registration requests have been processed.</p>
+                                <p class="text-sm text-slate-300 font-semibold">{{ __('No new approval requests.') }}</p>
+                                <p class="text-xs text-slate-500">{{ __('All registration requests have been processed.') }}</p>
                             </div>
                         </td>
                     </tr>

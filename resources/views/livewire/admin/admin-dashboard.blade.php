@@ -3,13 +3,13 @@
     <!-- Dashboard Main Heading & Header Bar -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
         <div>
-            <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">System Control Panel</h1>
-            <p class="text-xs text-slate-400 mt-1">Platform analytics, user access controls, and monetary parameters.</p>
+            <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">{{ __('System Control Panel') }}</h1>
+            <p class="text-xs text-slate-400 mt-1">{{ __('Platform analytics, user access controls, and monetary parameters.') }}</p>
         </div>
         <div class="flex items-center gap-2">
             <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                System Operational
+                {{ __('System Operational') }}
             </span>
         </div>
     </div>
@@ -30,7 +30,7 @@
             <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl group-hover:bg-indigo-500/10 transition-all"></div>
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-widest">Regular Users</p>
+                    <p class="text-[11px] font-extrabold text-indigo-400 uppercase tracking-widest">{{ __('Regular Users') }}</p>
                     <p class="text-3xl font-black text-white mt-2">{{ number_format($totalUsers) }}</p>
                 </div>
                 <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg">
@@ -38,7 +38,7 @@
                 </div>
             </div>
             <p class="text-[11px] text-slate-500 mt-4 flex items-center gap-1.5">
-                <i class="fa-solid fa-chart-line text-[10px] text-indigo-400"></i> Active Platform Members
+                <i class="fa-solid fa-chart-line text-[10px] text-indigo-400"></i> {{ __('Active Platform Members') }}
             </p>
         </div>
 
@@ -47,7 +47,7 @@
             <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-all"></div>
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-[11px] font-extrabold text-emerald-400 uppercase tracking-widest">Housing Scheme Owners</p>
+                    <p class="text-[11px] font-extrabold text-emerald-400 uppercase tracking-widest">{{ __('Housing Scheme Owners') }}</p>
                     <p class="text-3xl font-black text-white mt-2">{{ number_format($totalTownOwners) }}</p>
                 </div>
                 <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
@@ -64,7 +64,7 @@
             <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-amber-500/5 rounded-full blur-xl group-hover:bg-amber-500/10 transition-all"></div>
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-[11px] font-extrabold text-amber-400 uppercase tracking-widest">Verified Agents</p>
+                    <p class="text-[11px] font-extrabold text-amber-400 uppercase tracking-widest">{{ __('Verified Agents') }}</p>
                     <p class="text-3xl font-black text-white mt-2">{{ number_format($totalAgents) }}</p>
                 </div>
                 <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
@@ -72,10 +72,102 @@
                 </div>
             </div>
             <p class="text-[11px] text-slate-500 mt-4 flex items-center gap-1.5">
-                <i class="fa-solid fa-id-badge text-[10px] text-amber-400"></i> Market Service Providers
+                <i class="fa-solid fa-id-badge text-[10px] text-amber-400"></i> {{ __('Market Service Providers') }}
             </p>
         </div>
 
+    </div>
+
+    <!-- Revenue & money -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-[#0a0f1d] rounded-2xl p-5 border border-slate-800/80">
+            <p class="text-[11px] font-extrabold text-emerald-400 uppercase tracking-widest">{{ __('Unlock Revenue (month)') }}</p>
+            <p class="text-2xl font-black text-white mt-2">Rs. {{ number_format($revenue->month) }}</p>
+            <p class="text-[11px] text-slate-500 mt-1">{{ __('All time: Rs. :amount · :count unlocks', ['amount' => number_format($revenue->all_time), 'count' => number_format($revenue->unlocks)]) }}</p>
+        </div>
+        <div class="bg-[#0a0f1d] rounded-2xl p-5 border border-slate-800/80">
+            <p class="text-[11px] font-extrabold text-sky-400 uppercase tracking-widest">{{ __('Top-ups Approved (month)') }}</p>
+            <p class="text-2xl font-black text-white mt-2">Rs. {{ number_format($deposits->approved_month) }}</p>
+            <p class="text-[11px] text-slate-500 mt-1">{{ __('Money users added to wallets') }}</p>
+        </div>
+        <a href="{{ route('admin.topup-requests') }}" wire:navigate class="bg-[#0a0f1d] rounded-2xl p-5 border {{ $deposits->pending_count ? 'border-amber-500/40' : 'border-slate-800/80' }} hover:border-amber-500/60">
+            <p class="text-[11px] font-extrabold text-amber-400 uppercase tracking-widest">{{ __('Pending Top-ups') }}</p>
+            <p class="text-2xl font-black text-white mt-2">{{ number_format($deposits->pending_count) }}</p>
+            <p class="text-[11px] {{ $deposits->pending_count ? 'text-amber-400' : 'text-slate-500' }} mt-1">Rs. {{ number_format($deposits->pending_amount) }} · {{ __('Review now') }} →</p>
+        </a>
+        <div class="bg-[#0a0f1d] rounded-2xl p-5 border border-slate-800/80">
+            <p class="text-[11px] font-extrabold text-purple-400 uppercase tracking-widest">{{ __('Wallet Float') }}</p>
+            <p class="text-2xl font-black text-white mt-2">Rs. {{ number_format($walletFloat) }}</p>
+            <p class="text-[11px] text-slate-500 mt-1">{{ __('Unspent balance held for users') }}</p>
+        </div>
+    </div>
+
+    <!-- Platform activity + growth -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div class="lg:col-span-2 bg-[#0a0f1d] rounded-2xl p-5 border border-slate-800/80">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-base font-bold text-white">{{ __('Platform Activity') }}</h2>
+                <span class="text-[11px] text-slate-500">{{ __('+:count signups in 30 days', ['count' => number_format($newUsers30)]) }}</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                @foreach ([
+                    [__('Housing Schemes'), number_format($platform['towns'])],
+                    [__('Plots Booked / Total'), number_format($platform['plots_sold']) . ' / ' . number_format($platform['plots'])],
+                    [__('Active Bookings'), number_format($platform['active_bookings'])],
+                    [__('Installments Collected (month)'), 'Rs. ' . number_format($platform['installments_month'])],
+                    [__('Live Listings'), number_format($platform['listings'])],
+                    [__('Leads (30 days)'), number_format($platform['leads_30'])],
+                    [__('Town Owners'), number_format($totalTownOwners)],
+                    [__('Agents'), number_format($totalAgents)],
+                ] as [$label, $value])
+                    <div class="bg-slate-900/70 rounded-xl p-3">
+                        <p class="text-[10px] text-slate-500 uppercase font-bold">{{ $label }}</p>
+                        <p class="text-base font-black text-white mt-1">{{ $value }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="text-[11px] font-bold uppercase text-slate-500 mt-5 mb-2">{{ __('Signups — last 14 days') }}</p>
+            <div class="h-24 flex items-end gap-1">
+                @foreach ($signups as $day)
+                    <div class="flex-1 flex flex-col items-center justify-end h-full" title="{{ $day['label'] }}: {{ $day['count'] }}">
+                        <div class="w-full bg-indigo-500/70 hover:bg-indigo-400 rounded-t" style="height: max(2px, {{ round($day['count'] / $signupMax * 100) }}%)"></div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="bg-[#0a0f1d] rounded-2xl p-5 border border-slate-800/80 space-y-5">
+            <div>
+                <h2 class="text-base font-bold text-white mb-3">{{ __('Top Agents (unlocks this month)') }}</h2>
+                <ul class="space-y-2 text-xs">
+                    @forelse ($topAgents as $agent)
+                        <li class="flex justify-between gap-3">
+                            <span class="text-slate-200 truncate">{{ $agent->name }}</span>
+                            <span class="text-emerald-400 font-bold whitespace-nowrap">{{ $agent->unlocks_month }}</span>
+                        </li>
+                    @empty
+                        <li class="text-slate-500">{{ __('No unlocks yet this month.') }}</li>
+                    @endforelse
+                </ul>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-base font-bold text-white">{{ __('Recent Admin Activity') }}</h2>
+                    <a href="{{ route('admin.activity-log') }}" wire:navigate class="text-[11px] font-bold text-amber-400 hover:text-amber-300">{{ __('View all') }} →</a>
+                </div>
+                <ul class="space-y-2 text-[11px]">
+                    @forelse ($recentLogs as $log)
+                        <li class="text-slate-400">
+                            <span class="text-slate-200 font-semibold">{{ $log->admin?->name ?? __('System') }}</span> · {{ $log->summary ?? $log->action }}
+                            <span class="block text-slate-600">{{ $log->created_at->diffForHumans() }}</span>
+                        </li>
+                    @empty
+                        <li class="text-slate-500">{{ __('No admin activity recorded yet.') }}</li>
+                    @endforelse
+                </ul>
+            </div>
+        </div>
     </div>
 
     <!-- Pending Approvals Livewire Component Wrapper -->
@@ -91,7 +183,7 @@
             </div>
             <div>
                 <h2 class="text-base font-bold text-white">Platform Fee & Subscription Charges</h2>
-                <p class="text-xs text-slate-400">Manage unlock fees and recurring monthly platform subscriptions.</p>
+                <p class="text-xs text-slate-400">{{ __('Manage unlock fees and recurring monthly platform subscriptions.') }}</p>
             </div>
         </div>
         
@@ -104,46 +196,54 @@
 
         <form wire:submit="updateSettings" class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-2">Agent Lead Unlock Fee (PKR)</label>
+                <label class="block text-xs font-bold text-slate-300 mb-2">{{ __('Agent Lead Unlock Fee (PKR)') }}</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs font-bold">Rs.</span>
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs font-bold">{{ __('Rs.') }}</span>
                     <input type="number" step="0.01" wire:model="lead_unlock_fee_agent" 
                            class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-12 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-semibold" />
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-2">Town Owner Lead Unlock Fee (PKR)</label>
+                <label class="block text-xs font-bold text-slate-300 mb-2">{{ __('Town Owner Lead Unlock Fee (PKR)') }}</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs font-bold">Rs.</span>
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs font-bold">{{ __('Rs.') }}</span>
                     <input type="number" step="0.01" wire:model="lead_unlock_fee_town" 
                            class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-12 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-semibold" />
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-2">Town Owner Monthly Subscription (PKR)</label>
+                <label class="block text-xs font-bold text-slate-300 mb-2">{{ __('Town Owner Monthly Subscription (PKR)') }}</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs font-bold">Rs.</span>
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs font-bold">{{ __('Rs.') }}</span>
                     <input type="number" step="0.01" wire:model="town_owner_monthly_fee" 
                            class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-12 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-semibold" />
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-2">Agent Monthly Subscription (PKR)</label>
+                <label class="block text-xs font-bold text-slate-300 mb-2">{{ __('Agent Monthly Subscription (PKR)') }}</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs font-bold">Rs.</span>
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-xs font-bold">{{ __('Rs.') }}</span>
                     <input type="number" step="0.01" wire:model="agent_monthly_fee" 
                            class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-12 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-semibold" />
                 </div>
             </div>
 
+            <label class="md:col-span-2 flex items-start gap-3 bg-slate-900/70 border border-slate-800 rounded-xl p-4 cursor-pointer">
+                <input type="checkbox" wire:model="require_provider_approval" class="mt-0.5 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500">
+                <span>
+                    <span class="block text-xs font-bold text-slate-200">{{ __('New town owners & agents need admin approval') }}</span>
+                    <span class="block text-[11px] text-slate-500 mt-0.5">{{ __('When on, new provider accounts cannot log in until you approve them below. When off, they can start immediately.') }}</span>
+                </span>
+            </label>
+
             <div class="md:col-span-2 pt-2 flex justify-end">
                 <button type="submit" 
                         class="bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-black text-xs py-3 px-6 rounded-xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 transition-all duration-200 flex items-center gap-2">
                     <i class="fa-solid fa-floppy-disk"></i>
-                    <span>Save Fee Configuration</span>
+                    <span>{{ __('Save Fee Configuration') }}</span>
                 </button>
             </div>
         </form>
@@ -157,8 +257,8 @@
                     <i class="fa-solid fa-user-shield"></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-white">Manage Service Provider Approvals</h3>
-                    <p class="text-xs text-slate-400">Review, allow access or restrict housing scheme owners and agents.</p>
+                    <h3 class="text-base font-bold text-white">{{ __('Manage Service Provider Approvals') }}</h3>
+                    <p class="text-xs text-slate-400">{{ __('Review, allow access or restrict housing scheme owners and agents.') }}</p>
                 </div>
             </div>
         </div>
@@ -167,11 +267,11 @@
             <table class="w-full text-left text-xs text-slate-300">
                 <thead class="bg-slate-900/80 text-[11px] uppercase text-slate-400 border-b border-slate-800/80 font-black tracking-wider">
                     <tr>
-                        <th class="px-6 py-4">Provider Details</th>
-                        <th class="px-6 py-4">Contact Details</th>
-                        <th class="px-6 py-4">Assigned Role</th>
-                        <th class="px-6 py-4">Access Status</th>
-                        <th class="px-6 py-4 text-right">Actions</th>
+                        <th class="px-6 py-4">{{ __('Provider Details') }}</th>
+                        <th class="px-6 py-4">{{ __('Contact Details') }}</th>
+                        <th class="px-6 py-4">{{ __('Assigned Role') }}</th>
+                        <th class="px-6 py-4">{{ __('Access Status') }}</th>
+                        <th class="px-6 py-4 text-right">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800/60">
@@ -199,11 +299,11 @@
                             <td class="px-6 py-4">
                                 @if ($provider->is_approved)
                                     <span class="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg font-bold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Approved
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> {{ __('Approved') }}
                                     </span>
                                 @else
                                     <span class="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-lg font-bold">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Blocked / Pending
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> {{ __('Blocked / Pending') }}
                                     </span>
                                 @endif
                             </td>
@@ -218,7 +318,7 @@
                         <tr>
                             <td colspan="5" class="px-6 py-12 text-center text-slate-500 font-medium">
                                 <i class="fa-solid fa-users-slash text-2xl mb-2 block text-slate-600"></i>
-                                No Town Owners or Agents registered yet.
+                                {{ __('No Town Owners or Agents registered yet.') }}
                             </td>
                         </tr>
                     @endforelse

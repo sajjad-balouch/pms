@@ -11,8 +11,8 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next)
     {
-        // Session se locale check karein, default 'ur' ya 'en'
-        $locale = Session::get('locale', config('app.locale', 'ur'));
+        // Default English (config app.locale); user ka chuna hua locale session mein
+        $locale = Session::get('locale', config('app.locale', 'en'));
 
         if (in_array($locale, ['en', 'ur'])) {
             App::setLocale($locale);

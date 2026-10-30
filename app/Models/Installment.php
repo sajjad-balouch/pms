@@ -16,11 +16,19 @@ class Installment extends Model
         'buyer_phone',
         'installment_number',
         'amount',
+        'late_fee',
         'due_date',
         'paid_date',
+        'received_by',
         'status',
         'remarks',
     ];
+
+    // Team member (or owner) who recorded the payment
+    public function receivedBy()
+    {
+        return $this->belongsTo(User::class, 'received_by');
+    }
 
     public function plot()
     {

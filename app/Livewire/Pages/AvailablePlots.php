@@ -2,11 +2,15 @@
 
 namespace App\Livewire\Pages;
 
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Plot;
+use App\Models\SystemSetting;
 use App\Models\UnlockedContact;
+use App\Models\User;
 use App\Models\WalletTransaction;
+use App\Services\LeadCapture;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -21,8 +25,16 @@ class AvailablePlots extends Component
 
     public $showModal = false;
     public $selectedPlot = null;
+    // Locked: pehle browser se fee 0 ya minus karke muft unlock / wallet mein paise barhaye ja sakte the
+    #[Locked]
     public $unlockFee = 500;
     public $unlockedContactData = null;
+
+    // Town owner contact fee set by admin (Admin Dashboard > Platform Fee)
+    protected function currentFee(): float
+    {
+        return (float) (SystemSetting::getSettings()->lead_unlock_fee_town ?? 500);
+    }
 
     public function updatedType() { $this->resetPage(); }
     public function updatedSize() { $this->resetPage(); }
@@ -34,6 +46,8 @@ class AvailablePlots extends Component
             session()->flash('error', 'Inquire karne ke liye pehle Login/Register karein.');
             return redirect()->route('login');
         }
+
+        $this->unlockFee = $this->currentFee(); // shown in the modal
 
         // Plot ke sath Town aur Town ka User (Owner) load karein
         $this->selectedPlot = Plot::with(['town.user'])->find($plotId);
@@ -114,13 +128,18 @@ class AvailablePlots extends Component
             return;
         }
 
-        if (($user->wallet_balance ?? 0) < $this->unlockFee) {
-            session()->flash('modal_error', 'Aapke wallet me sufficient balance nahi hai. Pehle wallet top-up karein.');
-            return;
-        }
-
         DB::beginTransaction();
         try {
+            // Fee from the server; wallet row locked and re-checked inside the transaction (no double charge / negative balance)
+            $this->unlockFee = $this->currentFee();
+            $user = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            if ((float) ($user->wallet_balance ?? 0) < $this->unlockFee) {
+                DB::rollBack();
+                session()->flash('modal_error', 'Aapke wallet me sufficient balance nahi hai. Pehle wallet top-up karein.');
+                return;
+            }
+
             $user->decrement('wallet_balance', $this->unlockFee);
 
             WalletTransaction::create([
@@ -137,6 +156,13 @@ class AvailablePlots extends Component
                 'unlocked_user_id' => $ownerId,
                 'plot_id'          => $this->selectedPlot->id,
                 'expires_at'       => Carbon::now()->addMonth(),
+            ]);
+
+            // Town owner ke CRM mein garam lead
+            LeadCapture::fromUnlock($ownerId, $user, [
+                'plot_id' => $this->selectedPlot->id,
+                'town_id' => $this->selectedPlot->town_id,
+                'title' => ($this->selectedPlot->town->name ?? 'Scheme') . ' — Plot #' . $this->selectedPlot->plot_number . ' (' . $this->selectedPlot->size . ')',
             ]);
 
             DB::commit();

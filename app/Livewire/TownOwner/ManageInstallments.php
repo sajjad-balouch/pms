@@ -2,6 +2,7 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Support\Tenant;
 use App\Http\Controllers\BuyerPortalController;
 use App\Models\Installment;
 use App\Models\Plot;
@@ -24,12 +25,21 @@ class ManageInstallments extends Component
     public $receivingId = null;
     public $received_date = '';
     public $received_remarks = '';
+    public $received_late_fee = 0;
 
     // Last received installment (shows "send receipt on WhatsApp")
     public $justPaidId = null;
 
+    // Reschedule unpaid installments
+    public $showReschedule = false;
+    public $rs_count = 12;
+    public $rs_interval = 1;
+    public $rs_first_due = '';
+    public $rs_note = '';
+
     protected $messages = [
         'received_date.before_or_equal' => 'Aage ki tareekh par wusooli darj nahi ho sakti.',
+        'rs_first_due.after_or_equal' => 'Nayi pehli qist aaj ya baad ki honi chahiye.',
     ];
 
     public function mount($plotId)
@@ -62,11 +72,45 @@ class ManageInstallments extends Component
         $this->receivingId = $installment->id;
         $this->received_date = today()->toDateString();
         $this->received_remarks = '';
+        $this->received_late_fee = $this->suggestedLateFee($installment, today());
+    }
+
+    // Town ki setting: har shuru hone wale late mahine par X% (owner chahe to badal/maaf kar sakta hai)
+    public function updatedReceivedDate()
+    {
+        $installment = $this->receivingId ? $this->ledgerQuery()->find($this->receivingId) : null;
+
+        if ($installment) {
+            try {
+                $this->received_late_fee = $this->suggestedLateFee($installment, Carbon::parse($this->received_date));
+            } catch (\Throwable) {
+                // invalid date typed; validation will catch it
+            }
+        }
+    }
+
+    public function waiveLateFee()
+    {
+        $this->received_late_fee = 0;
+    }
+
+    protected function suggestedLateFee(Installment $installment, Carbon $paidOn): float
+    {
+        $percent = (float) ($this->plot->town->late_fee_percent ?? 0);
+        $due = Carbon::parse($installment->due_date);
+
+        if ($percent <= 0 || $installment->installment_number == 0 || $paidOn->lte($due)) {
+            return 0;
+        }
+
+        $lateMonths = (int) ceil($due->diffInDays($paidOn) / 30);
+
+        return round((float) $installment->amount * $percent / 100 * $lateMonths);
     }
 
     public function cancelReceive()
     {
-        $this->reset(['receivingId', 'received_date', 'received_remarks']);
+        $this->reset(['receivingId', 'received_date', 'received_remarks', 'received_late_fee']);
         $this->resetValidation();
     }
 
@@ -75,6 +119,7 @@ class ManageInstallments extends Component
         $this->validate([
             'received_date' => 'required|date|before_or_equal:today',
             'received_remarks' => 'nullable|string|max:500',
+            'received_late_fee' => 'nullable|numeric|min:0|max:100000000',
         ]);
 
         $installment = $this->ledgerQuery()->whereIn('status', BookingService::UNPAID)->findOrFail($this->receivingId);
@@ -82,6 +127,8 @@ class ManageInstallments extends Component
         $installment->update([
             'status' => 'paid',
             'paid_date' => $this->received_date,
+            'late_fee' => (float) ($this->received_late_fee ?: 0),
+            'received_by' => Auth::id(),
             'remarks' => $this->received_remarks ? trim($this->received_remarks) : $installment->remarks,
         ]);
 
@@ -102,7 +149,7 @@ class ManageInstallments extends Component
     {
         $installment = $this->ledgerQuery()->where('status', 'paid')->findOrFail($id);
 
-        $installment->update(['status' => 'pending', 'paid_date' => null]);
+        $installment->update(['status' => 'pending', 'paid_date' => null, 'late_fee' => 0, 'received_by' => null]);
 
         if ($this->plot->status === 'sold') {
             $this->plot->update(['status' => 'booked', 'sold_at' => null]);
@@ -114,6 +161,46 @@ class ManageInstallments extends Component
 
         unset($this->plot);
         session()->flash('success', 'Wusooli wapas le li gayi — qist dobara pending hai.');
+    }
+
+    /* ---------------- Reschedule ---------------- */
+
+    public function openReschedule()
+    {
+        $unpaid = $this->ledgerQuery()->whereIn('status', BookingService::UNPAID)->where('installment_number', '>', 0);
+        if (! $unpaid->exists()) {
+            return;
+        }
+
+        $this->resetValidation();
+        $this->rs_count = min(360, max(1, (clone $unpaid)->count()));
+        $this->rs_interval = 1;
+        $this->rs_first_due = today()->addMonthNoOverflow()->toDateString();
+        $this->rs_note = '';
+        $this->showReschedule = true;
+    }
+
+    public function closeReschedule()
+    {
+        $this->reset(['showReschedule', 'rs_count', 'rs_interval', 'rs_first_due', 'rs_note']);
+        $this->resetValidation();
+    }
+
+    public function confirmReschedule()
+    {
+        $this->validate([
+            'rs_count' => 'required|integer|min:1|max:360',
+            'rs_interval' => 'required|in:1,3,6,12',
+            'rs_first_due' => 'required|date|after_or_equal:today',
+            'rs_note' => 'nullable|string|max:255',
+        ]);
+
+        $booking = app(BookingService::class)->activeBookingFor($this->plot);
+        $result = app(BookingService::class)->reschedule($booking, (int) $this->rs_count, Carbon::parse($this->rs_first_due), (int) $this->rs_interval, $this->rs_note);
+
+        $this->closeReschedule();
+        unset($this->plot);
+        session()->flash('success', "Baqi Rs. " . number_format($result['balance']) . " ab {$result['count']} nayi qiston mein hain (pehli " . Carbon::parse($result['first_due'])->format('d M Y') . ').');
     }
 
     // Purani (feature se pehle ki) booking ke liye booking record + portal link banana
@@ -131,8 +218,23 @@ class ManageInstallments extends Component
     {
         $plot = $this->plot;
         $booking = $this->activeBooking();
-        $installments = $this->ledgerQuery()->orderBy('installment_number')->orderBy('due_date')->get();
+        $installments = $this->ledgerQuery()->with('receivedBy:id,name')->orderBy('installment_number')->orderBy('due_date')->get();
         $stats = BuyerPortalController::ledgerStats($installments);
+
+        $unpaidRegular = $installments->filter(fn ($i) => $i->status !== 'paid' && $i->installment_number > 0);
+        $reschedulePreview = [];
+        if ($this->showReschedule) {
+            try {
+                $reschedulePreview = BookingService::schedule(
+                    (float) $unpaidRegular->sum('amount'),
+                    min(360, max(0, (int) $this->rs_count)),
+                    Carbon::parse($this->rs_first_due),
+                    in_array((int) $this->rs_interval, [1, 3, 6, 12], true) ? (int) $this->rs_interval : 1
+                );
+            } catch (\Throwable) {
+                $reschedulePreview = [];
+            }
+        }
 
         $first = $installments->first();
         $buyerName = $booking?->customer?->name ?? $first?->buyer_name;
@@ -176,12 +278,16 @@ class ManageInstallments extends Component
             'whatsapp' => $whatsapp,
             'receiving' => $this->receivingId ? $installments->firstWhere('id', (int) $this->receivingId) : null,
             'justPaid' => $this->justPaidId ? $installments->firstWhere('id', (int) $this->justPaidId) : null,
+            'unpaidRegular' => $unpaidRegular,
+            'reschedulePreview' => $reschedulePreview,
+            'lateFeePercent' => (float) ($plot->town->late_fee_percent ?? 0),
+            'totalLateFees' => (float) $installments->sum('late_fee'),
         ])->layout('layouts.app');
     }
 
     protected function ownedPlotQuery()
     {
-        return Plot::whereHas('town', fn ($q) => $q->where('user_id', Auth::id()));
+        return Plot::whereHas('town', fn ($q) => $q->where('user_id', Tenant::ownerId()));
     }
 
     protected function activeBooking(): ?PlotBooking

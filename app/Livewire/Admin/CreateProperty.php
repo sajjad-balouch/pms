@@ -43,7 +43,7 @@ class CreateProperty extends Component
             'google_map_url' => 'nullable|url',
             'description' => 'nullable|string',
             'agent_id' => 'nullable|exists:users,id',
-            'images.*' => 'nullable|image|max:3072', // Max 3MB per photo
+            'images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072', // Max 3MB per photo
             'status' => 'required|in:available,sold,rented',
         ];
     }
@@ -67,10 +67,10 @@ class CreateProperty extends Component
             }
 
             foreach ($this->images as $photo) {
-                $filename = 'prop_' . time() . '_' . Str::random(8) . '.' . $photo->getClientOriginalExtension();
+                $filename = 'prop_' . time() . '_' . Str::random(8) . '.' . $photo->extension() /* real MIME type, never the user file name */;
                 
                 // Image ko direct public/property_images folder mein move/copy karein
-                $photo->storePubliclyAs('property_images', $filename, 'public'); 
+                copy($photo->getRealPath(), $destinationPath . DIRECTORY_SEPARATOR . $filename); // was saved to storage/app/public while the DB path points to public/property_images
 
                 // Database mein path save karne ke liye
                 $uploadedPaths[] = 'property_images/' . $filename;

@@ -113,7 +113,7 @@
 
                         <div class="p-4 pt-0 border-t border-slate-800/80 mt-2 flex items-center justify-between">
                             <span class="text-sm font-black text-emerald-400 font-mono">PKR {{ number_format($property->price) }}</span>
-                            <a href="{{ url('/property/' . $property->id) }}" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/30 rounded-lg text-xs font-bold transition">
+                            <a href="{{ route('property.details', $property->id) }}" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/30 rounded-lg text-xs font-bold transition">
                                 View Details
                             </a>
                         </div>

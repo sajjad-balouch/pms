@@ -16,6 +16,11 @@ class SystemSetting extends Model
         'agent_monthly_fee',
         'user_free_trial_days',
         'provider_free_months',
+        'require_provider_approval',
+    ];
+
+    protected $casts = [
+        'require_provider_approval' => 'boolean',
     ];
 
     // Static helper to get or create single settings row

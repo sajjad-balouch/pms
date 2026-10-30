@@ -84,7 +84,7 @@ class DealerExchange extends Component
             ]
         );
 
-        session()->flash('message', $this->demand_id ? 'ڈیمانڈ اپ ڈیٹ ہو گئی۔' : 'نئی ڈیمانڈ نیٹ ورک پر لائیو ہو گئی!');
+        session()->flash('message', $this->demand_id ? __('Demand updated.') : __('New demand is now live on the network!'));
         $this->isModalOpen = false;
         $this->resetForm();
     }
@@ -111,7 +111,7 @@ class DealerExchange extends Component
     {
         $demand = AgentDemand::where('agent_id', Auth::id())->findOrFail($id);
         $demand->update(['status' => 'closed']);
-        session()->flash('message', 'ڈیمانڈ بند کر دی گئی۔');
+        session()->flash('message', __('Demand closed.'));
     }
 
     public function connectDealer($demandId)
@@ -120,21 +120,25 @@ class DealerExchange extends Component
         $poster = $demand->agent;
 
         if (!$poster || empty($poster->phone)) {
-            $this->dispatch('notify-error', message: 'اس ڈیلر کا فون نمبر پروفائل میں درج نہیں ہے۔');
+            $this->dispatch('notify-error', message: __('This dealer has no phone number in their profile.'));
             return;
         }
 
         $myAgentName = Auth::user()->name;
-        $myAgency = Auth::user()->agency_name ?: 'ایجنٹ';
-        $budgetDisplay = $demand->budget_max ? 'PKR ' . number_format($demand->budget_max) : 'بجٹ کے مطابق';
+        $myAgency = Auth::user()->agency_name ?: __('Agent');
+        $budgetDisplay = $demand->budget_max ? 'PKR ' . number_format($demand->budget_max) : __('As per budget');
 
-        $msg = "السلام علیکم محترم {$poster->name} صاحب!\n\n"
-             . "میں نے آسان زمین (AssanZameen.com) کے B2B ڈیلر نیٹ ورک پر آپ کی پوسٹ دیکھی ہے:\n"
-             . "📢 *{$demand->title}*\n"
-             . "📍 لوکیشن: {$demand->target_location} ({$demand->city})\n"
-             . "📐 سائز: {$demand->area_size} | بجٹ: {$budgetDisplay}\n\n"
-             . "میرے پاس اس ڈیمانڈ کے عین مطابق کلائنٹ/پراپرٹی دستیاب ہے۔ کیا ہم 50/50 شیئرنگ پر یہ ڈیل بند کر سکتے ہیں؟\n\n"
-             . "ڈیلر: {$myAgentName} ({$myAgency})";
+        // Message language follows the panel language (English default, Urdu when switched)
+        $msg = __("Assalam o Alaikum :poster!\n\nI saw your post on the AssanZameen.com B2B dealer network:\n📢 *:title*\n📍 Location: :location (:city)\n📐 Size: :size | Budget: :budget\n\nI have a client/property that matches this demand exactly. Can we close this deal on 50/50 sharing?\n\nDealer: :agent (:agency)", [
+            'poster' => $poster->name,
+            'title' => $demand->title,
+            'location' => $demand->target_location,
+            'city' => $demand->city,
+            'size' => $demand->area_size,
+            'budget' => $budgetDisplay,
+            'agent' => $myAgentName,
+            'agency' => $myAgency,
+        ]);
 
         // Phone cleaning: 0300... -> 92300...
         $cleanPhone = preg_replace('/[^0-9]/', '', $poster->phone);

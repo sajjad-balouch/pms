@@ -6,6 +6,7 @@ use App\Models\Lead;
 use App\Models\Plot;
 use App\Models\Town;
 use Carbon\Carbon;
+use App\Support\Tenant;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -72,7 +73,7 @@ class ManageLeads extends Component
     // Drag-and-Drop update handler
     public function updateLeadStatus($leadId, $newStatus)
     {
-        $lead = Lead::where('agent_id', Auth::id())->find($leadId);
+        $lead = $this->ownedQuery()->find($leadId);
         if ($lead && in_array($newStatus, ['new', 'contacted', 'site_visit', 'negotiation', 'closed_won', 'closed_lost'])) {
             $lead->update(['status' => $newStatus]);
         }
@@ -117,10 +118,12 @@ class ManageLeads extends Component
     {
         $this->validate();
 
-        Lead::updateOrCreate(
-            ['id' => $this->lead_id],
+        // Edit sirf apni lead — pehle lead_id badal kar kisi aur agent ki lead apne naam ho sakti thi
+        $lead = $this->lead_id ? $this->ownedQuery()->findOrFail($this->lead_id) : new Lead();
+
+        $lead->fill(
             [
-                'agent_id' => Auth::id(),
+                'agent_id' => $this->ownerId(),
                 'town_id' => $this->town_id ?: null,
                 'plot_id' => $this->plot_id ?: null,
                 'client_name' => $this->client_name,
@@ -133,15 +136,15 @@ class ManageLeads extends Component
                 'next_followup_at' => $this->next_followup_at ?: null,
                 'notes' => $this->notes,
             ]
-        );
+        )->save();
 
-        session()->flash('message', $this->lead_id ? 'لیڈ اپ ڈیٹ ہو گئی!' : 'نئی لیڈ کامیابی سے شامل کر دی گئی۔');
+        session()->flash('message', $this->lead_id ? __('Lead updated!') : __('New lead added successfully.'));
         $this->closeModal();
     }
 
     public function edit($id)
     {
-        $lead = Lead::where('agent_id', Auth::id())->findOrFail($id);
+        $lead = $this->ownedQuery()->findOrFail($id);
 
         $this->lead_id = $id;
         $this->town_id = $lead->town_id;
@@ -165,13 +168,13 @@ class ManageLeads extends Component
 
     public function delete($id)
     {
-        Lead::where('agent_id', Auth::id())->findOrFail($id)->delete();
-        session()->flash('message', 'لیڈ ڈیلیٹ کر دی گئی۔');
+        $this->ownedQuery()->findOrFail($id)->delete();
+        session()->flash('message', __('Lead deleted.'));
     }
 
     public function openWhatsAppModal($leadId)
     {
-        $this->selectedLeadForWhatsApp = Lead::where('agent_id', Auth::id())->with(['town', 'plot'])->findOrFail($leadId);
+        $this->selectedLeadForWhatsApp = $this->ownedQuery()->with(['town', 'plot'])->findOrFail($leadId);
         $this->whatsappMessageType = 'intro';
         $this->customMessageNote = '';
         $this->isWhatsAppModalOpen = true;
@@ -183,31 +186,22 @@ class ManageLeads extends Component
         if (!$lead) return;
 
         $agentName = Auth::user()->name;
-        $townName = $lead->town?->name ?? 'پلاٹ / پراپرٹی';
-        $plotInfo = $lead->plot ? "پلاٹ # {$lead->plot->plot_number}" : '';
+        $townName = $lead->town?->name ?? $lead->property?->title ?? __('Plot / Property');
+        $plotInfo = $lead->plot ? __('Plot #:number', ['number' => $lead->plot->plot_number]) : '';
         $targetProperty = trim("{$townName} {$plotInfo}");
 
-        $msg = "";
-        if ($this->whatsappMessageType === 'intro') {
-            $msg = "السلام علیکم {$lead->client_name} صاحب!\n\n"
-                 . "آپ نے آسان زمین (AssanZameen.com) پر *{$targetProperty}* کے بارے میں معلومات کے لیے رابطہ کیا تھا۔\n"
-                 . "میں آپ کا ڈیلر {$agentName} حاضر ہوں۔ کیا میں آپ کو اس کی تصاویر اور ریٹ پلان واٹس ایپ کر دوں؟";
-        } elseif ($this->whatsappMessageType === 'site_visit') {
-            $msg = "السلام علیکم {$lead->client_name} صاحب!\n\n"
-                 . "پراپرٹی *{$targetProperty}* کے موقع وزٹ کے لیے رابطہ کیا جا رہا ہے۔ کیا آپ آج شام یا کل موقع دیکھنے کے لیے وقت نکال سکتے ہیں؟\n\n"
-                 . "رابطہ: {$agentName}";
-        } elseif ($this->whatsappMessageType === 'negotiation') {
-            $msg = "السلام علیکم {$lead->client_name} صاحب!\n\n"
-                 . "آپ کی پیشکش پر مالک سے بات چیت ہوئی ہے۔ کیا آپ آج آفس تشریف لا سکتے ہیں تاکہ روبرو بات فائنل کی جا سکے؟\n\n"
-                 . "رابطہ: {$agentName}";
-        } elseif ($this->whatsappMessageType === 'token') {
-            $msg = "السلام علیکم {$lead->client_name} صاحب!\n\n"
-                 . "پراپرٹی *{$targetProperty}* پر مزید خریدار بھی آ رہے ہیں۔ اگر آپ ڈیل فائنل کرنا چاہتے ہیں تو برائے مہربانی ٹوکن ایڈوانس کے لیے آج رابطہ کریں۔\n\n"
-                 . "رابطہ: {$agentName}";
-        }
+        // Message language follows the panel language (English default, Urdu when switched)
+        $vars = ['client' => $lead->client_name, 'property' => $targetProperty, 'agent' => $agentName];
+
+        $msg = match ($this->whatsappMessageType) {
+            'site_visit' => __("Assalam o Alaikum :client!\n\nI am contacting you about a site visit for *:property*. Can you make time this evening or tomorrow to see it?\n\nContact: :agent", $vars),
+            'negotiation' => __("Assalam o Alaikum :client!\n\nWe have discussed your offer with the owner. Can you visit the office today so we can finalise it face to face?\n\nContact: :agent", $vars),
+            'token' => __("Assalam o Alaikum :client!\n\nMore buyers are coming for *:property*. If you want to finalise the deal, please contact us today for the token advance.\n\nContact: :agent", $vars),
+            default => __("Assalam o Alaikum :client!\n\nYou contacted us on AssanZameen.com about *:property*.\nI am your dealer :agent. Shall I send you its photos and rate plan on WhatsApp?", $vars),
+        };
 
         if (!empty($this->customMessageNote)) {
-            $msg .= "\n\n📌 *نوٹ:* " . $this->customMessageNote;
+            $msg .= "\n\n📌 *" . __('Note') . ":* " . $this->customMessageNote;
         }
 
         $cleanPhone = preg_replace('/[^0-9]/', '', $lead->client_phone);
@@ -234,7 +228,7 @@ class ManageLeads extends Component
     {
         $now = Carbon::now();
 
-        $query = Lead::where('agent_id', Auth::id())->with(['town', 'plot']);
+        $query = $this->ownedQuery()->with(['town', 'plot']);
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -261,9 +255,9 @@ class ManageLeads extends Component
         }
 
         // Metrics for summary bar
-        $overdueCount = Lead::where('agent_id', Auth::id())->whereNotNull('next_followup_at')->where('next_followup_at', '<', $now)->count();
-        $todayCount = Lead::where('agent_id', Auth::id())->whereDate('next_followup_at', $now->toDateString())->count();
-        $hotCount = Lead::where('agent_id', Auth::id())->where('priority', 'hot')->count();
+        $overdueCount = $this->ownedQuery()->whereNotNull('next_followup_at')->where('next_followup_at', '<', $now)->count();
+        $todayCount = $this->ownedQuery()->whereDate('next_followup_at', $now->toDateString())->count();
+        $hotCount = $this->ownedQuery()->where('priority', 'hot')->count();
 
         // Agar Kanban view hai toh pagination ke baghair grouped records
         if ($this->viewMode === 'kanban') {
@@ -288,7 +282,21 @@ class ManageLeads extends Component
             'overdueCount' => $overdueCount,
             'todayCount' => $todayCount,
             'hotCount' => $hotCount,
-            'towns' => Town::all(),
+            // Town owner: sirf apni schemes. Agent: active schemes (sirf zaroori columns)
+            'towns' => Auth::user()?->role === 'town_owner'
+                ? Town::where('user_id', $this->ownerId())->orderBy('name')->get(['id', 'name'])
+                : Town::where('is_active', true)->orderBy('name')->get(['id', 'name']),
         ])->layout('layouts.app');
+    }
+
+    // Agent: khud. Town owner ki team: owner ka account (leads owner ke naam par)
+    protected function ownerId(): int
+    {
+        return (int) Tenant::ownerId();
+    }
+
+    protected function ownedQuery()
+    {
+        return Lead::where('agent_id', $this->ownerId());
     }
 }

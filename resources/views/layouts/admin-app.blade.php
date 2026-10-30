@@ -33,11 +33,22 @@
         [x-cloak] {
             display: none !important;
         }
+        /* Sidebar layout — plain CSS so it works even without rebuilding Tailwind */
+        .admin-shell { height: 100vh; height: 100dvh; }
+        .admin-aside { height: 100vh; height: 100dvh; max-width: 85vw; }
+        .admin-nav-wrap { display: flex; flex-direction: column; flex: 1 1 0%; min-height: 0; }
+        .admin-nav { flex: 1 1 0%; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+        .admin-nav::-webkit-scrollbar { width: 6px; }
+        .admin-nav::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        .admin-main { min-width: 0; }
+        @media (min-width: 1024px) { .admin-aside { max-width: none; } }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col" x-data="{ sidebarOpen: false }">
+<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col" x-data="{ sidebarOpen: false }"
+      :class="sidebarOpen ? 'overflow-hidden lg:overflow-auto' : ''"
+      @keydown.escape.window="sidebarOpen = false">
 
-    <div class="flex h-screen overflow-hidden bg-slate-950">
+    <div class="admin-shell flex h-screen overflow-hidden bg-slate-950">
 
         <!-- Sidebar Overlay for Mobile -->
         <div x-show="sidebarOpen" 
@@ -48,11 +59,12 @@
 
         <!-- Sidebar Navigation -->
         <aside :class="sidebarOpen ? 'translate-x-0' : ({{ app()->getLocale() == 'ur' ? "'translate-x-full'" : "'-translate-x-full'" }})" 
-               class="fixed inset-y-0 {{ app()->getLocale() == 'ur' ? 'right-0 border-l' : 'left-0 border-r' }} z-50 w-64 bg-[#0a0f1d] border-slate-800/80 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col justify-between shadow-2xl">
-            
-            <div>
+               class="fixed inset-y-0 {{ app()->getLocale() == 'ur' ? 'right-0 border-l' : 'left-0 border-r' }} admin-aside z-50 w-64 bg-[#0a0f1d] border-slate-800/80 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col shadow-2xl">
+
+            <!-- Header + scrollable links (min-h-0 lets the nav shrink and scroll instead of being cut off) -->
+            <div class="admin-nav-wrap">
                 <!-- Brand / Logo Header -->
-                <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800/80 bg-[#0a0f1d]">
+                <div class="h-16 shrink-0 flex items-center justify-between px-6 border-b border-slate-800/80 bg-[#0a0f1d]">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group">
                         <div class="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
                             A
@@ -66,7 +78,9 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <nav class="p-4 space-y-1.5 overflow-y-auto">
+                <nav class="admin-nav p-4 space-y-1.5"
+                     x-init="$nextTick(() => $el.querySelector('a[class*=&quot;bg-amber-500&quot;]')?.scrollIntoView({ block: 'center' }))"
+                     @click="if ($event.target.closest('a')) sidebarOpen = false">
                     
                     <div class="px-3 pt-2 pb-2 text-[10px] font-black text-slate-400/90 uppercase tracking-widest">
                         {{ __('Main Management') }}
@@ -153,6 +167,14 @@
                         <span>{{ __('User Management') }}</span>
                     </a>
 
+                    <!-- Admin Activity Log Link -->
+                    @php $isLog = request()->routeIs('admin.activity-log'); @endphp
+                    <a href="{{ route('admin.activity-log') }}" wire:navigate
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 {{ $isLog ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-extrabold' : 'text-slate-300 hover:bg-slate-800/60 hover:text-white' }}">
+                        <i class="fa-solid fa-clock-rotate-left text-sm w-5 text-center {{ $isLog ? 'text-slate-950' : 'text-slate-400' }}"></i>
+                        <span>{{ __('Activity Log') }}</span>
+                    </a>
+
                     <!-- Housing Schemes Link -->
                     @php $isTowns = request()->routeIs('admin.towns'); @endphp
                     <a href="{{ route('admin.towns') }}" wire:navigate
@@ -204,7 +226,7 @@
             </div>
 
             <!-- Sidebar Footer User Profile -->
-            <div class="p-4 border-t border-slate-800/80 bg-[#080c18]">
+            <div class="shrink-0 p-4 border-t border-slate-800/80 bg-[#080c18]">
                 <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-900/60 border border-slate-800/50">
                     <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 font-black flex items-center justify-center uppercase shrink-0">
                         {{ substr(auth()->user()->name ?? 'A', 0, 1) }}
@@ -219,20 +241,20 @@
         </aside>
 
         <!-- Main Wrapper -->
-        <div class="flex-1 flex flex-col overflow-y-auto bg-slate-950">
+        <div class="admin-main flex-1 flex flex-col overflow-y-auto bg-slate-950">
             
             <!-- Top Navbar Header -->
             <header class="h-16 bg-[#0a0f1d]/90 backdrop-blur-md border-b border-slate-800/80 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6">
                 
                 <div class="flex items-center gap-3">
-                    <button @click="sidebarOpen = true" class="lg:hidden text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80">
+                    <button @click="sidebarOpen = true" aria-label="{{ __('Open menu') }}" class="lg:hidden text-slate-400 hover:text-white p-2 rounded-xl bg-slate-800/80">
                         <i class="fa-solid fa-bars text-lg"></i>
                     </button>
                     <span class="text-xs font-bold text-slate-400 hidden sm:inline-block tracking-wide">{{ __('Administrator Mode') }}</span>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    
+                <div class="flex items-center gap-2 sm:gap-3">
+
                     <!-- Language Switcher -->
                     <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl px-2 py-1 text-xs">
                         <i class="fa-solid fa-globe text-amber-400 mr-1.5 ml-1.5"></i>
@@ -244,17 +266,17 @@
                     </div>
 
                     <!-- Front Site Button -->
-                    <a href="{{ url('/') }}" target="_blank" class="text-xs font-bold text-slate-300 hover:text-amber-400 transition flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700/60 shadow-sm">
+                    <a href="{{ url('/') }}" target="_blank" title="{{ __('Visit Site') }}" class="text-xs font-bold text-slate-300 hover:text-amber-400 transition flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 px-3 sm:px-3.5 py-2 rounded-xl border border-slate-700/60 shadow-sm">
                         <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
-                        <span>{{ __('Visit Site') }}</span>
+                        <span class="hidden sm:inline">{{ __('Visit Site') }}</span>
                     </a>
 
                     <!-- Logout Button -->
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-xs font-bold text-rose-400 hover:text-white hover:bg-rose-600 transition flex items-center gap-2 bg-rose-500/10 px-3.5 py-2 rounded-xl border border-rose-500/20 shadow-sm">
+                        <button type="submit" title="{{ __('Logout') }}" class="text-xs font-bold text-rose-400 hover:text-white hover:bg-rose-600 transition flex items-center gap-2 bg-rose-500/10 px-3 sm:px-3.5 py-2 rounded-xl border border-rose-500/20 shadow-sm">
                             <i class="fa-solid fa-right-from-bracket"></i>
-                            <span>{{ __('Logout') }}</span>
+                            <span class="hidden sm:inline">{{ __('Logout') }}</span>
                         </button>
                     </form>
                 </div>

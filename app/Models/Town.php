@@ -20,6 +20,7 @@ class Town extends Model
         'gallery_images',
         'total_area',
         'noc_number',
+        'late_fee_percent',
     ];
 
     protected $casts = [

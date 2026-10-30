@@ -2,10 +2,14 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Support\Tenant;
 use App\Models\EmployeeSalary;
 use App\Models\Installment;
 use App\Models\Plot;
+use App\Models\PlotBooking;
+use App\Models\PlotTransfer;
 use App\Models\Town;
+use App\Support\WhatsApp;
 use App\Models\TownExpense;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -50,7 +54,7 @@ class TownOwnerDashboard extends Component
 
     public function render()
     {
-        $myTowns = Town::where('user_id', Auth::id())->orderBy('name')->get(['id', 'name']);
+        $myTowns = Town::where('user_id', Tenant::ownerId())->orderBy('name')->get(['id', 'name']);
 
         // Never trust URL values: only the owner's own towns and known periods
         if ($this->townId !== '' && ! $myTowns->contains('id', (int) $this->townId)) {
@@ -65,7 +69,48 @@ class TownOwnerDashboard extends Component
         return view('livewire.town-owner.town-owner-dashboard', $stats + [
             'myTowns' => $myTowns,
             'periodLabel' => $this->periodLabel(),
+            'daily' => $this->dailySummary($myTowns, $stats),
         ])->layout('layouts.app');
+    }
+
+    // "Aaj ka khulasa" — one tap to send it on WhatsApp (to self, a partner or the family group)
+    protected function dailySummary($myTowns, array $stats): array
+    {
+        $today = Carbon::today()->toDateString();
+        $townIds = $this->townId !== '' ? [(int) $this->townId] : $myTowns->pluck('id')->all();
+        $plotIds = Plot::select('id')->whereIn('town_id', $townIds);
+
+        $collected = Installment::whereIn('plot_id', $plotIds)->where('status', 'paid')->whereDate('paid_date', $today)
+            ->toBase()->selectRaw('COUNT(*) AS n, COALESCE(SUM(amount + COALESCE(late_fee, 0)), 0) AS total')->first();
+        $dueToday = Installment::whereIn('plot_id', $plotIds)->whereIn('status', ['pending', 'overdue'])->whereDate('due_date', $today)
+            ->toBase()->selectRaw('COUNT(*) AS n, COALESCE(SUM(amount), 0) AS total')->first();
+        $spent = (float) TownExpense::whereIn('town_id', $townIds)->whereDate('expense_date', $today)->sum('amount');
+        $bookedToday = Plot::whereIn('town_id', $townIds)->whereDate('booked_at', $today)->count();
+
+        $scope = $this->townId !== '' ? ($myTowns->firstWhere('id', (int) $this->townId)?->name ?? '') : 'Tamam schemes';
+        $rs = fn ($n) => 'Rs. ' . number_format((float) $n);
+
+        $message = implode("\n", array_filter([
+            '📊 *Aaj ka khulasa* — ' . now()->format('d M Y'),
+            '🏘️ ' . $scope,
+            '',
+            "✅ Wusooli: {$rs($collected->total)} ({$collected->n} entries)",
+            "📅 Aaj due (baqi): {$rs($dueToday->total)} ({$dueToday->n})",
+            "⚠️ Kul late: {$rs($stats['overdueAmount'])} ({$stats['overdueCount']} qistein)",
+            "💸 Aaj ke kharche: {$rs($spent)}",
+            $bookedToday ? "📝 Nayi bookings: {$bookedToday}" : null,
+            "📈 Is mahine recovery: {$stats['monthRecoveryRate']}%",
+        ], fn ($line) => $line !== null));
+
+        return [
+            'collected' => (float) $collected->total,
+            'collected_count' => (int) $collected->n,
+            'due_today' => (float) $dueToday->total,
+            'spent' => $spent,
+            'booked' => $bookedToday,
+            'to_self' => WhatsApp::url(Auth::user()?->phone, $message),
+            'share' => WhatsApp::shareUrl($message),
+        ];
     }
 
     protected function buildStats(): array
@@ -85,7 +130,7 @@ class TownOwnerDashboard extends Component
         $salaryDateCol = $this->firstColumn((new EmployeeSalary)->getTable(), ['paid_at', 'paid_date', 'payment_date', 'date'], 'created_at');
 
         // Towns + per-town plot counts in ONE query (inventory totals are derived from this)
-        $towns = Town::where('user_id', Auth::id())
+        $towns = Town::where('user_id', Tenant::ownerId())
             ->when($this->townId !== '', fn ($q) => $q->whereKey($this->townId))
             ->withCount([
                 'plots',
@@ -111,23 +156,23 @@ class TownOwnerDashboard extends Component
 
         // Financial Metrics - Income (all installment figures in ONE aggregate query)
         $bindings = [$monthStart, $monthEnd, $monthStart, $monthEnd, $todayStr, $todayStr, $todayStr, $weekEnd, $todayStr, $weekEnd];
-        $periodSql = "COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0)";
+        $periodSql = "COALESCE(SUM(CASE WHEN status = 'paid' THEN amount + COALESCE(late_fee, 0) ELSE 0 END), 0)";
         if ($range) {
-            $periodSql = "COALESCE(SUM(CASE WHEN status = 'paid' AND {$paidCol} BETWEEN ? AND ? THEN amount ELSE 0 END), 0)";
+            $periodSql = "COALESCE(SUM(CASE WHEN status = 'paid' AND {$paidCol} BETWEEN ? AND ? THEN amount + COALESCE(late_fee, 0) ELSE 0 END), 0)";
             array_push($bindings, ...$range);
         }
 
         $stats = Installment::whereIn('plot_id', $plotIdsQuery)
             ->toBase()
             ->selectRaw("
-                COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0) AS total_collected,
-                COALESCE(SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END), 0) AS total_receivable,
-                COALESCE(SUM(CASE WHEN status = 'pending' AND due_date BETWEEN ? AND ? THEN amount ELSE 0 END), 0) AS due_this_month,
+                COALESCE(SUM(CASE WHEN status = 'paid' THEN amount + COALESCE(late_fee, 0) ELSE 0 END), 0) AS total_collected,
+                COALESCE(SUM(CASE WHEN status IN ('pending', 'overdue') THEN amount ELSE 0 END), 0) AS total_receivable,
+                COALESCE(SUM(CASE WHEN status IN ('pending', 'overdue') AND due_date BETWEEN ? AND ? THEN amount ELSE 0 END), 0) AS due_this_month,
                 COALESCE(SUM(CASE WHEN status = 'paid' AND due_date BETWEEN ? AND ? THEN amount ELSE 0 END), 0) AS collected_this_month,
-                COALESCE(SUM(CASE WHEN status = 'pending' AND due_date < ? THEN amount ELSE 0 END), 0) AS overdue_amount,
-                COALESCE(SUM(CASE WHEN status = 'pending' AND due_date < ? THEN 1 ELSE 0 END), 0) AS overdue_count,
-                COALESCE(SUM(CASE WHEN status = 'pending' AND due_date > ? AND due_date <= ? THEN amount ELSE 0 END), 0) AS upcoming_amount,
-                COALESCE(SUM(CASE WHEN status = 'pending' AND due_date > ? AND due_date <= ? THEN 1 ELSE 0 END), 0) AS upcoming_count,
+                COALESCE(SUM(CASE WHEN status IN ('pending', 'overdue') AND due_date < ? THEN amount ELSE 0 END), 0) AS overdue_amount,
+                COALESCE(SUM(CASE WHEN status IN ('pending', 'overdue') AND due_date < ? THEN 1 ELSE 0 END), 0) AS overdue_count,
+                COALESCE(SUM(CASE WHEN status IN ('pending', 'overdue') AND due_date > ? AND due_date <= ? THEN amount ELSE 0 END), 0) AS upcoming_amount,
+                COALESCE(SUM(CASE WHEN status IN ('pending', 'overdue') AND due_date > ? AND due_date <= ? THEN 1 ELSE 0 END), 0) AS upcoming_count,
                 {$periodSql} AS period_collected
             ", $bindings)
             ->first();
@@ -149,10 +194,22 @@ class TownOwnerDashboard extends Component
 
         $totalExpenses = (float) $expenseQuery()->sum('amount');
         $totalSalariesPaid = (float) $salaryQuery()->sum('amount');
-        $totalOutflow = $totalExpenses + $totalSalariesPaid;
+
+        // Booking cancellations: refunds are outflow; transfer fees are extra income
+        $totalRefunds = (float) PlotBooking::whereIn('plot_id', $plotIdsQuery)
+            ->where('status', 'cancelled')
+            ->where('refund_amount', '>', 0)
+            ->when($range, fn ($q) => $q->whereBetween('refund_date', $range))
+            ->sum('refund_amount');
+
+        $transferFees = (float) PlotTransfer::whereIn('plot_id', $plotIdsQuery)
+            ->when($range, fn ($q) => $q->whereBetween('transfer_date', $range))
+            ->sum('transfer_fee');
+
+        $totalOutflow = $totalExpenses + $totalSalariesPaid + $totalRefunds;
 
         // Net Profit Calculation
-        $netProfit = $periodCollected - $totalOutflow;
+        $netProfit = $periodCollected + $transferFees - $totalOutflow;
 
         // Expense breakdown: by category if the table has one, otherwise by town
         if ($expenseCategoryCol) {
@@ -186,7 +243,7 @@ class TownOwnerDashboard extends Component
 
         $overdueRows = Installment::with($relations)
             ->whereIn('plot_id', $plotIdsQuery)
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'overdue'])
             ->where('due_date', '<', $todayStr)
             ->orderBy('due_date')
             ->limit(10)
@@ -196,7 +253,7 @@ class TownOwnerDashboard extends Component
 
         $upcomingRows = Installment::with($relations)
             ->whereIn('plot_id', $plotIdsQuery)
-            ->where('status', 'pending')
+            ->whereIn('status', ['pending', 'overdue'])
             ->where('due_date', '>', $todayStr)
             ->where('due_date', '<=', $weekEnd)
             ->orderBy('due_date')
@@ -207,7 +264,7 @@ class TownOwnerDashboard extends Component
 
         // Last 6 months: income vs outflow
         $trendStart = $today->copy()->startOfMonth()->subMonths(5);
-        $incomeByMonth = $this->sumByMonth(Installment::whereIn('plot_id', $plotIdsQuery)->where('status', 'paid'), $paidCol, $trendStart);
+        $incomeByMonth = $this->sumByMonth(Installment::whereIn('plot_id', $plotIdsQuery)->where('status', 'paid'), $paidCol, $trendStart, 'amount + COALESCE(late_fee, 0)');
         $expenseByMonth = $this->sumByMonth(TownExpense::whereIn('town_id', $townIds), $expenseDateCol, $trendStart);
         $salaryByMonth = $this->sumByMonth(
             EmployeeSalary::whereHas('employee', fn ($q) => $q->whereIn('town_id', $townIds)),
@@ -302,6 +359,8 @@ class TownOwnerDashboard extends Component
             'upcomingRows' => $upcomingRows,
             'totalExpenses' => $totalExpenses,
             'totalSalariesPaid' => $totalSalariesPaid,
+            'totalRefunds' => $totalRefunds,
+            'transferFees' => $transferFees,
             'totalOutflow' => $totalOutflow,
             'netProfit' => $netProfit,
             'expenseBreakdown' => $expenseBreakdown->values()->all(),
@@ -320,8 +379,10 @@ class TownOwnerDashboard extends Component
         $due = Carbon::parse($installment->due_date);
 
         $name = $this->attr($customer, ['name', 'full_name'])
+            ?? $this->attr($installment, ['buyer_name'])
             ?? $this->attr($plot, ['customer_name', 'owner_name', 'buyer_name']);
         $phone = $this->attr($customer, ['phone', 'mobile', 'phone_number', 'contact'])
+            ?? $this->attr($installment, ['buyer_phone'])
             ?? $this->attr($plot, ['customer_phone', 'owner_phone', 'buyer_phone']);
 
         $plotLabel = $this->plotLabel($plot) ?? '#' . $installment->plot_id;
@@ -362,7 +423,7 @@ class TownOwnerDashboard extends Component
         return strlen($digits) >= 11 ? 'https://wa.me/' . $digits . '?text=' . rawurlencode($message) : null;
     }
 
-    protected function sumByMonth($query, string $column, Carbon $start): array
+    protected function sumByMonth($query, string $column, Carbon $start, string $sumExpr = 'amount'): array
     {
         $base = $query->toBase();
 
@@ -375,7 +436,7 @@ class TownOwnerDashboard extends Component
 
         return $base
             ->where($column, '>=', $start->toDateTimeString())
-            ->selectRaw("{$expr} AS ym, SUM(amount) AS total")
+            ->selectRaw("{$expr} AS ym, SUM({$sumExpr}) AS total")
             ->groupByRaw($expr)
             ->pluck('total', 'ym')
             ->all();
@@ -433,7 +494,7 @@ class TownOwnerDashboard extends Component
 
     protected function cacheKey(): string
     {
-        return 'town-owner-dashboard:' . Auth::id() . ':' . md5(implode('|', [
+        return 'town-owner-dashboard:' . Tenant::ownerId() . ':' . md5(implode('|', [
             $this->townId, $this->period, $this->from, $this->to, Carbon::today()->toDateString(),
         ]));
     }

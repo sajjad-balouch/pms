@@ -4,21 +4,55 @@ namespace App\Livewire;
 
 use App\Models\Property;
 use App\Models\User;
+use App\Services\LeadCapture;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class PropertyDetails extends Component
 {
+    const UNLOCK_FEE = 500;
+
     public $property;
+
+    #[Locked]
     public $propertyId;
+
     public $isUnlocked = false;
-    public $unlockFee = 500;
+
+    // Locked: pehle browser se fee 0 ya minus karke muft unlock / wallet mein paise barhaye ja sakte the
+    #[Locked]
+    public $unlockFee = self::UNLOCK_FEE;
+
+    // Fee set by admin (Admin Dashboard > Platform Fee); UNLOCK_FEE is only the fallback
+    public static function currentFee(): float
+    {
+        return (float) (\App\Models\SystemSetting::getSettings()->lead_unlock_fee_agent ?? self::UNLOCK_FEE);
+    }
 
     public function mount($id)
     {
         $this->propertyId = $id;
+        $this->unlockFee = self::currentFee(); // shown in the modal; the charge itself is re-read on the server
         $this->loadPropertyData();
+        $this->countView();
+    }
+
+    // Listing analytics: ek session mein ek property ka ek view (agent khud ginti mein nahi)
+    protected function countView(): void
+    {
+        $key = 'viewed_property_' . $this->property->id;
+
+        if (session()->has($key) || Auth::id() === $this->property->agent_id) {
+            return;
+        }
+
+        session()->put($key, true);
+        Property::whereKey($this->property->id)->update([
+            'views_count' => DB::raw('views_count + 1'),
+            'last_viewed_at' => now(),
+        ]);
     }
 
     public function loadPropertyData()
@@ -43,49 +77,66 @@ class PropertyDetails extends Component
             return redirect()->route('login');
         }
 
-        $user = User::find(Auth::id());
-
-        if (($user->wallet_balance ?? 0) < $this->unlockFee) {
-            session()->flash('error', 'Insufficient wallet balance. Please top up your wallet in dashboard.');
-            return;
-        }
+        $fee = self::currentFee(); // always from the server, never from the browser
+        $propertyId = $this->property->id;
 
         try {
-            DB::transaction(function () use ($user) {
-                // 1. Deduct balance from user
-                $user->decrement('wallet_balance', $this->unlockFee);
+            $result = DB::transaction(function () use ($fee, $propertyId) {
+                // Lock the wallet row: do tez clicks se balance minus mein na jaye
+                $user = User::whereKey(Auth::id())->lockForUpdate()->firstOrFail();
 
-                // 2. Record property unlock
-                DB::table('property_unlocks')->updateOrInsert(
-                    [
-                        'user_id' => $user->id,
-                        'property_id' => $this->property->id,
-                    ],
-                    [
-                        'amount_paid' => $this->unlockFee,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
-                );
+                // Pehle se unlock hai to dobara paise na katein
+                if (DB::table('property_unlocks')->where('user_id', $user->id)->where('property_id', $propertyId)->exists()) {
+                    return 'already';
+                }
 
-                // 3. Record Wallet Transaction
-                DB::table('wallet_transactions')->insert([
+                if ((float) ($user->wallet_balance ?? 0) < $fee) {
+                    return 'insufficient';
+                }
+
+                $user->decrement('wallet_balance', $fee);
+
+                DB::table('property_unlocks')->insert([
                     'user_id' => $user->id,
-                    'amount' => $this->unlockFee,
-                    'type' => 'unlock_fee',
-                    'description' => 'Unlocked contact details for property #' . $this->property->id,
-                    'reference_id' => (string) $this->property->id,
+                    'property_id' => $propertyId,
+                    'amount_paid' => $fee,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-            });
 
-            $this->isUnlocked = true;
-            $this->dispatch('unlock-success'); // Alpine modal ko band karne ke liye event
-            session()->flash('success', 'Contact details unlocked successfully!');
+                DB::table('wallet_transactions')->insert([
+                    'user_id' => $user->id,
+                    'amount' => $fee,
+                    'type' => 'unlock_fee',
+                    'description' => 'Unlocked contact details for property #' . $propertyId,
+                    'reference_id' => (string) $propertyId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Agent ke CRM mein garam lead
+                LeadCapture::fromUnlock($this->property->agent_id, $user, [
+                    'property_id' => $propertyId,
+                    'town_id' => $this->property->town_id,
+                    'title' => $this->property->title . ' (PKR ' . number_format((float) $this->property->price) . ')',
+                ]);
+
+                return 'unlocked';
+            });
         } catch (\Exception $e) {
-            session()->flash('error', 'Transaction error: ' . $e->getMessage());
+            report($e);
+            session()->flash('error', __('Transaction error, please try again.'));
+            return;
         }
+
+        if ($result === 'insufficient') {
+            session()->flash('error', __('Insufficient wallet balance. Please top up your wallet in dashboard.'));
+            return;
+        }
+
+        $this->isUnlocked = true;
+        $this->dispatch('unlock-success'); // Alpine modal ko band karne ke liye event
+        session()->flash('success', $result === 'already' ? __('This contact is already unlocked.') : __('Contact details unlocked successfully!'));
     }
 
     public function render()

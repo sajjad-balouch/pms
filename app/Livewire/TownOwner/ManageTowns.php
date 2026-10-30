@@ -2,6 +2,7 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Support\Tenant;
 use App\Models\City;
 use App\Models\Town;
 use Illuminate\Support\Arr;
@@ -25,6 +26,7 @@ class ManageTowns extends Component
     const MAX_GALLERY_IMAGES = 20;
 
     public $name, $location, $total_area, $noc_number, $google_map_url;
+    public $late_fee_percent = 0;
     public $editingTownId = null;
 
     // Searchable City Properties
@@ -46,12 +48,13 @@ class ManageTowns extends Component
         return [
             'name' => [
                 'required', 'string', 'max:255',
-                Rule::unique('towns', 'name')->where('user_id', Auth::id())->ignore($this->editingTownId),
+                Rule::unique('towns', 'name')->where('user_id', Tenant::ownerId())->ignore($this->editingTownId),
             ],
             'location' => 'required|string|max:255',
             'city_id' => ['required', Rule::exists('cities', 'id')->where('is_active', 1)],
             'total_area' => 'nullable|string|max:100',
             'noc_number' => 'nullable|string|max:100',
+            'late_fee_percent' => 'nullable|numeric|min:0|max:20',
             'google_map_url' => 'nullable|url|max:500',
             'new_master_plan_map' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120', // Max 5MB
             'new_gallery_images' => 'array|max:10',
@@ -113,7 +116,7 @@ class ManageTowns extends Component
 
         $town = $this->editingTownId
             ? $this->ownedTown($this->editingTownId)
-            : new Town(['user_id' => Auth::id()]);
+            : new Town(['user_id' => Tenant::ownerId()]);
 
         $oldMap = $town->master_plan_map;
         $gallery = is_array($town->gallery_images) ? $town->gallery_images : [];
@@ -143,6 +146,7 @@ class ManageTowns extends Component
             'gallery_images' => $gallery ?: null,
             'total_area' => $this->total_area,
             'noc_number' => $this->noc_number,
+            'late_fee_percent' => (float) ($this->late_fee_percent ?: 0),
         ])->save();
 
         // Remove the old map only after the new one is saved successfully
@@ -168,6 +172,7 @@ class ManageTowns extends Component
         $this->google_map_url = $town->google_map_url;
         $this->total_area = $town->total_area;
         $this->noc_number = $town->noc_number;
+        $this->late_fee_percent = (float) $town->late_fee_percent;
 
         $this->city_id = $town->city_id;
         $this->selected_city_name = City::find($town->city_id)?->name ?? $town->city ?? '';
@@ -232,7 +237,7 @@ class ManageTowns extends Component
     {
         $this->reset([
             'editingTownId', 'name', 'location', 'city_id', 'city_search', 'selected_city_name',
-            'google_map_url', 'total_area', 'noc_number',
+            'google_map_url', 'total_area', 'noc_number', 'late_fee_percent',
             'new_master_plan_map', 'new_gallery_images',
         ]);
         $this->uploadIteration++;
@@ -271,7 +276,7 @@ class ManageTowns extends Component
     public function render()
     {
         $editingTown = $this->editingTownId
-            ? Town::where('user_id', Auth::id())->find($this->editingTownId)
+            ? Town::where('user_id', Tenant::ownerId())->find($this->editingTownId)
             : null;
 
         if ($this->editingTownId && ! $editingTown) {
@@ -280,7 +285,7 @@ class ManageTowns extends Component
 
         $search = trim($this->search);
 
-        $towns = Town::where('user_id', Auth::id())
+        $towns = Town::where('user_id', Tenant::ownerId())
             ->withCount([
                 'plots',
                 'plots as sold_plots_count' => fn ($q) => $q->whereIn('status', ['booked', 'sold']),
@@ -312,7 +317,7 @@ class ManageTowns extends Component
 
     protected function ownedTown($id): Town
     {
-        return Town::where('user_id', Auth::id())->findOrFail($id);
+        return Town::where('user_id', Tenant::ownerId())->findOrFail($id);
     }
 
     protected function storeImage($file, string $dir, string $prefix): string

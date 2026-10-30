@@ -20,6 +20,12 @@ class WhatsApp
         return strlen($digits) >= 11 ? $digits : null;
     }
 
+    // No number: WhatsApp asks whom to send it to (partner, family group...)
+    public static function shareUrl(string $message): string
+    {
+        return 'https://wa.me/?text=' . rawurlencode($message);
+    }
+
     // wa.me link with a ready message; null when the phone number is not usable
     public static function url($phone, string $message): ?string
     {

@@ -42,6 +42,10 @@ class Register extends Component
 
         $isUser = $this->role === 'user';
 
+        // Admin setting: town owners / agents may need approval before they can log in.
+        // (Pehle message "pending approval" dikhata tha lekin account foran approved hota tha.)
+        $needsApproval = ! $isUser && (bool) \App\Models\SystemSetting::getSettings()->require_provider_approval;
+
         $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
@@ -49,13 +53,15 @@ class Register extends Component
             'password' => Hash::make($this->password),
             'role' => $this->role,
             'trial_ends_at' => $isUser ? Carbon::now()->addDays(3) : null,
-            'is_approved' => true,
+            'is_approved' => ! $needsApproval,
         ]);
 
         event(new \Illuminate\Auth\Events\Registered($user));
 
         if (! $isUser) {
-            session()->flash('status', 'Account registered successfully! Pending admin approval.');
+            session()->flash('status', $needsApproval
+                ? __('Account registered successfully! Pending admin approval.')
+                : __('Account registered successfully! You can log in now.'));
             return redirect()->route('login');
         }
 

@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'wallet_balance',
         'is_approved',
         'phone',
+        'owner_id',
+        'permissions',
     ];
 
     protected $hidden = [
@@ -35,7 +38,19 @@ class User extends Authenticatable
             'password' => 'hashed',
             'trial_ends_at' => 'datetime',
             'is_approved' => 'boolean',
+            'permissions' => 'array',
         ];
+    }
+
+    // Town owner's team members (staff work inside the owner's account)
+    public function teamMembers(): HasMany
+    {
+        return $this->hasMany(User::class, 'owner_id');
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     // --- Helper Methods for Roles ---

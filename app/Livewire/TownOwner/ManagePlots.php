@@ -2,6 +2,7 @@
 
 namespace App\Livewire\TownOwner;
 
+use App\Support\Tenant;
 use App\Models\Installment;
 use App\Models\Plot;
 use App\Models\PlotBooking;
@@ -64,13 +65,13 @@ class ManagePlots extends Component
 
     public function mount($townId)
     {
-        $this->townId = Town::where('user_id', Auth::id())->findOrFail($townId)->id;
+        $this->townId = Town::where('user_id', Tenant::ownerId())->findOrFail($townId)->id;
     }
 
     #[Computed]
     public function town()
     {
-        return Town::where('user_id', Auth::id())->findOrFail($this->townId);
+        return Town::where('user_id', Tenant::ownerId())->findOrFail($this->townId);
     }
 
     protected function rules()

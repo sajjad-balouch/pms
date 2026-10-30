@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Tenant;
 use App\Models\CustomerDocument;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -13,7 +14,7 @@ class CustomerDocumentController extends Controller
     public function show(CustomerDocument $document)
     {
         $document->load('customer:id,user_id,name');
-        abort_unless((int) $document->customer?->user_id === (int) Auth::id(), 403);
+        abort_unless((int) $document->customer?->user_id === (int) Tenant::ownerId(), 403);
 
         $disk = Storage::disk(CustomerDocument::DISK);
         abort_unless($disk->exists($document->path), 404);

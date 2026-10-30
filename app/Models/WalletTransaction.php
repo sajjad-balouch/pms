@@ -19,10 +19,18 @@ class WalletTransaction extends Model
         'screenshot',
         'status',
         'description',
+        'reference_id',
         'admin_note',
         'approved_at',
         'rejected_at',
+        'processed_by',
     ];
+
+    // Admin who approved / rejected / adjusted
+    public function processedBy()
+    {
+        return $this->belongsTo(User::class, 'processed_by');
+    }
 
     protected $casts = [
         'approved_at' => 'datetime',
