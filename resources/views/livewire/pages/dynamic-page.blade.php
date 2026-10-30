@@ -7,6 +7,11 @@
     $slug    = (string) ($page->slug ?? '');
     $rawHtml = htmlspecialchars_decode((string) $page->content);
 
+    // AdSense policy: privacy page par ads aur cookies ka bayan hona zaroori hai
+    if ($slug === 'privacy-policy') {
+        $rawHtml .= view('partials.ads-disclosure')->render();
+    }
+
     // DOM-START
     // HTML ko safe karna, headings ko id dena, fehrist (TOC) aur (FAQ page ho to) sawal-jawab nikalna
     $bodyHtml = $rawHtml;

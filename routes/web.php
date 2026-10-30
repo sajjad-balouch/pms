@@ -36,7 +36,9 @@ use App\Livewire\Pages\HousingSchemes;
 use App\Livewire\Pages\AvailablePlots;
 use App\Livewire\Pages\AboutUs;
 use App\Livewire\Pages\ContactUs;
+use App\Livewire\Pages\Disclaimer;
 use App\Livewire\Pages\DynamicPage;
+use App\Http\Controllers\SitemapController;
 use App\Livewire\Pages\ShowHousingScheme;
 use App\Livewire\Admin\ManageInquiries;
 use App\Livewire\Admin\PropertyManagement;
@@ -95,6 +97,8 @@ Route::middleware(['web'])->group(function () {
     Route::get('/available-plots', AvailablePlots::class)->name('available-plots');
     Route::get('/about-us', AboutUs::class)->name('about-us');
     Route::get('/contact', ContactUs::class)->name('contact');
+    Route::get('/disclaimer', Disclaimer::class)->name('disclaimer');
+    Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
     Route::get('/blog', BlogIndex::class)->name('blog.index');
     Route::get('/blog/{slug}', BlogShow::class)->name('blog.show');

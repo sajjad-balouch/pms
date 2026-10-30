@@ -78,7 +78,7 @@
     <meta name="twitter:image" content="{{ $pageImage }}">
 
     <meta name="facebook-domain-verification" content="0euryzc4bk3zu3xheravcmf8iloetv">
-    <meta name="google-adsense-account" content="ca-pub-4146136986292795">
+    <meta name="google-adsense-account" content="{{ config('services.adsense.client') }}">
 
     <link rel="icon" type="image/png" href="{{ asset('public/favicon.png') }}">
 
@@ -152,10 +152,7 @@
         }
     </style>
 
-    {{-- AdSense sirf live site par load hoga --}}
-    @production
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4146136986292795" crossorigin="anonymous"></script>
-    @endproduction
+    @include('partials.adsense-script')
 
     <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 </head>

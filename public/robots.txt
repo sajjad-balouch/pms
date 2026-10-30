@@ -1,2 +1,12 @@
-User-agent: *
+User-agent: Mediapartners-Google
 Disallow:
+
+User-agent: *
+Disallow: /admin
+Disallow: /town-owner
+Disallow: /dashboard
+Disallow: /my-plot/
+Disallow: /verify/
+Disallow: /lang/
+
+Sitemap: https://www.assanzameen.com/sitemap.xml

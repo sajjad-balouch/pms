@@ -18,14 +18,11 @@
     $pageImage       = $image ?? asset('public/hero-image.jpg');
     $pageUrl         = $canonical ?? url()->current();
     $pageOgType      = $ogType ?? 'website';
-    $showAds         = $ads ?? true;
 
-    // Private pages search engines se door rakhein
-    $pageRobots = $robots ?? (
-        request()->routeIs(['login', 'register', 'password.*', 'verification.*', 'dashboard*', 'admin.*', 'agent.*', 'town.*', 'saved-plots*'])
-            ? 'noindex, nofollow'
-            : 'index, follow, max-image-preview:large'
-    );
+    // Private pages search engines se door rakhein, aur un par ads bhi na chalein
+    $isPrivatePage = request()->routeIs(['login', 'register', 'password.*', 'verification.*', 'dashboard*', 'admin.*', 'agent.*', 'town_owner.*', 'saved-plots*', 'portal.*']);
+    $showAds       = $ads ?? ! $isPrivatePage;
+    $pageRobots    = $robots ?? ($isPrivatePage ? 'noindex, nofollow' : 'index, follow, max-image-preview:large');
 
     $orgSchema = [
         '@context' => 'https://schema.org',
@@ -64,7 +61,7 @@
     <meta name="twitter:image" content="{{ $pageImage }}">
 
     <meta name="facebook-domain-verification" content="0euryzc4bk3zu3xheravcmf8iloetv">
-    <meta name="google-adsense-account" content="ca-pub-4146136986292795">
+    <meta name="google-adsense-account" content="{{ config('services.adsense.client') }}">
 
     <link rel="icon" type="image/png" href="{{ asset('public/favicon.png') }}">
 
@@ -143,11 +140,8 @@
         }
     </style>
 
-    {{-- AdSense sirf live site par (aur jab $ads false na ho) --}}
     @if($showAds)
-        @production
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4146136986292795" crossorigin="anonymous"></script>
-        @endproduction
+        @include('partials.adsense-script')
     @endif
 
     <script type="application/ld+json">{!! json_encode($orgSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>

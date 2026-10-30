@@ -192,6 +192,7 @@
                             <a href="{{ route('dynamic.page', $fPage->slug) }}" class="hover:text-amber-300 transition-colors">{{ __($fPage->title) }}</a>
                         @endif
                     @endforeach
+                    <a href="{{ route('disclaimer') }}" class="hover:text-amber-300 transition-colors">{{ $t('Disclaimer', 'اعلانِ لاتعلقی') }}</a>
                     <a href="{{ route('about-us') }}" class="hover:text-amber-300 transition-colors">{{ __('About Us') }}</a>
                     <a href="{{ route('contact') }}" class="hover:text-amber-300 transition-colors">{{ __('Contact Us') }}</a>
                 </nav>

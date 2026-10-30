@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'adsense' => [
+        'client' => env('ADSENSE_CLIENT', 'ca-pub-4146136986292795'),
+    ],
+
 ];
