@@ -2,10 +2,8 @@
 
 namespace App\Livewire\Tools;
 
-use App\Models\RentAgreement;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use App\Support\Tools\DeedHelper;
+use App\Support\Tools\ToolCatalog;
 use Livewire\Component;
 
 class RentAgreementGenerator extends Component
@@ -14,28 +12,28 @@ class RentAgreementGenerator extends Component
     public $leave_stamp_space = true; // Top 4.5 inch blank space for e-Stamp Paper
 
     // Landlord Details
-    public $landlord_name = 'ملک محمد اسلم';
-    public $landlord_father = 'ملک عبدالحفیظ';
-    public $landlord_cnic = '31301-2345678-1';
-    public $landlord_phone = '0300-9876543';
-    public $landlord_address = 'مکان نمبر 24، گلی نمبر 3، ٹرسٹ کالونی، رحیم یار خان';
+    public $landlord_name = '';
+    public $landlord_father = '';
+    public $landlord_cnic = '';
+    public $landlord_phone = '';
+    public $landlord_address = '';
 
     // Tenant Details
-    public $tenant_name = 'وسیم اکرم';
-    public $tenant_father = 'بشیر احمد';
-    public $tenant_cnic = '31301-8765432-1';
-    public $tenant_phone = '0302-1234567';
-    public $tenant_permanent_address = 'چک نمبر 89، ڈاکخانہ خاص، تحصیل صادق آباد';
+    public $tenant_name = '';
+    public $tenant_father = '';
+    public $tenant_cnic = '';
+    public $tenant_phone = '';
+    public $tenant_permanent_address = '';
 
     // Premises Information
     public $property_type = 'residential'; // residential, commercial, portion, warehouse
-    public $property_title = 'رہائشی مکان رقبہ 5 مرلہ معہ بجلی و گیس کنکشن';
-    public $city = 'Rahim Yar Khan';
-    public $property_address = 'پلاٹ نمبر 108، بلاک بی، گلشنِ عثمان، رحیم یار خان';
+    public $property_title = '';
+    public $city = '';
+    public $property_address = '';
 
     // Tenancy & Financial Terms
-    public $monthly_rent = 25000;
-    public $security_deposit = 50000; // 2 months advance security
+    public $monthly_rent = 0;
+    public $security_deposit = 0;
     public $annual_increment_percentage = 10;
     public $tenancy_tenure_months = 11;
     public $start_date = '';
@@ -44,40 +42,66 @@ class RentAgreementGenerator extends Component
     public $payment_method = 'bank_transfer';
 
     // Meter Reference
-    public $electricity_meter_no = 'MEPCO-889921';
-    public $gas_meter_no = 'SNGPL-443321';
-    public $current_electricity_reading = '14520';
+    public $electricity_meter_no = '';
+    public $gas_meter_no = '';
+    public $current_electricity_reading = '';
 
     // Witnesses
-    public $witness1_name = 'عبدالوحید ولد محمد صادق';
-    public $witness1_cnic = '31301-1122334-5';
-    public $witness2_name = 'محمد عدنان ولد نذیر احمد';
-    public $witness2_cnic = '31301-5566778-9';
+    public $witness1_name = '';
+    public $witness1_cnic = '';
+    public $witness2_name = '';
+    public $witness2_cnic = '';
 
     public function mount()
     {
-        $this->start_date = date('Y-m-d');$this->updateEndDate();
-    }
-
-    public function updatedStartDate()
-    {
+        $this->start_date = date('Y-m-d');
         $this->updateEndDate();
     }
 
-    public function updatedTenancyTenureMonths()
+    public function updated($propertyName)
     {
+        $this->monthly_rent = max(0, (float) $this->monthly_rent);
+        $this->security_deposit = max(0, (float) $this->security_deposit);
+        $this->annual_increment_percentage = min(100, max(0, (float) $this->annual_increment_percentage));
+        $this->tenancy_tenure_months = min(120, max(1, (int) $this->tenancy_tenure_months));
+        $this->rent_due_day = min(28, max(1, (int) $this->rent_due_day));
         $this->updateEndDate();
     }
 
     private function updateEndDate()
     {
-        if ($this->start_date) {$months = max(1, (int)$this->tenancy_tenure_months);$this->end_date = Carbon::parse($this->start_date)->addMonths($months)->subDay()->format('Y-m-d');
+        $start = DeedHelper::date($this->start_date);
+        $this->end_date = $start ? $start->addMonthsNoOverflow((int) $this->tenancy_tenure_months)->subDay()->format('Y-m-d') : '';
+    }
+
+    private function issues(): array
+    {
+        $issues = DeedHelper::missing([
+            'Landlord name' => $this->landlord_name, 'Landlord father name' => $this->landlord_father, 'Landlord address' => $this->landlord_address,
+            'Tenant name' => $this->tenant_name, 'Tenant father name' => $this->tenant_father, 'Tenant address' => $this->tenant_permanent_address,
+            'Property details' => $this->property_title, 'Property address' => $this->property_address, 'City' => $this->city,
+            'Witness 1' => $this->witness1_name, 'Witness 2' => $this->witness2_name,
+        ]);
+
+        foreach (['Landlord' => $this->landlord_cnic, 'Tenant' => $this->tenant_cnic, 'Witness 1' => $this->witness1_cnic, 'Witness 2' => $this->witness2_cnic] as $who => $cnic) {
+            if (! DeedHelper::validCnic($cnic)) {
+                $issues[] = __(':who CNIC must have 13 digits', ['who' => __($who)]);
+            }
         }
+
+        if ($this->monthly_rent <= 0) {
+            $issues[] = __('Enter the monthly rent');
+        }
+        if (! DeedHelper::date($this->start_date)) {
+            $issues[] = __('Enter the start date');
+        }
+
+        return $issues;
     }
 
     public function render()
     {
-        return view('livewire.tools.rent-agreement-generator')
-            ->layout('layouts.front-app', ['title' => 'خودکار کرایہ نامہ بلڈر و قانونی ٹیننسی ایگریمنٹ | AssanZameen']);
+        return view('livewire.tools.rent-agreement-generator', ['issues' => $this->issues()])
+            ->layout('layouts.front-app', ToolCatalog::meta('rent'));
     }
 }

@@ -22,9 +22,9 @@ class SitemapController extends Controller
     {
         $urls = collect([
             'home', 'housing-schemes', 'available-plots', 'about-us', 'contact', 'disclaimer', 'blog.index',
-            'tools.legal-scanner', 'tools.tax-calculator', 'tools.land-converter', 'tools.bayana-generator',
+            'tools.index', 'tools.legal-scanner', 'tools.tax-calculator', 'tools.land-converter', 'tools.bayana-generator',
             'tools.society-directory', 'tools.inheritance-calculator', 'tools.rent-generator',
-            'tools.zakat-calculator', 'tools.cv-maker',
+            'tools.zakat-calculator', 'tools.government-links', 'tools.cv-maker',
         ])->map(fn ($name) => [route($name), null]);
 
         Page::where('is_active', true)->where('slug', '!=', 'about-us')->get(['slug', 'updated_at'])

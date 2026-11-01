@@ -240,7 +240,7 @@
             @foreach([
                 ['tools.tax-calculator',  'fa-calculator',      $t('Tax & Registry Calculator', 'ٹیکس و رجسٹری کیلکولیٹر'), 'Stamp duty, TMA, FBR 236-C/K'],
                 ['tools.land-converter',  'fa-ruler-combined',  $t('Patwari Land Converter', 'پٹواری اراضی کنورٹر'),         $t('Karam, sarsahi & marla', 'کرم، سرساہی و مرلہ')],
-                ['tools.legal-scanner',   'fa-shield-halved',   $t('AI Property Wakeel', 'AI پراپرٹی وکیل'),                 $t('Fard, registry & title risk', 'فرد، رجسٹری و ٹائٹل رسک')],
+                ['tools.legal-scanner',   'fa-file-circle-check',   $t('Property Document Checker', 'پراپرٹی دستاویز چیکر'),                 $t('Fard, registry & title risk', 'فرد، رجسٹری و ٹائٹل رسک')],
             ] as [$routeName, $icon, $label, $desc])
                 <a href="{{ route($routeName) }}" wire:navigate class="az-card flex items-start gap-4 p-5 rounded-2xl bg-slate-800/40 border border-slate-700/50">
                     <span class="w-11 h-11 rounded-xl bg-amber-400/10 text-amber-300 flex items-center justify-center shrink-0"><i class="fa-solid {{ $icon }}" aria-hidden="true"></i></span>

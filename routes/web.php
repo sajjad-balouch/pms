@@ -68,6 +68,8 @@ use App\Livewire\Tools\InheritanceCalculator;
 use App\Livewire\Tools\RentAgreementGenerator;
 use App\Livewire\Tools\ZakatCalculator;
 use App\Livewire\Tools\CvMaker;
+use App\Livewire\Tools\ToolsIndex;
+use App\Livewire\Tools\GovernmentLinks;
 
 // Public Routes
 Route::get('/', function () {
@@ -107,6 +109,8 @@ Route::middleware(['web'])->group(function () {
      * Tools
      * 
      * */
+    Route::get('/tools', ToolsIndex::class)->name('tools.index');
+    Route::get('/tools/government-links', GovernmentLinks::class)->name('tools.government-links');
     Route::get('/tools/legal-scanner', PropertyLegalScanner::class)->name('tools.legal-scanner');
     Route::get('/tools/registry-tax-calculator', UserTax::class)->name('tools.tax-calculator');
     Route::get('/tools/patwari-land-converter', PatwariLandConverter::class)->name('tools.land-converter');

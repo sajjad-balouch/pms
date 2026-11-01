@@ -2,129 +2,166 @@
 
 namespace App\Livewire\Tools;
 
-use App\Models\PropertyScan;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
+use App\Support\Tools\DeedHelper;
+use App\Support\Tools\ToolCatalog;
+use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Smalot\PdfParser\Parser;
+use Throwable;
 
+/**
+ * Document checklist: risk user ke apne jawabon se banta hai.
+ * Yeh PLRA ya kisi sarkari record se connected nahi, is liye "verified" kabhi nahi kehta.
+ * Upload sirf text parhne ke liye hai aur save nahi hoti.
+ */
 class PropertyLegalScanner extends Component
 {
     use WithFileUploads;
 
-    public $document;
     public $document_type = 'fard';
+    public $answers = [];
+
+    public $document;
     public $seller_cnic = '';
-    public $district = 'Lahore';
-    
-    // UI Process States
-    public $isAnalyzing = false;
-    public $currentStep = 'upload'; // upload, analyzing, result
-    public $scanResult = null;
+    public $pdfReport = null;
 
-    protected $rules = [
-        'document' => 'required|file|mimes:jpeg,png,jpg,webp,pdf|max:10240', // Max 10MB
-        'document_type' => 'required|in:fard,registry,allotment_letter,intiqal',
-        'seller_cnic' => 'nullable|string|min:13|max:15',
-        'district' => 'required|string',
-    ];
-
-    public function startAnalysis()
+    protected function rules()
     {
-        $this->validate();
-
-        $this->isAnalyzing = true;
-        $this->currentStep = 'analyzing';
-
-        // File Save
-        $destination = public_path('scans');
-        if (!File::exists($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
-        $filename = 'scan_' . time() . '_' . Str::random(8) . '.' . $this->document->getClientOriginalExtension();
-        copy($this->document->getRealPath(), $destination . DIRECTORY_SEPARATOR . $filename);
-        $filePath = 'scans/' . $filename;
-
-        // Perform Deep Document Audit
-        $audit = $this->performLegalInspection($this->document_type, $this->seller_cnic, $this->district);
-
-        $scan = PropertyScan::create([
-            'scan_uuid' => (string) Str::uuid(),
-            'user_id' => Auth::id(),
-            'document_type' => $this->document_type,
-            'document_file' => $filePath,
-            'risk_score' => $audit['score'],
-            'risk_verdict' => $audit['verdict'],
-            'extracted_data' => $audit['extracted'],
-            'audit_flags' => $audit['flags'],
-            'is_paid' => false,
-            'ip_address' => request()->ip(),
-        ]);
-
-        $this->scanResult = $scan;
-        $this->isAnalyzing = false;
-        $this->currentStep = 'result';
-    }
-
-    private function performLegalInspection($filePath, $documentType, $district)
-    {
-        $fullPath = public_path($filePath);
-        $text = '';
-
-        // Extract real text from PDF
-        if (pathinfo($fullPath, PATHINFO_EXTENSION) === 'pdf') {
-            $parser = new Parser();
-            $pdf = $parser->parseFile($fullPath);
-            $text = $pdf->getText();
-        }
-
-        // Real regex patterns for PLRA Fard
-        preg_match('/(\d+-\d+-\d+)/', $text, $areaMatch); // 2-0-0
-        preg_match('/کھیوٹ\s*نمبر\s*[:\s]*(\d+)/u', $text, $khewatMatch);
-        preg_match('/(\d+\/\d+)/', $text, $shareMatch); // 10/667
-
-        $extractedArea = !empty($areaMatch[1]) ? $areaMatch[1] . ' (Kanal-Marla-Sarsahi)' : '2-0-0 (2 Kanal)';
-        $extractedKhewat = !empty($khewatMatch[1]) ? $khewatMatch[1] : '150';
-        $extractedShare = !empty($shareMatch[1]) ? $shareMatch[1] : '10/667';
-
         return [
-            'score' => 92,
-            'verdict' => 'محفوظ ٹائٹل (Low Risk - تصدیق شدہ فرد برائے بیع)',
-            'extracted' => [
-                'khasra' => 'مشترکہ کھاتہ (Multiple Khasra Holding)',
-                'khewat' => $extractedKhewat,
-                'area' => '2 Kanal 0 Marla (' . $extractedShare . ' hissa)',
-                'district' => 'Rahim Yar Khan (Khanpur)',
-                'owner_name' => 'فیاض احمد ولد نور محمد',
-                'cnic_status' => '31301-3849539-3 (Verified)',
-                'document_age' => 'Valid for Sale (PLRA Token: 1076)',
-            ],
-            'flags' => [
-                'green' => [
-                    'نقل کا مقصد "برائے بیع" تصدیق شدہ ہے اور سرکاری فیس (5,150 روپے) ادا شدہ ہے۔',
-                    'دستاویز آئی ڈی اور ٹوکن نمبر PLRA سسٹم میں باضابطہ جاری شدہ ہے۔',
-                    'خریدار (محمد جمیل ولد محمد سلیم) کا نام و شناختی کارڈ اندراج شدہ ہے۔',
-                ],
-                'warnings' => [
-                    'یہ 10/667 حصے کی مشترکہ فرد ہے، رجسٹری سے قبل موقع پر قابض رقبے کی باؤنڈری تسلی کر لیں۔',
-                    'اراضی کا قبضہ پنجاب لینڈ ریکارڈز اتھارٹی سے تصدیق شدہ نہیں، رجسٹری کے بعد انتقال لازمی کروائیں۔',
-                ],
-                'critical' => []
-            ]
+            'document' => 'required|file|mimes:pdf|max:10240',
+            'seller_cnic' => 'nullable|string|max:15',
         ];
     }
 
-    public function resetScanner()
+    public static function checks(string $type): array
     {
-        $this->reset(['document', 'seller_cnic', 'scanResult', 'isAnalyzing']);
-        $this->currentStep = 'upload';
+        $common = [
+            'fresh_copy' => ['You or your own representative got a fresh copy from the record office', true],
+            'owner_match' => ['Seller name, father name and CNIC match the record exactly', true],
+            'no_charge' => ['The record shows no mortgage, lien, court stay or government acquisition', true],
+            'area_match' => ['Area and location in the document match the land shown on site', true],
+            'possession' => ['You confirmed on site who has possession of the land', false],
+            'no_dispute' => ['Neighbours and the local office report no dispute over the land', false],
+        ];
+
+        $specific = [
+            'fard' => [
+                'for_sale' => ['The fard was issued for sale and is still valid', true],
+                'joint_share' => ['If the khewat is joint, the seller\'s share and boundary are clear', false],
+            ],
+            'registry' => [
+                'registry_verified' => ['The registry copy was checked at the Sub-Registrar office', true],
+                'mutation_done' => ['A mutation (intiqal) was attested after this registry', true],
+            ],
+            'allotment_letter' => [
+                'society_confirmed' => ['The society confirmed this allotment in writing', true],
+                'noc_confirmed' => ['The authority confirmed the society NOC and layout plan', true],
+                'dues_clear' => ['Society dues are clear and a transfer is allowed', false],
+            ],
+            'intiqal' => [
+                'intiqal_attested' => ['The intiqal is attested by a revenue officer, not only entered', true],
+                'jamabandi_match' => ['The owner in the latest record (jamabandi) matches this intiqal', true],
+            ],
+        ];
+
+        return $common + ($specific[$type] ?? []);
+    }
+
+    public function updatedDocumentType()
+    {
+        $this->document_type = array_key_exists($this->document_type, self::documentTypes()) ? $this->document_type : 'fard';
+        $this->answers = array_intersect_key($this->answers, self::checks($this->document_type));
+    }
+
+    public static function documentTypes(): array
+    {
+        return [
+            'fard' => 'Fard (ownership record)',
+            'registry' => 'Registry (sale deed)',
+            'allotment_letter' => 'Allotment letter or society file',
+            'intiqal' => 'Intiqal (mutation)',
+        ];
+    }
+
+    /** Sirf jawabon se nateeja: koi score ghar kar nahi dikhaya jata. */
+    private function assessment(): array
+    {
+        $checks = self::checks($this->document_type);
+        $blockers = [];
+        $warnings = [];
+        $open = [];
+        $cleared = 0;
+
+        foreach ($checks as $key => [$label, $critical]) {
+            $answer = $this->answers[$key] ?? null;
+            if ($answer === 'yes') {
+                $cleared++;
+            } elseif ($answer === 'no') {
+                $critical ? $blockers[] = $label : $warnings[] = $label;
+            } else {
+                $open[] = $label;
+            }
+        }
+
+        $level = match (true) {
+            count($blockers) > 0 => 'high',
+            count($open) > 0 => 'incomplete',
+            count($warnings) > 0 => 'medium',
+            default => 'clear',
+        };
+
+        return ['level' => $level, 'total' => count($checks), 'cleared' => $cleared, 'blockers' => $blockers, 'warnings' => $warnings, 'open' => $open];
+    }
+
+    public function readPdf()
+    {
+        $this->validate();
+
+        $key = 'doc-check:' . request()->ip();
+        if (RateLimiter::tooManyAttempts($key, 20)) {
+            $this->addError('document', __('Too many files. Please try again later.'));
+
+            return;
+        }
+        RateLimiter::hit($key, 3600);
+
+        try {
+            $text = (new Parser())->parseFile($this->document->getRealPath())->getText();
+        } catch (Throwable) {
+            $text = '';
+        }
+
+        // File apne paas nahi rakhte
+        $this->document->delete();
+        $this->document = null;
+
+        $digits = preg_replace('/\D/', '', (string) $this->seller_cnic);
+        $found = preg_match_all('/\b\d{5}-?\d{7}-?\d\b/u', $text, $matches) ? array_map(fn ($c) => preg_replace('/\D/', '', $c), $matches[0]) : [];
+
+        preg_match('/(?:کھیوٹ|khewat)\D{0,15}(\d+)/iu', $text, $khewat);
+        preg_match('/(?:خسرہ|khasra)\D{0,15}(\d+(?:\/\d+)?)/iu', $text, $khasra);
+
+        $this->pdfReport = [
+            'has_text' => mb_strlen(trim($text)) >= 30,
+            'khewat' => $khewat[1] ?? null,
+            'khasra' => $khasra[1] ?? null,
+            'cnic_count' => count(array_unique($found)),
+            'cnic_match' => DeedHelper::validCnic($digits) ? in_array($digits, $found, true) : null,
+        ];
+    }
+
+    public function resetChecklist()
+    {
+        $this->reset(['answers', 'document', 'seller_cnic', 'pdfReport']);
     }
 
     public function render()
     {
-        return view('livewire.tools.property-legal-scanner')
-            ->layout('layouts.front-app', ['title' => 'AI وکیل - Property Legal Title Scanner | AssanZameen']);
+        return view('livewire.tools.property-legal-scanner', [
+            'checks' => self::checks($this->document_type),
+            'types' => self::documentTypes(),
+            'result' => $this->assessment(),
+        ])->layout('layouts.front-app', ToolCatalog::meta('scanner'));
     }
 }

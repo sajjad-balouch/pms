@@ -206,7 +206,7 @@
             @foreach([
                 ['tools.tax-calculator', 'fa-calculator',     $t('Tax & Registry Calculator', 'ٹیکس و رجسٹری کیلکولیٹر')],
                 ['tools.land-converter', 'fa-ruler-combined', $t('Patwari Land Converter', 'پٹواری اراضی کنورٹر')],
-                ['tools.legal-scanner',  'fa-shield-halved',  $t('AI Property Wakeel', 'AI پراپرٹی وکیل')],
+                ['tools.legal-scanner',  'fa-file-circle-check',  $t('Property Document Checker', 'پراپرٹی دستاویز چیکر')],
             ] as [$routeName, $icon, $label])
                 <a href="{{ route($routeName) }}" wire:navigate class="az-card flex items-center gap-3 p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 text-sm text-slate-200">
                     <span class="w-9 h-9 rounded-lg bg-amber-400/10 text-amber-300 flex items-center justify-center shrink-0"><i class="fa-solid {{ $icon }}" aria-hidden="true"></i></span>

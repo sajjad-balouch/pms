@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Tools;
 
+use App\Support\Tools\InheritanceEngine;
+use App\Support\Tools\ToolCatalog;
 use Livewire\Component;
 
 class InheritanceCalculator extends Component
@@ -12,6 +14,7 @@ class InheritanceCalculator extends Component
     public $total_marlas = 0;
     public $cash_estate = 5000000; // Kul Maal / Naqad
     public $debts_funeral = 200000; // Qarz aur Tajheez o Takfeen
+    public $will_amount = 0; // Wasiyat: ghair-waris ke liye, zyada se zyada 1/3
 
     // Heirs Input
     public $wives_count = 1; // Agar mard fout hua
@@ -20,10 +23,17 @@ class InheritanceCalculator extends Component
     public $has_mother = true;
     public $sons_count = 2;
     public $daughters_count = 3;
+    public $brothers_count = 0;
+    public $sisters_count = 0;
 
     public $heirs_shares = [];
     public $net_cash = 0;
     public $net_marlas = 0;
+    public $debt_shortfall = 0;
+    public $will_capped = false;
+    public $has_awl = false;
+    public $has_radd = false;
+    public $unassigned_pct = 0;
 
     public function mount()
     {
@@ -32,163 +42,74 @@ class InheritanceCalculator extends Component
 
     public function updated($propertyName)
     {
-        if ($this->deceased_gender === 'female') {
-            $this->wives_count = 0;
-        } else {
-            $this->has_husband = false;
-        }
-
         $this->calculateInheritance();
     }
 
     public function calculateInheritance()
     {
-        // 1. Total Distributable Assets
-        $this->net_cash = max(0, (float)$this->cash_estate - (float)$this->debts_funeral);
-        $this->net_marlas = ((float)$this->total_kanals * 20.0) + (float)$this->total_marlas;
+        // Form se aane wali values strings hoti hain, aur inhein had mein rakhna zaroori hai
+        $this->deceased_gender = $this->deceased_gender === 'female' ? 'female' : 'male';
+        $this->wives_count = $this->count($this->wives_count, 4);
+        $this->sons_count = $this->count($this->sons_count);
+        $this->daughters_count = $this->count($this->daughters_count);
+        $this->brothers_count = $this->count($this->brothers_count);
+        $this->sisters_count = $this->count($this->sisters_count);
 
-        $hasChildren = ($this->sons_count > 0 || $this->daughters_count > 0);
-        $shares = [];
-        $allocatedPercentage = 0;
+        // Tarteeb: pehle qarz aur kafan dafan, phir wasiyat (1/3 tak), phir warasat
+        $cash = max(0, (float) $this->cash_estate);
+        $debts = max(0, (float) $this->debts_funeral);
+        $afterDebts = max(0, $cash - $debts);
+        $this->debt_shortfall = max(0, $debts - $cash);
 
-        // --- A. Spouse Share (Zawj / Zawjah) ---
-        if ($this->deceased_gender === 'male' && $this->wives_count > 0) {
-            // Biwi: 1/8 (12.5%) agar aulad ho, warna 1/4 (25%)
-            $pct = $hasChildren ? 12.5 : 25.0;
-            $perWifePct = $pct / max(1, $this->wives_count);
-            for ($i = 1; $i <= $this->wives_count; $i++) {
-                $shares[] = [
-                    'relation' => 'بیوہ (زوجہ ' . ($this->wives_count > 1 ? "#$i" : '') . ')',
-                    'quranic_fraction' => $hasChildren ? '1/8' : '1/4',
-                    'percentage' => $perWifePct,
-                    'is_asabah' => false,
-                ];
-                $allocatedPercentage += $perWifePct;
-            }
-        } elseif ($this->deceased_gender === 'female' && $this->has_husband) {
-            // Shauhar: 1/4 (25%) agar aulad ho, warna 1/2 (50%)
-            $pct = $hasChildren ? 25.0 : 50.0;
-            $shares[] = [
-                'relation' => 'شوہر (زوج)',
-                'quranic_fraction' => $hasChildren ? '1/4' : '1/2',
-                'percentage' => $pct,
-                'is_asabah' => false,
+        $will = max(0, (float) $this->will_amount);
+        $maxWill = $afterDebts / 3;
+        $this->will_capped = $will > $maxWill;
+
+        $this->net_cash = $afterDebts - min($will, $maxWill);
+        $this->net_marlas = max(0, (float) $this->total_kanals) * 20.0 + max(0, (float) $this->total_marlas);
+
+        $result = InheritanceEngine::calculate([
+            'gender' => $this->deceased_gender,
+            'wives' => $this->wives_count,
+            'husband' => (bool) $this->has_husband,
+            'father' => (bool) $this->has_father,
+            'mother' => (bool) $this->has_mother,
+            'sons' => $this->sons_count,
+            'daughters' => $this->daughters_count,
+            'brothers' => $this->brothers_count,
+            'sisters' => $this->sisters_count,
+        ]);
+
+        $this->has_awl = $result['awl'];
+        $this->has_radd = $result['radd'];
+        $this->unassigned_pct = round($result['unassigned'] * 100, 2);
+
+        // Har group ki ek row: hissa fi kas dikhaya jata hai
+        $this->heirs_shares = array_map(function ($g) {
+            $each = $g['share'] / $g['count'];
+            $marlas = $this->net_marlas * $each;
+
+            return [
+                'key' => $g['key'],
+                'count' => $g['count'],
+                'basis' => $g['basis'],
+                'percentage' => round($each * 100, 2),
+                'group_percentage' => round($g['share'] * 100, 2),
+                'kanals' => (int) floor($marlas / 20.0),
+                'marlas' => round(fmod($marlas, 20.0), 2),
+                'cash_amount' => round($this->net_cash * $each),
             ];
-            $allocatedPercentage += $pct;
-        }
+        }, $result['groups']);
+    }
 
-        // --- B. Mother (Walida) ---
-        if ($this->has_mother) {
-            // Walida: 1/6 (16.666%) agar aulad ya 2+ behan bhai hon, warna 1/3 (33.333%)
-            $pct = $hasChildren ? (100.0 / 6.0) : (100.0 / 3.0);
-            $shares[] = [
-                'relation' => 'والدہ',
-                'quranic_fraction' => $hasChildren ? '1/6' : '1/3',
-                'percentage' => $pct,
-                'is_asabah' => false,
-            ];
-            $allocatedPercentage += $pct;
-        }
-
-        // --- C. Father (Walid) ---
-        if ($this->has_father) {
-            // Walid: 1/6 fix agar aulad ho
-            $pct = $hasChildren ? (100.0 / 6.0) : 0; // Agar aulad na ho to asabah banega
-            if ($pct > 0) {
-                $shares[] = [
-                    'relation' => 'والد',
-                    'quranic_fraction' => '1/6',
-                    'percentage' => $pct,
-                    'is_asabah' => false,
-                ];
-                $allocatedPercentage += $pct;
-            }
-        }
-
-        // --- D. Children (Asabah Bil Ghair: Beta 2 Hisse, Beti 1 Hissa) ---
-        $remainingPercentage = max(0, 100.0 - $allocatedPercentage);
-
-        if ($this->sons_count > 0 || $this->daughters_count > 0) {
-            if ($this->sons_count > 0) {
-                // Beta mojud hai: Residuary (عصبہ) ratio (2:1)
-                $totalUnits = ($this->sons_count * 2) + $this->daughters_count;
-                $perUnitPct = $remainingPercentage / max(1, $totalUnits);
-
-                for ($s = 1; $s <= $this->sons_count; $s++) {
-                    $shares[] = [
-                        'relation' => 'بیٹا (فرزند ' . ($this->sons_count > 1 ? "#$s" : '') . ')',
-                        'quranic_fraction' => 'عصبہ (2 حصص)',
-                        'percentage' => $perUnitPct * 2,
-                        'is_asabah' => true,
-                    ];
-                }
-
-                for ($d = 1; $d <= $this->daughters_count; $d++) {
-                    $shares[] = [
-                        'relation' => 'بیٹی (دختر ' . ($this->daughters_count > 1 ? "#$d" : '') . ')',
-                        'quranic_fraction' => 'عصبہ (1 حصہ)',
-                        'percentage' => $perUnitPct,
-                        'is_asabah' => true,
-                    ];
-                }
-            } else {
-                // Sirf Betiyan hain (Koi beta nahi): 1 beti = 1/2, 2 ya zyada = 2/3
-                $daughtersPct = ($this->daughters_count === 1) ? 50.0 : (200.0 / 3.0);
-                $perDaughterPct = $daughtersPct / $this->daughters_count;
-
-                for ($d = 1; $d <= $this->daughters_count; $d++) {
-                    $shares[] = [
-                        'relation' => 'بیٹی (دختر ' . ($this->daughters_count > 1 ? "#$d" : '') . ')',
-                        'quranic_fraction' => ($this->daughters_count === 1) ? '1/2' : '2/3 مشترکہ',
-                        'percentage' => $perDaughterPct,
-                        'is_asabah' => false,
-                    ];
-                }
-
-                // Agar walid zinda hai to baqi bacha hissa walid ko asabah ke tor par milega
-                if ($this->has_father) {
-                    $walidAsabahPct = max(0, $remainingPercentage - $daughtersPct);
-                    $shares[] = [
-                        'relation' => 'والد (بطور عصبہ بقیہ مال)',
-                        'quranic_fraction' => 'عصبہ',
-                        'percentage' => $walidAsabahPct,
-                        'is_asabah' => true,
-                    ];
-                }
-            }
-        } elseif ($this->has_father) {
-            // Koi aulad nahi: Pura bacha hua hissa walid ko
-            $shares[] = [
-                'relation' => 'والد (عصبہ بنفسہ)',
-                'quranic_fraction' => 'تمام بقیہ ترکہ',
-                'percentage' => $remainingPercentage,
-                'is_asabah' => true,
-            ];
-        }
-
-        // Calculate exact Marlas, Kanals and Cash values
-        $this->heirs_shares = [];
-        foreach ($shares as $item) {
-            $marlas = ($this->net_marlas * $item['percentage']) / 100.0;
-            $cash = ($this->net_cash * $item['percentage']) / 100.0;
-
-            $kanals = floor($marlas / 20.0);
-            $remMarlas = fmod($marlas, 20.0);
-
-            $this->heirs_shares[] = [
-                'relation' => $item['relation'],
-                'fraction' => $item['quranic_fraction'],
-                'percentage' => round($item['percentage'], 2),
-                'total_marlas' => round($marlas, 2),
-                'formatted_land' => "{$kanals} کنال - " . round($remMarlas, 1) . " مرلہ",
-                'cash_amount' => round($cash),
-            ];
-        }
+    private function count($value, int $max = 50): int
+    {
+        return min($max, max(0, (int) $value));
     }
 
     public function render()
     {
         return view('livewire.tools.inheritance-calculator')
-            ->layout('layouts.front-app', ['title' => 'اسلامی شرعی وراثت و تقسیمِ اراضی کیلکولیٹر | AssanZameen']);
+            ->layout('layouts.front-app', ToolCatalog::meta('inheritance'));
     }
 }

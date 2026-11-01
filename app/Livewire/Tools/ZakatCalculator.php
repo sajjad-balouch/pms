@@ -52,6 +52,16 @@ class ZakatCalculator extends Component
 
     public function calculateZakat()
     {
+        // Manfi raqam bachat ko ghalat kam kar deti hai
+        foreach ([
+            'gold_rate_per_tola', 'silver_rate_per_tola', 'gold_tola', 'silver_tola', 'jewelry_cash_value',
+            'cash_in_hand', 'bank_savings', 'foreign_currency_pkr', 'prize_bonds', 'trading_plots_files_value',
+            'rental_income_retained', 'business_inventory', 'good_loans_receivable', 'immediate_debt_payable', 'unpaid_bills_salaries',
+        ] as $field) {
+            $this->{$field} = max(0, (float) $this->{$field});
+        }
+        $this->nisab_standard = $this->nisab_standard === 'gold' ? 'gold' : 'silver';
+
         // 1. Calculate Nisab Threshold
         if ($this->nisab_standard === 'silver') {
             // 52.5 Tola Chandi (Standard for mixed wealth & currency)
@@ -100,6 +110,6 @@ class ZakatCalculator extends Component
     public function render()
     {
         return view('livewire.tools.zakat-calculator')
-            ->layout('layouts.front-app', ['title' => 'آسان شرعی زکوٰۃ کیلکولیٹر و رئیل اسٹیٹ زکوٰۃ شیڈول | AssanZameen']);
+            ->layout('layouts.front-app', \App\Support\Tools\ToolCatalog::meta('zakat'));
     }
 }

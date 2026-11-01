@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-[#070a13] text-slate-100 py-10 px-4 sm:px-6 lg:px-8 w-full overflow-x-hidden"  style="font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif; line-height: 1.8;">
+<div class="min-h-screen bg-[#070a13] text-slate-100 py-10 px-4 sm:px-6 lg:px-8 w-full overflow-x-hidden">
 
     <!-- Print & Flexbox Layout Styling -->
     <style>
@@ -86,15 +86,15 @@
         <div class="text-center space-y-3 no-print w-full">
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider">
                 <i class="fa-solid fa-ruler-combined text-sm"></i>
-                <span>Patwari Land Cadastral & Irregular Area Engine</span>
+                <span>{{ __('Marla, kanal, acre and more') }}</span>
             </div>
             
-            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight" style="font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif; line-height: 1.8;">
-                پٹواری اراضی کنورٹر و ٹیڑھے پلاٹ کا رقبہ
+            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                {{ __('Land Unit Converter & Plot Area') }}
             </h1>
             
             <p class="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                4 مختلف اضلاع کے ٹیڑھے پلاٹ کا دقیق مرلہ اور لائیو خاکہ نکالیں یا کرم، سرساہی، گز، مرلہ، کنال اور ایکڑ کی دو طرفہ پیمائش کو تبدیل کریں۔
+                {{ __('Convert marla, kanal, acre, karam and sarsahi, and measure the area of an irregular plot.') }}
             </p>
         </div>
 
@@ -106,26 +106,26 @@
                 <button type="button" wire:click="$set('activeTab', 'irregular')" 
                         class="px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer w-1/2 sm:w-auto justify-center {{ $activeTab === 'irregular' ? 'bg-amber-500 text-slate-950 font-black shadow-md' : 'text-slate-400 hover:text-white' }}">
                     <i class="fa-solid fa-draw-polygon"></i>
-                    <span>ٹیڑھا پلاٹ (4 Sides)</span>
+                    <span>{{ __('Irregular plot') }}</span>
                 </button>
                 <button type="button" wire:click="$set('activeTab', 'converter')" 
                         class="px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer w-1/2 sm:w-auto justify-center {{ $activeTab === 'converter' ? 'bg-amber-500 text-slate-950 font-black shadow-md' : 'text-slate-400 hover:text-white' }}">
                     <i class="fa-solid fa-arrows-rotate"></i>
-                    <span>اکائی کنورٹر (Units)</span>
+                    <span>{{ __('Unit converter') }}</span>
                 </button>
             </div>
 
             <!-- Standard Selector (225 vs 272.25) -->
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <span class="text-xs font-bold text-slate-400">مرلہ پیمائش:</span>
+                <span class="text-xs font-bold text-slate-400">{{ __('Marla size:') }}</span>
                 <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
                     <button type="button" wire:click="$set('standard', 'society')" 
                             class="px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer {{ $standard === 'society' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white' }}">
-                        سوسائٹی (225 Sq Ft)
+                        {{ __('Society (225 sq ft)') }}
                     </button>
                     <button type="button" wire:click="$set('standard', 'revenue')" 
                             class="px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer {{ $standard === 'revenue' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white' }}">
-                        پٹواری / سرکاری (272.25 Sq Ft)
+                        {{ __('Revenue (272.25 sq ft)') }}
                     </button>
                 </div>
             </div>
@@ -146,7 +146,7 @@
                         <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
                             <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
                                 <i class="fa-solid fa-compass-drafting text-amber-400"></i>
-                                <span>چاروں اطراف کی لمبائی فٹ میں درج کریں</span>
+                                <span>{{ __('Enter all four sides in feet') }}</span>
                             </h3>
                             <span class="text-[11px] text-slate-400 font-mono">1 Marla = {{ $marlaSqFt }} Sq Ft</span>
                         </div>
@@ -154,25 +154,25 @@
                         <!-- 4 Sides Grid -->
                         <div class="grid grid-cols-2 gap-3 w-full">
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">شمال / اوپر کی لمبائی (فٹ)</label>
+                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">{{ __('North side (ft)') }}</label>
                                 <input type="number" step="any" wire:model.live.debounce.300ms="side_north" placeholder="e.g. 50"
                                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white font-mono font-bold focus:border-amber-500 outline-none">
                             </div>
 
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">جنوب / نیچے کی لمبائی (فٹ)</label>
+                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">{{ __('South side (ft)') }}</label>
                                 <input type="number" step="any" wire:model.live.debounce.300ms="side_south" placeholder="e.g. 45"
                                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white font-mono font-bold focus:border-amber-500 outline-none">
                             </div>
 
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">مشرق / دائیں چوڑائی (فٹ)</label>
+                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">{{ __('East side (ft)') }}</label>
                                 <input type="number" step="any" wire:model.live.debounce.300ms="side_east" placeholder="e.g. 30"
                                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white font-mono font-bold focus:border-amber-500 outline-none">
                             </div>
 
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">مغرب / بائیں چوڑائی (فٹ)</label>
+                                <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">{{ __('West side (ft)') }}</label>
                                 <input type="number" step="any" wire:model.live.debounce.300ms="side_west" placeholder="e.g. 35"
                                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white font-mono font-bold focus:border-amber-500 outline-none">
                             </div>
@@ -181,21 +181,21 @@
                         <!-- Optional Diagonal (Kona / Watar) -->
                         <div class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-1.5 w-full">
                             <label class="block text-xs font-bold text-amber-400 flex items-center justify-between">
-                                <span>ترچھا وتر / ڈائگنل فاصلہ (Diagonal - اختیاری)</span>
-                                <span class="text-[10px] text-slate-500 font-normal">100% ہیرون فارمولا</span>
+                                <span>{{ __('Diagonal (optional)') }}</span>
+                                <span class="text-[10px] text-slate-500 font-normal">{{ __('More accurate') }}</span>
                             </label>
-                            <input type="number" step="any" wire:model.live.debounce.300ms="diagonal" placeholder="e.g. 60 (ایک کونے سے مخالف کونے کا فاصلہ)"
+                            <input type="number" step="any" wire:model.live.debounce.300ms="diagonal" placeholder="{{ __('North-west corner to south-east corner') }}"
                                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white font-mono font-bold focus:border-amber-500 outline-none">
-                            <span class="text-[10px] text-slate-500 block">اگر وتر معلوم نہ ہو تو اوسط فارمولے سے تخمینہ ہو گا، وتر درج کرنے سے رقبہ سو فیصد درست آئے گا۔</span>
+                            <span class="text-[10px] text-slate-500 block">{{ __('Without the diagonal, the area is an average-based estimate. Adding it gives a much more accurate result.') }}</span>
                         </div>
 
                         <!-- Visual SVG Polygon Plot Canvas (Live Coordinates Based) -->
                         <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 text-center space-y-2 w-full">
                             <div class="flex items-center justify-between px-1">
                                 <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-draw-polygon"></i> لائیو پلاٹ خاکہ (Dynamic Live Geometry)
+                                    <i class="fa-solid fa-draw-polygon"></i> {{ __('Plot sketch') }}
                                 </span>
-                                <span class="text-[10px] text-slate-500 font-mono">Proportionate Map</span>
+                                <span class="text-[10px] text-slate-500 font-mono">{{ __('Sketch only') }}</span>
                             </div>
 
                             <div class="w-full h-52 bg-slate-900/60 rounded-xl border border-slate-800/80 flex items-center justify-center p-2 relative overflow-hidden">
@@ -224,7 +224,7 @@
                                         <text x="{{ ($svgCoordinates['p1']['x'] + $svgCoordinates['p3']['x']) / 2 }}" 
                                               y="{{ ($svgCoordinates['p1']['y'] + $svgCoordinates['p3']['y']) / 2 - 5 }}" 
                                               fill="#ef4444" font-size="10" font-weight="bold" text-anchor="middle" font-family="monospace">
-                                            وتر: {{ $diagonal }}'
+                                            {{ __('Diagonal:') }} {{ $diagonal }}'
                                         </text>
                                     @endif
 
@@ -237,22 +237,22 @@
                                     <!-- Dynamic Live Dimension Labels -->
                                     <text x="{{ $svgCoordinates['northLabel']['x'] }}" y="{{ $svgCoordinates['northLabel']['y'] }}" 
                                           fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" font-family="monospace">
-                                        شمال: {{ $side_north }}'
+                                        {{ __('N:') }} {{ $side_north }}'
                                     </text>
 
                                     <text x="{{ $svgCoordinates['southLabel']['x'] }}" y="{{ $svgCoordinates['southLabel']['y'] }}" 
                                           fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle" font-family="monospace">
-                                        جنوب: {{ $side_south }}'
+                                        {{ __('S:') }} {{ $side_south }}'
                                     </text>
 
                                     <text x="{{ $svgCoordinates['eastLabel']['x'] }}" y="{{ $svgCoordinates['eastLabel']['y'] }}" 
                                           fill="#ffffff" font-size="11" font-weight="bold" text-anchor="start" font-family="monospace">
-                                        مشرق: {{ $side_east }}'
+                                        {{ __('E:') }} {{ $side_east }}'
                                     </text>
 
                                     <text x="{{ $svgCoordinates['westLabel']['x'] }}" y="{{ $svgCoordinates['westLabel']['y'] }}" 
                                           fill="#ffffff" font-size="11" font-weight="bold" text-anchor="end" font-family="monospace">
-                                        مغرب: {{ $side_west }}'
+                                        {{ __('W:') }} {{ $side_west }}'
                                     </text>
                                 </svg>
                             </div>
@@ -265,39 +265,40 @@
                         <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
                             <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
                                 <i class="fa-solid fa-arrows-rotate text-emerald-400"></i>
-                                <span>مقدار اور اکائی درج کریں</span>
+                                <span>{{ __('Enter a value and unit') }}</span>
                             </h3>
                             <span class="text-[11px] text-slate-400 font-mono">1 Marla = {{ $marlaSqFt }} Sq Ft</span>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">مقدار (Value to Convert)</label>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">{{ __('Value') }}</label>
                             <input type="number" step="any" wire:model.live.debounce.300ms="input_value" 
                                    class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-amber-400 font-mono font-bold focus:border-amber-500 outline-none">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">موجودہ اکائی (From Unit)</label>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">{{ __('From unit') }}</label>
                             <select wire:model.live="from_unit" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-xs text-white focus:border-amber-500 outline-none font-bold">
-                                <option value="marla">مرلہ (Marla)</option>
-                                <option value="kanal">کنال (Kanal)</option>
-                                <option value="sqft">مربع فٹ (Square Feet)</option>
-                                <option value="sqyards">مربع گز (Square Yards / Gaz)</option>
-                                <option value="sarsahi">سرساہی (Sarsahi)</option>
-                                <option value="karam">مربع کرم (Square Karam)</option>
-                                <option value="acre">ایکڑ / قلعہ (Acre / Killa)</option>
-                                <option value="murabba">مربع اراضی (Murabba - 25 Acres)</option>
+                                <option value="marla">{{ __('Marla') }}</option>
+                                <option value="kanal">{{ __('Kanal') }}</option>
+                                <option value="sqft">{{ __('Square feet') }}</option>
+                                <option value="sqyards">{{ __('Square yards') }}</option>
+                                <option value="sarsahi">{{ __('Sarsahi') }}</option>
+                                <option value="karam">{{ __('Square karam') }}</option>
+                                <option value="sqm">{{ __('Square meters') }}</option>
+                                    <option value="acre">{{ __('Acre') }}</option>
+                                <option value="murabba">{{ __('Murabba (25 acres)') }}</option>
                             </select>
                         </div>
 
                         <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-2 text-xs text-slate-400">
-                            <span class="font-bold text-white block">پٹواری اراضی پیمائش کا مروجہ نظام:</span>
+                            <span class="font-bold text-white block">{{ __('Revenue measurement system:') }}</span>
                             <ul class="list-disc list-inside space-y-1 text-[11px]">
-                                <li>1 مرلہ = 9 سرساہی</li>
-                                <li>1 کنال = 20 مرلے</li>
-                                <li>1 ایکڑ (قلعہ) = 8 کنال (160 مرلے)</li>
-                                <li>1 مربع = 25 ایکڑ (200 کنال)</li>
-                                <li>1 کرم (سرکاری) = 5.5 فٹ (66 انچ)</li>
+                                <li>{{ __('1 marla = 9 sarsahi') }}</li>
+                                <li>{{ __('1 kanal = 20 marla') }}</li>
+                                <li>{{ __('1 acre = 8 kanal (160 revenue marla)') }}</li>
+                                <li>{{ __('1 murabba = 25 acres (200 revenue kanal)') }}</li>
+                                <li>{{ __('1 revenue karam = 5.5 ft (66 in)') }}</li>
                             </ul>
                         </div>
                     </div>
@@ -310,13 +311,13 @@
                 
                 <!-- Quick Print / Share Actions -->
                 <div id="action-bar" class="no-print flex items-center justify-between gap-3 p-4 bg-slate-900 rounded-2xl border border-slate-800 w-full">
-                    <span class="text-xs font-bold text-slate-400">پیمائش سمری و تصدیق:</span>
+                    <span class="text-xs font-bold text-slate-400">{{ __('Measurement summary:') }}</span>
                     <div class="flex items-center gap-2">
                         <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-slate-700 cursor-pointer">
-                            <i class="fa-solid fa-print text-amber-400"></i> پرنٹ / PDF
+                            <i class="fa-solid fa-print text-amber-400"></i> {{ __('Print / PDF') }}
                         </button>
 
-                        <a href="https://wa.me/?text={{ urlencode('اراضی پیمائش و پلاٹ رقبہ رپورٹ: ' . ($activeTab === 'irregular' ? $plotResult['patwari_formatted'] . ' (' . $plotResult['marlas'] . ' مرلہ)' : $convertedUnits['patwari_formatted']) . '۔ آسان زمین ٹول پر تصدیق کریں: ' . url()->current()) }}" 
+                        <a href="https://wa.me/?text={{ urlencode(__('Land measurement:') . ' ' . ($activeTab === 'irregular' ? $plotResult['patwari_formatted'] : $convertedUnits['patwari_formatted']) . ' - ' . url()->current()) }}" 
                            target="_blank" 
                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer">
                             <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
@@ -330,14 +331,14 @@
                     <!-- Sheet Header -->
                     <div class="border-b border-slate-800 pb-4 flex items-center justify-between w-full">
                         <div>
-                            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">Official Measurement Certificate</span>
-                            <h2 class="text-xl font-black text-white">پٹواری اراضی پیمائش و رقبہ شیڈول</h2>
+                            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">{{ __('Estimate only') }}</span>
+                            <h2 class="text-xl font-black text-white">{{ __('Land measurement report') }}</h2>
                             <p class="text-xs text-slate-400 mt-0.5">
-                                اسٹینڈرڈ: <strong class="text-white">{{ $standard === 'society' ? 'ہاؤسنگ سوسائٹیز (225 فٹ فی مرلہ)' : 'سرکاری ریونیو پٹواری (272.25 فٹ فی مرلہ)' }}</strong>
+                                {{ __('Standard:') }} <strong class="text-white">{{ $standard === 'society' ? __('Society (225 sq ft)') : __('Revenue (272.25 sq ft)') }}</strong>
                             </p>
                         </div>
                         <div class="text-right">
-                            <span class="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">Verified Math</span>
+                            <span class="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg">{{ __('Calculated') }}</span>
                         </div>
                     </div>
 
@@ -345,7 +346,7 @@
                         <!-- IRREGULAR PLOT REPORT OUTPUT -->
                         <div class="p-5 bg-gradient-to-r from-emerald-500/10 via-slate-950 to-slate-950 rounded-2xl border border-emerald-500/30 flex items-center justify-between w-full">
                             <div>
-                                <span class="text-xs font-bold text-slate-400 block">پٹواری مساحت فارمیٹ (کنال - مرلہ - سرساہی):</span>
+                                <span class="text-xs font-bold text-slate-400 block">{{ __('Kanal - marla - sarsahi:') }}</span>
                                 <span class="text-2xl sm:text-3xl font-black text-emerald-400 font-mono mt-1 block">
                                     {{ $plotResult['patwari_formatted'] }}
                                 </span>
@@ -356,22 +357,22 @@
                         <!-- Plot Dimensions Breakdown Grid -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
                             <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                                <span class="text-[10px] text-slate-400 uppercase font-bold block">کل رقبہ مرلہ</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-bold block">{{ __('Total marla') }}</span>
                                 <span class="text-base font-black text-white font-mono mt-0.5 block">{{ $plotResult['marlas'] }}</span>
                             </div>
 
                             <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                                <span class="text-[10px] text-slate-400 uppercase font-bold block">کل مربع فٹ (Sq Ft)</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-bold block">{{ __('Total sq ft') }}</span>
                                 <span class="text-base font-black text-amber-400 font-mono mt-0.5 block">{{ number_format($plotResult['sqft']) }}</span>
                             </div>
 
                             <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                                <span class="text-[10px] text-slate-400 uppercase font-bold block">مربع گز (Square Yards)</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-bold block">{{ __('Square yards') }}</span>
                                 <span class="text-base font-black text-sky-400 font-mono mt-0.5 block">{{ number_format($plotResult['sqyards']) }}</span>
                             </div>
 
                             <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                                <span class="text-[10px] text-slate-400 uppercase font-bold block">کنال شیئر</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-bold block">{{ __('Kanal') }}</span>
                                 <span class="text-base font-black text-indigo-400 font-mono mt-0.5 block">{{ $plotResult['kanals'] }}</span>
                             </div>
                         </div>
@@ -381,11 +382,11 @@
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid {{ $plotResult['is_diagonal_used'] ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-amber-400' }}"></i>
                                 <span class="font-bold">
-                                    {{ $plotResult['is_diagonal_used'] ? 'ہیرون کا تثلیثی فارمولا (100% دقیق و مستند رقبہ)' : 'اوسط فارمولا (Average Length x Average Width)' }}
+                                    {{ $plotResult['is_diagonal_used'] ? __('Worked out from the four sides and the diagonal') : __('Estimate: average length x average width') }}
                                 </span>
                             </div>
                             <p class="text-[11px] text-slate-400 mt-1">
-                                {{ $plotResult['is_diagonal_used'] ? 'آپ نے ترچھا وتر درج کیا ہے جس سے چاروں اضلاع کے زاویوں کا درست رقبہ نکالا گیا ہے۔' : 'پلاٹ اگر زیادہ ترچھا ہو تو وتر درج کرنے سے رقبے میں چند انچ کا بھی فرق نہیں رہتا۔' }}
+                                {{ $plotResult['is_diagonal_used'] ? __('The diagonal splits the plot into two triangles, which gives an accurate area if the measurements are right.') : __('If the plot is crooked, add the diagonal for a more accurate area.') }}
                             </p>
                         </div>
 
@@ -393,7 +394,7 @@
                         <!-- UNIT CONVERTER REPORT OUTPUT -->
                         <div class="p-5 bg-gradient-to-r from-amber-500/10 via-slate-950 to-slate-950 rounded-2xl border border-amber-500/30 flex items-center justify-between w-full">
                             <div>
-                                <span class="text-xs font-bold text-slate-400 block">{{ $input_value }} {{ ucfirst($from_unit) }} کی پٹواری تقسیم:</span>
+                                <span class="text-xs font-bold text-slate-400 block">{{ $input_value }} {{ __(ucfirst($from_unit)) }} {{ __('converts to:') }}</span>
                                 <span class="text-2xl sm:text-3xl font-black text-amber-400 font-mono mt-1 block">
                                     {{ $convertedUnits['patwari_formatted'] }}
                                 </span>
@@ -406,46 +407,56 @@
                             <table class="w-full text-left text-xs border-collapse">
                                 <thead>
                                     <tr class="border-b border-slate-800 text-slate-400 uppercase font-bold text-[10px]">
-                                        <th class="py-2.5 px-3">پیمائش کی اکائی</th>
-                                        <th class="py-2.5 px-3">مساوی مقدار</th>
-                                        <th class="py-2.5 px-3 text-right">فارمولا معیار</th>
+                                        <th class="py-2.5 px-3">{{ __('Unit') }}</th>
+                                        <th class="py-2.5 px-3">{{ __('Equal to') }}</th>
+                                        <th class="py-2.5 px-3 text-right">{{ __('Formula') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-800/60 text-slate-200 font-medium">
                                     <tr>
-                                        <td class="py-2.5 px-3 font-bold text-white">مرلہ (Marla)</td>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Marla') }}</td>
                                         <td class="py-2.5 px-3 font-mono font-bold text-emerald-400 text-sm">{{ $convertedUnits['marla'] }}</td>
                                         <td class="py-2.5 px-3 text-right text-slate-400 font-mono">{{ $marlaSqFt }} Sq Ft</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2.5 px-3 font-bold text-white">کنال (Kanal)</td>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Kanal') }}</td>
                                         <td class="py-2.5 px-3 font-mono font-bold text-white">{{ $convertedUnits['kanal'] }}</td>
                                         <td class="py-2.5 px-3 text-right text-slate-400 font-mono">20 Marla</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2.5 px-3 font-bold text-white">مربع فٹ (Square Feet)</td>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Square feet') }}</td>
                                         <td class="py-2.5 px-3 font-mono font-bold text-amber-400">{{ number_format($convertedUnits['sqft']) }}</td>
-                                        <td class="py-2.5 px-3 text-right text-slate-400 font-mono">Sq Ft</td>
+                                        <td class="py-2.5 px-3 text-right text-slate-400 font-mono">{{ __('sq ft') }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2.5 px-3 font-bold text-white">مربع گز (Square Yards / Gaz)</td>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Square yards') }}</td>
                                         <td class="py-2.5 px-3 font-mono font-bold text-white">{{ number_format($convertedUnits['sqyards']) }}</td>
                                         <td class="py-2.5 px-3 text-right text-slate-400 font-mono">9 Sq Ft</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2.5 px-3 font-bold text-white">سرساہی (Sarsahi)</td>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Sarsahi') }}</td>
                                         <td class="py-2.5 px-3 font-mono font-bold text-sky-400">{{ $convertedUnits['sarsahi'] }}</td>
                                         <td class="py-2.5 px-3 text-right text-slate-400 font-mono">1/9 Marla</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2.5 px-3 font-bold text-white">مربع کرم (Square Karam)</td>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Square karam') }}</td>
                                         <td class="py-2.5 px-3 font-mono font-bold text-white">{{ $convertedUnits['karam'] }}</td>
                                         <td class="py-2.5 px-3 text-right text-slate-400 font-mono">{{ $standard === 'society' ? "5.0' x 5.0'" : "5.5' x 5.5'" }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2.5 px-3 font-bold text-white">ایکڑ / قلعہ (Acre / Killa)</td>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Acre') }}</td>
                                         <td class="py-2.5 px-3 font-mono font-bold text-white">{{ $convertedUnits['acre'] }}</td>
-                                        <td class="py-2.5 px-3 text-right text-slate-400 font-mono">8 Kanals</td>
+                                        <td class="py-2.5 px-3 text-right text-slate-400 font-mono">43,560 {{ __('sq ft') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Murabba (25 acres)') }}</td>
+                                        <td class="py-2.5 px-3 font-mono font-bold text-white">{{ $convertedUnits['murabba'] }}</td>
+                                        <td class="py-2.5 px-3 text-right text-slate-400 font-mono">25 {{ __('Acre') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2.5 px-3 font-bold text-white">{{ __('Square meters') }}</td>
+                                        <td class="py-2.5 px-3 font-mono font-bold text-white">{{ $convertedUnits['sqm'] }}</td>
+                                        <td class="py-2.5 px-3 text-right text-slate-400 font-mono">10.764 {{ __('sq ft') }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -454,8 +465,8 @@
 
                     <!-- Certified Footer Notes -->
                     <div class="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
-                        <span>نوٹ: یہ پیمائش پنجاب لینڈ ریونیو ایکٹ اور منظور شدہ جیومیٹرک اصولوں کے عین مطابق ہے۔</span>
-                        <span class="font-mono">AssanZameen Cadastral Engine</span>
+                        <span>{{ __('This is a calculated estimate. Get the final measurement from the patwari or a licensed surveyor.') }}</span>
+                        <span class="font-mono">Assan Zameen</span>
                     </div>
 
                 </div>
@@ -465,4 +476,5 @@
         </div>
 
     </div>
+    @include('livewire.tools.partials.tool-footer', ['toolKey' => 'land'])
 </div>

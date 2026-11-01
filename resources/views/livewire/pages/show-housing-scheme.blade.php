@@ -197,7 +197,7 @@
                     <i class="fa-solid fa-building-circle-check text-amber-300/80 w-4 text-center" aria-hidden="true"></i>{{ $t('Society NOC Directory', 'سوسائٹی NOC ڈائریکٹری') }}
                 </a>
                 <a href="{{ route('tools.legal-scanner') }}" wire:navigate class="flex items-center gap-2 text-slate-300 hover:text-amber-300 transition-colors">
-                    <i class="fa-solid fa-shield-halved text-amber-300/80 w-4 text-center" aria-hidden="true"></i>{{ $t('AI Property Wakeel', 'AI پراپرٹی وکیل') }}
+                    <i class="fa-solid fa-file-circle-check text-amber-300/80 w-4 text-center" aria-hidden="true"></i>{{ $t('Property Document Checker', 'پراپرٹی دستاویز چیکر') }}
                 </a>
             </div>
         </aside>

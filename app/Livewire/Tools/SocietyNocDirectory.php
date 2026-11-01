@@ -64,6 +64,6 @@ class SocietyNocDirectory extends Component
         return view('livewire.tools.society-noc-directory', [
             'societies' => $societies,
             'cities' => $cities,
-        ])->layout('layouts.front-app', ['title' => 'پنجاب ہاؤسنگ سوسائٹی NOC و قانونی اسٹیٹس ڈائریکٹری | AssanZameen']);
+        ])->layout('layouts.front-app', \App\Support\Tools\ToolCatalog::meta('society'));
     }
 }

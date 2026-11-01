@@ -18,12 +18,16 @@
     $footerPages = Cache::remember('footer.pages', 3600, fn () => \App\Models\Page::where('is_active', true)->get(['title', 'slug']));
 
     $footerTools = [
-        ['route' => 'tools.legal-scanner',     'ur' => 'AI پراپرٹی وکیل',         'en' => 'AI Property Wakeel'],
+        ['route' => 'tools.legal-scanner',     'ur' => 'پراپرٹی دستاویز چیکر',         'en' => 'Property Document Checker'],
         ['route' => 'tools.tax-calculator',    'ur' => 'ٹیکس و رجسٹری کیلکولیٹر',  'en' => 'Tax & Registry Calculator'],
         ['route' => 'tools.land-converter',    'ur' => 'پٹواری اراضی کنورٹر',      'en' => 'Patwari Land Converter'],
         ['route' => 'tools.bayana-generator',  'ur' => 'اقرار نامہ بیعانہ میکر',   'en' => 'Bayana Agreement Maker'],
         ['route' => 'tools.society-directory', 'ur' => 'سوسائٹی NOC ڈائریکٹری',    'en' => 'Society NOC Directory'],
         ['route' => 'tools.rent-generator',    'ur' => 'کرایہ نامہ میکر',          'en' => 'Rent Agreement Maker'],
+        ['route' => 'tools.inheritance-calculator', 'ur' => 'وراثت کیلکولیٹر', 'en' => 'Inheritance Calculator'],
+        ['route' => 'tools.zakat-calculator', 'ur' => 'زکوٰۃ کیلکولیٹر', 'en' => 'Zakat Calculator'],
+        ['route' => 'tools.government-links', 'ur' => 'سرکاری لنکس گائیڈ', 'en' => 'Government Links Guide'],
+        ['route' => 'tools.cv-maker', 'ur' => 'سی وی میکر', 'en' => 'CV Maker'],
     ];
 
     $hasNewsletter = Route::has('newsletter.subscribe');
@@ -177,6 +181,7 @@
                     @foreach($footerTools as $tool)
                         <li><a href="{{ route($tool['route']) }}" class="{{ $linkClass }}">{{ $isUr ? $tool['ur'] : $tool['en'] }}</a></li>
                     @endforeach
+                    <li><a href="{{ route('tools.index') }}" class="{{ $linkClass }} text-amber-300">{{ $t('All tools', 'تمام ٹولز') }}</a></li>
                 </ul>
             </nav>
         </div>

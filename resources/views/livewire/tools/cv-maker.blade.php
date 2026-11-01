@@ -29,15 +29,15 @@
         <div class="text-center space-y-3 w-full">
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-bold uppercase tracking-wider">
                 <i class="fa-solid fa-file-user text-sm"></i>
-                <span>ATS-Compliant English Resume & CV Studio</span>
+                <span>{{ __('Clean one-page English CV') }}</span>
             </div>
             
             <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
-                Professional Resume & CV Builder
+                {{ __('CV Maker') }}
             </h1>
             
             <p class="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                Design a recruiter-ready, ATS-friendly curriculum vitae in minutes. Fill in your career details and export an international standard A4 PDF instantly.
+                {{ __('Build a clean one-page CV with a live preview and print it or save it as a PDF.') }}
             </p>
         </div>
 
@@ -48,12 +48,12 @@
                 
                 <!-- Color Theme Selector -->
                 <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Accent Color:</span>
+                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">{{ __('Accent color:') }}</span>
                     <div class="flex items-center gap-2">
-                        <button type="button" title="Corporate Blue" wire:click="$set('theme_color', '#0284c7')" class="w-6 h-6 rounded-full bg-sky-600 border-2 {{ $theme_color === '#0284c7' ? 'border-white scale-110 shadow-lg' : 'border-transparent' }}"></button>
-                        <button type="button" title="Emerald Green" wire:click="$set('theme_color', '#059669')" class="w-6 h-6 rounded-full bg-emerald-600 border-2 {{ $theme_color === '#059669' ? 'border-white scale-110 shadow-lg' : 'border-transparent' }}"></button>
-                        <button type="button" title="Warm Amber" wire:click="$set('theme_color', '#d97706')" class="w-6 h-6 rounded-full bg-amber-600 border-2 {{ $theme_color === '#d97706' ? 'border-white scale-110 shadow-lg' : 'border-transparent' }}"></button>
-                        <button type="button" title="Executive Slate" wire:click="$set('theme_color', '#334155')" class="w-6 h-6 rounded-full bg-slate-700 border-2 {{ $theme_color === '#334155' ? 'border-white scale-110 shadow-lg' : 'border-transparent' }}"></button>
+                        <button type="button" title="Blue" wire:click="$set('theme_color', '#0284c7')" class="w-6 h-6 rounded-full bg-sky-600 border-2 {{ $theme_color === '#0284c7' ? 'border-white scale-110 shadow-lg' : 'border-transparent' }}"></button>
+                        <button type="button" title="Green" wire:click="$set('theme_color', '#059669')" class="w-6 h-6 rounded-full bg-emerald-600 border-2 {{ $theme_color === '#059669' ? 'border-white scale-110 shadow-lg' : 'border-transparent' }}"></button>
+                        <button type="button" title="Amber" wire:click="$set('theme_color', '#d97706')" class="w-6 h-6 rounded-full bg-amber-600 border-2 {{ $theme_color === '#d97706' ? 'border-white scale-110 shadow-lg' : 'border-transparent' }}"></button>
+                        <button type="button" title="Slate" wire:click="$set('theme_color', '#334155')" class="w-6 h-6 rounded-full bg-slate-700 border-2 {{ $theme_color === '#334155' ? 'border-white scale-110 shadow-lg' : 'border-transparent' }}"></button>
                     </div>
                 </div>
 
@@ -62,39 +62,39 @@
                     <span class="text-xs font-bold text-sky-400 uppercase tracking-wider block">1. Personal Information</span>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[10px] text-slate-400 uppercase mb-1">Full Name</label>
+                            <label class="block text-[10px] text-slate-400 uppercase mb-1">{{ __('Full name') }}</label>
                             <input type="text" wire:model.live="full_name" placeholder="John Doe" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-sky-500">
                         </div>
                         <div>
-                            <label class="block text-[10px] text-slate-400 uppercase mb-1">Professional Title</label>
+                            <label class="block text-[10px] text-slate-400 uppercase mb-1">{{ __('Job title') }}</label>
                             <input type="text" wire:model.live="job_title" placeholder="Lead Software Architect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-sky-500">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[10px] text-slate-400 uppercase mb-1">Email Address</label>
+                            <label class="block text-[10px] text-slate-400 uppercase mb-1">{{ __('Email address') }}</label>
                             <input type="email" wire:model.live="email" placeholder="john@example.com" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono outline-none focus:border-sky-500">
                         </div>
                         <div>
-                            <label class="block text-[10px] text-slate-400 uppercase mb-1">Phone Number</label>
+                            <label class="block text-[10px] text-slate-400 uppercase mb-1">{{ __('Phone number') }}</label>
                             <input type="text" wire:model.live="phone" placeholder="+1 (555) 000-0000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono outline-none focus:border-sky-500">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[10px] text-slate-400 uppercase mb-1">Location / City</label>
+                            <label class="block text-[10px] text-slate-400 uppercase mb-1">{{ __('City') }}</label>
                             <input type="text" wire:model.live="city" placeholder="City, Country" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-sky-500">
                         </div>
                         <div>
-                            <label class="block text-[10px] text-slate-400 uppercase mb-1">LinkedIn / Portfolio URL</label>
+                            <label class="block text-[10px] text-slate-400 uppercase mb-1">{{ __('LinkedIn or portfolio link') }}</label>
                             <input type="text" wire:model.live="linkedin_url" placeholder="linkedin.com/in/username" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono outline-none focus:border-sky-500">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">Executive Summary</label>
+                        <label class="block text-[10px] text-slate-400 uppercase font-bold mb-1">{{ __('Summary') }}</label>
                         <textarea rows="3" wire:model.live="summary" placeholder="Write a crisp, high-impact professional summary..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white leading-relaxed outline-none focus:border-sky-500"></textarea>
                     </div>
                 </div>
@@ -104,31 +104,31 @@
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">2. Work Experience</span>
                         <button type="button" wire:click="addExperience" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Add Experience
+                            <i class="fa-solid fa-plus text-[10px]"></i> {{ __('Add experience') }}
                         </button>
                     </div>
 
                     @foreach($experiences as $index => $exp)
                         <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 relative">
-                            <button type="button" wire:click="removeExperience({{ $index }})" class="absolute top-2.5 right-2.5 text-rose-400 hover:text-rose-300 text-xs cursor-pointer" title="Delete Experience">
+                            <button type="button" wire:click="removeExperience({{ $index }})" class="absolute top-2.5 right-2.5 text-rose-400 hover:text-rose-300 text-xs cursor-pointer" title="{{ __('Delete') }}">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                             <div class="grid grid-cols-2 gap-2 pr-6">
                                 <div>
-                                    <label class="block text-[9px] text-slate-400 uppercase">Role / Job Title</label>
+                                    <label class="block text-[9px] text-slate-400 uppercase">{{ __('Job title') }}</label>
                                     <input type="text" wire:model.live="experiences.{{ $index }}.role" placeholder="e.g. Senior Software Architect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[9px] text-slate-400 uppercase">Company / Organization</label>
+                                    <label class="block text-[9px] text-slate-400 uppercase">{{ __('Company') }}</label>
                                     <input type="text" wire:model.live="experiences.{{ $index }}.company" placeholder="e.g. Acme Corporation" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-[9px] text-slate-400 uppercase">Employment Dates</label>
+                                <label class="block text-[9px] text-slate-400 uppercase">{{ __('Dates') }}</label>
                                 <input type="text" wire:model.live="experiences.{{ $index }}.duration" placeholder="e.g. 2022 - Present" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none">
                             </div>
                             <div>
-                                <label class="block text-[9px] text-slate-400 uppercase">Key Responsibilities & Achievements</label>
+                                <label class="block text-[9px] text-slate-400 uppercase">{{ __('Duties and achievements') }}</label>
                                 <textarea rows="2" wire:model.live="experiences.{{ $index }}.details" placeholder="Describe measurable accomplishments and responsibilities..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white outline-none"></textarea>
                             </div>
                         </div>
@@ -140,27 +140,27 @@
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">3. Education</span>
                         <button type="button" wire:click="addEducation" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-slate-950 rounded-lg text-[11px] font-bold transition flex items-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Add Education
+                            <i class="fa-solid fa-plus text-[10px]"></i> {{ __('Add education') }}
                         </button>
                     </div>
 
                     @foreach($educations as $index => $edu)
                         <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 relative">
-                            <button type="button" wire:click="removeEducation({{ $index }})" class="absolute top-2.5 right-2.5 text-rose-400 hover:text-rose-300 text-xs cursor-pointer" title="Delete Degree">
+                            <button type="button" wire:click="removeEducation({{ $index }})" class="absolute top-2.5 right-2.5 text-rose-400 hover:text-rose-300 text-xs cursor-pointer" title="{{ __('Delete') }}">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                             <div class="grid grid-cols-2 gap-2 pr-6">
                                 <div>
-                                    <label class="block text-[9px] text-slate-400 uppercase">Degree / Qualification</label>
+                                    <label class="block text-[9px] text-slate-400 uppercase">{{ __('Degree') }}</label>
                                     <input type="text" wire:model.live="educations.{{ $index }}.degree" placeholder="e.g. BS Computer Science" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[9px] text-slate-400 uppercase">Institution / University</label>
+                                    <label class="block text-[9px] text-slate-400 uppercase">{{ __('Institute') }}</label>
                                     <input type="text" wire:model.live="educations.{{ $index }}.institute" placeholder="e.g. Oxford University" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-[9px] text-slate-400 uppercase">Graduation Year</label>
+                                <label class="block text-[9px] text-slate-400 uppercase">{{ __('Year') }}</label>
                                 <input type="text" wire:model.live="educations.{{ $index }}.year" placeholder="e.g. 2017 - 2021" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono outline-none">
                             </div>
                         </div>
@@ -171,11 +171,11 @@
                 <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">4. Core Competencies & Languages</span>
                     <div>
-                        <label class="block text-[10px] text-slate-400 uppercase mb-1">Key Skills (Comma separated):</label>
+                        <label class="block text-[10px] text-slate-400 uppercase mb-1">{{ __('Skills (separate with commas):') }}</label>
                         <input type="text" wire:model.live="skills" placeholder="Laravel, MySQL, REST APIs, Git" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-sky-500">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-slate-400 uppercase mb-1">Languages Spoken:</label>
+                        <label class="block text-[10px] text-slate-400 uppercase mb-1">{{ __('Languages:') }}</label>
                         <input type="text" wire:model.live="languages" placeholder="English (Professional), Urdu (Native)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-sky-500">
                     </div>
                 </div>
@@ -186,10 +186,10 @@
             <div class="cv-preview-col w-full space-y-4">
                 
                 <div class="flex items-center justify-between gap-3 p-4 bg-slate-900 rounded-2xl border border-slate-800 w-full">
-                    <span class="text-xs font-bold text-slate-400">Live Recruiter-Ready Preview:</span>
+                    <span class="text-xs font-bold text-slate-400">{{ __('Live preview:') }}</span>
                     <button type="button" onclick="printPerfectCV()" class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 text-white font-black rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-sky-500/20 cursor-pointer">
                         <i class="fa-solid fa-print"></i>
-                        <span>Download Resume (A4 PDF)</span>
+                        <span>{{ __('Print / Save PDF') }}</span>
                     </button>
                 </div>
 
@@ -446,4 +446,5 @@
             }, 300);
         }
     </script>
+    @include('livewire.tools.partials.tool-footer', ['toolKey' => 'cv'])
 </div>

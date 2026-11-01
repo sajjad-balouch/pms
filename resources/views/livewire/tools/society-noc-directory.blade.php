@@ -6,15 +6,18 @@
         <div class="text-center space-y-3 w-full">
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-bold uppercase tracking-wider">
                 <i class="fa-solid fa-building-circle-check text-sm"></i>
-                <span>Punjab Housing Schemes Regulatory Verification Registry</span>
+                <span>{{ __('Confirm with the authority before you buy') }}</span>
+            </div>
+            <div class="mt-3">
+                <a href="https://www.punjab-zameen.gov.pk/approvedSocieties" target="_blank" rel="noopener noreferrer" class="text-sm text-amber-300 hover:text-amber-200 underline">{{ __('Check the official PLRA society list') }}</a>
             </div>
             
-            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight" style="font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif; line-height: 1.8;">
-                ہاؤسنگ سوسائٹی NOC و قانونی اسٹیٹس چیکر
+            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                {{ __('Society NOC Directory') }}
             </h1>
             
             <p class="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                پلاٹ فائل یا زمین میں سرمایہ کاری سے پہلے سوسائٹی کا TMA، LDA، FDA یا RDA سے منظور شدہ این او سی، لے آؤٹ پلان (LOP) اور رہن شدہ پلاٹس کی تفصیل لائیو چیک کریں۔
+                {{ __('Look up the recorded approval status of housing societies before buying a plot or a file.') }}
             </p>
         </div>
 
@@ -25,14 +28,14 @@
                 <!-- Search Input -->
                 <div class="sm:col-span-6 relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="سوسائٹی کا نام، NOC نمبر یا ڈویلپر سرچ کریں..."
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('Search society, NOC number or developer...') }}"
                            class="w-full bg-slate-950 border border-slate-800 rounded-2xl pl-10 pr-4 py-3 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
                 </div>
 
                 <!-- City Filter -->
                 <div class="sm:col-span-3">
                     <select wire:model.live="filterCity" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500">
-                        <option value="">تمام اضلاع / شہر (All Cities)</option>
+                        <option value="">{{ __('All cities') }}</option>
                         @foreach($cities as $city)
                             <option value="{{ $city }}">{{ $city }}</option>
                         @endforeach
@@ -42,10 +45,10 @@
                 <!-- Status Filter -->
                 <div class="sm:col-span-3">
                     <select wire:model.live="filterStatus" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500">
-                        <option value="">تمام قانونی اسٹیٹس</option>
-                        <option value="approved">منظور شدہ (Approved NOC ✓)</option>
-                        <option value="under_process">زیرِ کارروائی (Under Process ⌛)</option>
-                        <option value="illegal">غیر منظور شدہ / غیر قانونی (Illegal ⚠)</option>
+                        <option value="">{{ __('All statuses') }}</option>
+                        <option value="approved">{{ __('Approved') }}</option>
+                        <option value="under_process">{{ __('Under process') }}</option>
+                        <option value="illegal">{{ __('Not approved') }}</option>
                     </select>
                 </div>
 
@@ -63,9 +66,9 @@
                     };
 
                     $statusBadgeText = match($item->status) {
-                        'approved' => 'منظور شدہ (Approved)',
-                        'under_process' => 'زیرِ جائزہ (Under Process)',
-                        'illegal' => 'غیر قانونی (Illegal / Fake)',
+                        'approved' => __('Approved'),
+                        'under_process' => __('Under process'),
+                        'illegal' => __('Not approved'),
                     };
                 @endphp
 
@@ -73,7 +76,7 @@
                     
                     @if($item->is_featured)
                         <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-slate-950 text-[10px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                            Verified Partner
+                            {{ __('Featured') }}
                         </div>
                     @endif
 
@@ -100,19 +103,19 @@
                         <!-- Metrics Grid -->
                         <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
                             <div>
-                                <span class="text-[10px] text-slate-500 block uppercase">NOC ریفرنس:</span>
+                                <span class="text-[10px] text-slate-500 block uppercase">{{ __('NOC reference:') }}</span>
                                 <span class="font-mono text-slate-200 font-bold truncate block text-[11px]">{{ $item->noc_number ?: 'N/A' }}</span>
                             </div>
                             <div>
-                                <span class="text-[10px] text-slate-500 block uppercase">منظور شدہ رقبہ:</span>
-                                <span class="font-bold text-slate-200 block text-[11px]">{{ $item->total_sanctioned_area ?: 'نامعلوم' }}</span>
+                                <span class="text-[10px] text-slate-500 block uppercase">{{ __('Sanctioned area:') }}</span>
+                                <span class="font-bold text-slate-200 block text-[11px]">{{ $item->total_sanctioned_area ?: __('Not known') }}</span>
                             </div>
                             <div>
-                                <span class="text-[10px] text-slate-500 block uppercase">کل منظور پلاٹس:</span>
+                                <span class="text-[10px] text-slate-500 block uppercase">{{ __('Sanctioned plots:') }}</span>
                                 <span class="font-mono font-bold text-slate-200 block text-[11px]">{{ number_format($item->sanctioned_plots_count) }}</span>
                             </div>
                             <div>
-                                <span class="text-[10px] text-slate-500 block uppercase">رہن شدہ پلاٹس:</span>
+                                <span class="text-[10px] text-slate-500 block uppercase">{{ __('Mortgaged plots:') }}</span>
                                 <span class="font-mono font-bold text-amber-400 block text-[11px]">{{ number_format($item->mortgaged_plots_count) }}</span>
                             </div>
                         </div>
@@ -127,19 +130,19 @@
 
                     <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between">
                         <span class="text-[11px] text-slate-500">
-                            ڈویلپر: <strong class="text-slate-300">{{ $item->developer_name ?: 'Private' }}</strong>
+                            {{ __('Developer:') }} <strong class="text-slate-300">{{ $item->developer_name ?: 'Private' }}</strong>
                         </span>
 
                         <button wire:click="viewDetails({{ $item->id }})" 
                                 class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold rounded-xl transition border border-slate-700 cursor-pointer">
-                            مکمل تفصیلات
+                            {{ __('Full details') }}
                         </button>
                     </div>
 
                 </div>
             @empty
                 <div class="col-span-full p-12 text-center bg-slate-900/50 rounded-3xl border border-slate-800 text-slate-400 text-xs">
-                    مطلوبہ سرچ یا فلٹر کے مطابق کوئی ہاؤسنگ سکیم نہیں ملی۔
+                    {{ __('No housing scheme matches your search or filter.') }}
                 </div>
             @endforelse
         </div>
@@ -161,7 +164,7 @@
                             <span>{{ $selectedSociety->name }}</span>
                         </h2>
                         <p class="text-xs text-slate-400 mt-1">
-                            ضلع {{ $selectedSociety->city }} &bull; منظوری اتھارٹی: <strong class="text-white">{{ $selectedSociety->authority }}</strong>
+                            {{ __('District') }} {{ $selectedSociety->city }} &bull; {{ __('Authority:') }} <strong class="text-white">{{ $selectedSociety->authority }}</strong>
                         </p>
                     </div>
 
@@ -173,33 +176,33 @@
                 <div class="space-y-4 text-xs">
                     <div class="grid grid-cols-2 gap-3 bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono">
                         <div>
-                            <span class="text-slate-500 block text-[10px] uppercase">NOC نمبر</span>
+                            <span class="text-slate-500 block text-[10px] uppercase">{{ __('NOC number') }}</span>
                             <span class="text-amber-400 font-bold text-sm">{{ $selectedSociety->noc_number ?: 'NOT ALLOTTED' }}</span>
                         </div>
                         <div>
-                            <span class="text-slate-500 block text-[10px] uppercase">تاریخِ منظوری</span>
-                            <span class="text-white font-bold">{{ $selectedSociety->approval_date ? $selectedSociety->approval_date->format('d M, Y') : 'زیرِ جائزہ' }}</span>
+                            <span class="text-slate-500 block text-[10px] uppercase">{{ __('Approval date') }}</span>
+                            <span class="text-white font-bold">{{ $selectedSociety->approval_date ? $selectedSociety->approval_date->format('d M, Y') : __('Under process') }}</span>
                         </div>
                         <div>
-                            <span class="text-slate-500 block text-[10px] uppercase">منظور شدہ رقبہ</span>
+                            <span class="text-slate-500 block text-[10px] uppercase">{{ __('Sanctioned area') }}</span>
                             <span class="text-white font-bold">{{ $selectedSociety->total_sanctioned_area ?: 'N/A' }}</span>
                         </div>
                         <div>
-                            <span class="text-slate-500 block text-[10px] uppercase">لے آؤٹ پلان (LOP) اسٹیٹس</span>
+                            <span class="text-slate-500 block text-[10px] uppercase">{{ __('Layout plan status') }}</span>
                             <span class="text-emerald-400 font-bold">{{ $selectedSociety->lop_status }}</span>
                         </div>
                     </div>
 
                     <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-1">
-                        <span class="text-amber-400 font-bold block">رہن شدہ پلاٹس کا انتباہ (Mortgaged Plots Notice):</span>
+                        <span class="text-amber-400 font-bold block">{{ __('Mortgaged plots:') }}</span>
                         <p class="text-[11px] text-amber-200 leading-relaxed">
-                            اس سوسائٹی کے <strong>{{ number_format($selectedSociety->mortgaged_plots_count) }}</strong> پلاٹس ترقیاتی کاموں کی ضمانت کے طور پر سرکاری اتھارٹی کے پاس رہن ہیں۔ جب تک اتھارٹی این او سی جاری نہ کرے، ان مخصوص پلاٹس کی خرید و فروخت غیر قانونی سمجھی جاتی ہے۔
+                            {{ __('This society has') }} <strong>{{ number_format($selectedSociety->mortgaged_plots_count) }}</strong> {{ __('plots recorded as mortgaged with the authority as a guarantee for development work. Confirm with the authority before buying one of these plots.') }}
                         </p>
                     </div>
 
                     @if($selectedSociety->risk_warning)
                         <div class="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl space-y-1">
-                            <span class="text-rose-400 font-bold block">قانونی وارننگ (Regulatory Notice):</span>
+                            <span class="text-rose-400 font-bold block">{{ __('Notice:') }}</span>
                             <p class="text-[11px] text-rose-300 leading-relaxed">
                                 {{ $selectedSociety->risk_warning }}
                             </p>
@@ -209,7 +212,7 @@
 
                 <div class="pt-4 border-t border-slate-800 flex justify-end">
                     <button wire:click="closeDetails" class="px-5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
-                        بند کریں (Close)
+                        {{ __('Close') }}
                     </button>
                 </div>
 
@@ -217,4 +220,5 @@
         </div>
     @endif
 
+    @include('livewire.tools.partials.tool-footer', ['toolKey' => 'society'])
 </div>

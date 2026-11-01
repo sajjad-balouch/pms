@@ -6,6 +6,9 @@ use Livewire\Component;
 
 class PatwariLandConverter extends Component
 {
+    private const ACRE_SQFT = 43560.0;
+    private const SQM_SQFT = 10.7639;
+
     public $activeTab = 'irregular';
     public $standard = 'society'; // 'society' (225) ya 'revenue' (272.25)
 
@@ -33,7 +36,7 @@ class PatwariLandConverter extends Component
             'convertedUnits' => $convertedUnits,
             'plotResult' => $plotResult,
             'svgCoordinates' => $svgCoordinates,
-        ])->layout('layouts.front-app', ['title' => 'پٹواری لینڈ کنورٹر و ٹیڑھے پلاٹ کا رقبہ کیلکولیٹر | AssanZameen']);
+        ])->layout('layouts.front-app', \App\Support\Tools\ToolCatalog::meta('land'));
     }
 
     private function calculateUnitConversions($marlaSqFt)
@@ -50,17 +53,21 @@ class PatwariLandConverter extends Component
             case 'sqyards': $totalSqFt = $val * 9.0; break;
             case 'marla': $totalSqFt = $val * $marlaSqFt; break;
             case 'kanal': $totalSqFt = $val * ($marlaSqFt * 20.0); break;
-            case 'acre': $totalSqFt = $val * ($marlaSqFt * 160.0); break;
-            case 'murabba': $totalSqFt = $val * ($marlaSqFt * 160.0 * 25.0); break;
+            // Acre har standard mein 43,560 sq ft hai; society marla se iska hisab nahi badalta
+            case 'acre': $totalSqFt = $val * self::ACRE_SQFT; break;
+            case 'murabba': $totalSqFt = $val * (self::ACRE_SQFT * 25.0); break;
+            case 'sqm': $totalSqFt = $val * self::SQM_SQFT; break;
         }
 
         return [
             'sqft' => round($totalSqFt, 2),
             'sqyards' => round($totalSqFt / 9.0, 2),
+            'sqm' => round($totalSqFt / self::SQM_SQFT, 2),
             'sarsahi' => round($totalSqFt / $sarsahiSqFt, 2),
             'marla' => round($totalSqFt / $marlaSqFt, 3),
             'kanal' => round($totalSqFt / ($marlaSqFt * 20.0), 4),
-            'acre' => round($totalSqFt / ($marlaSqFt * 160.0), 4),
+            'acre' => round($totalSqFt / self::ACRE_SQFT, 4),
+            'murabba' => round($totalSqFt / (self::ACRE_SQFT * 25.0), 4),
             'karam' => round($totalSqFt / ($karamFeet * $karamFeet), 2),
             'patwari_formatted' => $this->formatToKanalMarlaSarsahi($totalSqFt, $marlaSqFt),
         ];
@@ -230,6 +237,6 @@ class PatwariLandConverter extends Component
 
         $feetRemainder = round(fmod($sqft, $sarsahiSqFt), 1);
 
-        return "{$kanals} کنال - {$marlas} مرلہ - {$sarsahi} سرساہی" . ($feetRemainder > 0 ? " ({$feetRemainder} فٹ)" : "");
+        return "{$kanals} " . __('Kanal') . " - {$marlas} " . __('Marla') . " - {$sarsahi} " . __('Sarsahi') . ($feetRemainder > 0 ? " ({$feetRemainder} " . __('sq ft') . ')' : '');
     }
 }

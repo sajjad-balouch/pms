@@ -2,144 +2,97 @@
 
 namespace App\Livewire\Tools;
 
-use App\Models\BayanaDeed;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use App\Support\Tools\DeedHelper;
+use App\Support\Tools\ToolCatalog;
 use Livewire\Component;
 
 class BayanaDeedGenerator extends Component
 {
-    // Wizard State: 'form' ya 'preview'
-    public $viewMode = 'form'; // 'form' or 'preview'
     public $leave_stamp_space = true; // e-Stamp paper ke liye upar 4.5 inch jagah chhorna
 
     // Seller Info
-    public $seller_name = 'محمد اکرم';
-    public $seller_father = 'چوہدری عبداللہ';
-    public $seller_cnic = '31301-1234567-1';
-    public $seller_phone = '0300-1234567';
-    public $seller_address = 'چک نمبر 123، تحصیل خان پور، ضلع رحیم یار خان';
+    public $seller_name = '';
+    public $seller_father = '';
+    public $seller_cnic = '';
+    public $seller_phone = '';
+    public $seller_address = '';
 
     // Buyer Info
-    public $buyer_name = 'محمد سجاد';
-    public $buyer_father = 'شمس الدین';
-    public $buyer_cnic = '31301-9876543-1';
-    public $buyer_phone = '0301-7654321';
-    public $buyer_address = 'محلہ گلشنِ اقبال، رحیم یار خان';
+    public $buyer_name = '';
+    public $buyer_father = '';
+    public $buyer_cnic = '';
+    public $buyer_phone = '';
+    public $buyer_address = '';
 
     // Property Details
-    public $property_title = 'رہائشی پلاٹ نمبر 45، گلی نمبر 3';
-    public $city = 'Rahim Yar Khan';
-    public $location_mouza = 'موضع میاں والی، نزد چوک بہادر پور';
-    public $khasra_khewat = 'کھیوٹ نمبر 150، خسرہ نمبر 273/12';
-    public $area_size = '5 مرلہ (1,125 مربع فٹ)';
+    public $property_title = '';
+    public $city = '';
+    public $location_mouza = '';
+    public $khasra_khewat = '';
+    public $area_size = '';
 
     // Financials
-    public $total_amount = 3500000; // 35 Lac
-    public $bayana_advance_amount = 500000; // 5 Lac
-    public $remaining_amount = 3000000;
+    public $total_amount = 0;
+    public $bayana_advance_amount = 0;
+    public $remaining_amount = 0;
     public $payment_method = 'pay_order'; // cash, pay_order, cheque, online
-    public $payment_reference = 'Pay Order No: PO-889012 (HBL)';
+    public $payment_reference = '';
     public $deed_date = '';
     public $target_registry_date = '';
 
     // Witnesses
-    public $witness1_name = 'طارق محمود ولد بشیر احمد';
-    public $witness1_cnic = '31301-4455667-3';
-    public $witness2_name = 'عبدالرحمان ولد غلام سرور';
-    public $witness2_cnic = '31301-9988776-5';
-
-    public $saved_deed_uuid = null;
-
-    protected $rules = [
-        'seller_name' => 'required|string|max:100',
-        'seller_father' => 'required|string|max:100',
-        'seller_cnic' => 'required|string|min:13|max:15',
-        'seller_address' => 'required|string',
-        'buyer_name' => 'required|string|max:100',
-        'buyer_father' => 'required|string|max:100',
-        'buyer_cnic' => 'required|string|min:13|max:15',
-        'buyer_address' => 'required|string',
-        'property_title' => 'required|string',
-        'city' => 'required|string',
-        'location_mouza' => 'required|string',
-        'area_size' => 'required|string',
-        'total_amount' => 'required|numeric|min:1000',
-        'bayana_advance_amount' => 'required|numeric|min:100',
-        'deed_date' => 'required|date',
-        'target_registry_date' => 'required|date|after_or_equal:deed_date',
-    ];
+    public $witness1_name = '';
+    public $witness1_cnic = '';
+    public $witness2_name = '';
+    public $witness2_cnic = '';
 
     public function mount()
     {
         $this->deed_date = date('Y-m-d');
         $this->target_registry_date = date('Y-m-d', strtotime('+45 days'));
-        $this->calculateRemaining();
     }
 
     public function updated($propertyName)
     {
-        if (in_array($propertyName, ['total_amount', 'bayana_advance_amount'])) {
-            $this->calculateRemaining();
-        }
+        $this->total_amount = max(0, (float) $this->total_amount);
+        $this->bayana_advance_amount = max(0, (float) $this->bayana_advance_amount);
+        $this->remaining_amount = max(0, $this->total_amount - $this->bayana_advance_amount);
     }
 
-    public function calculateRemaining()
+    /** Print se pehle dikhne wale masle. Khali ya ghalat deed print na ho. */
+    private function issues(): array
     {
-        $tot = max(0, (float) $this->total_amount);
-        $adv = max(0, (float) $this->bayana_advance_amount);
-        $this->remaining_amount = max(0, $tot - $adv);
-    }
-
-    public function generateDeed()
-    {
-        $this->validate();
-        $this->calculateRemaining();
-
-        $deed = BayanaDeed::create([
-            'deed_uuid' => (string) Str::uuid(),
-            'user_id' => Auth::id(),
-            'seller_name' => $this->seller_name,
-            'seller_father' => $this->seller_father,
-            'seller_cnic' => $this->seller_cnic,
-            'seller_phone' => $this->seller_phone,
-            'seller_address' => $this->seller_address,
-            'buyer_name' => $this->buyer_name,
-            'buyer_father' => $this->buyer_father,
-            'buyer_cnic' => $this->buyer_cnic,
-            'buyer_phone' => $this->buyer_phone,
-            'buyer_address' => $this->buyer_address,
-            'property_title' => $this->property_title,
-            'city' => $this->city,
-            'location_mouza' => $this->location_mouza,
-            'khasra_khewat' => $this->khasra_khewat,
-            'area_size' => $this->area_size,
-            'total_amount' => $this->total_amount,
-            'bayana_advance_amount' => $this->bayana_advance_amount,
-            'remaining_amount' => $this->remaining_amount,
-            'payment_method' => $this->payment_method,
-            'payment_reference' => $this->payment_reference,
-            'deed_date' => $this->deed_date,
-            'target_registry_date' => $this->target_registry_date,
-            'witness1_name' => $this->witness1_name,
-            'witness1_cnic' => $this->witness1_cnic,
-            'witness2_name' => $this->witness2_name,
-            'witness2_cnic' => $this->witness2_cnic,
-            'ip_address' => request()->ip(),
+        $issues = DeedHelper::missing([
+            'Seller name' => $this->seller_name, 'Seller father name' => $this->seller_father, 'Seller address' => $this->seller_address,
+            'Buyer name' => $this->buyer_name, 'Buyer father name' => $this->buyer_father, 'Buyer address' => $this->buyer_address,
+            'Property details' => $this->property_title, 'Location' => $this->location_mouza, 'City' => $this->city, 'Area' => $this->area_size,
+            'Witness 1' => $this->witness1_name, 'Witness 2' => $this->witness2_name,
         ]);
 
-        $this->saved_deed_uuid = $deed->deed_uuid;
-        $this->viewMode = 'preview';
-    }
+        foreach (['Seller' => $this->seller_cnic, 'Buyer' => $this->buyer_cnic, 'Witness 1' => $this->witness1_cnic, 'Witness 2' => $this->witness2_cnic] as $who => $cnic) {
+            if (! DeedHelper::validCnic($cnic)) {
+                $issues[] = __(':who CNIC must have 13 digits', ['who' => __($who)]);
+            }
+        }
 
-    public function editForm()
-    {
-        $this->viewMode = 'form';
+        if ($this->total_amount <= 0) {
+            $issues[] = __('Enter the total price');
+        }
+        if ($this->bayana_advance_amount <= 0 || $this->bayana_advance_amount > $this->total_amount) {
+            $issues[] = __('Advance must be more than zero and not above the total price');
+        }
+        if (! DeedHelper::date($this->deed_date) || ! DeedHelper::date($this->target_registry_date)) {
+            $issues[] = __('Enter both dates');
+        } elseif ($this->target_registry_date < $this->deed_date) {
+            $issues[] = __('Registry date cannot be before the agreement date');
+        }
+
+        return $issues;
     }
 
     public function render()
     {
-        return view('livewire.tools.bayana-deed-generator')
-            ->layout('layouts.front-app', ['title' => 'خودکار اقرار نامہ بیعانہ میکر و اسٹامپ بلڈر | AssanZameen']);
+        return view('livewire.tools.bayana-deed-generator', ['issues' => $this->issues()])
+            ->layout('layouts.front-app', ToolCatalog::meta('bayana'));
     }
 }

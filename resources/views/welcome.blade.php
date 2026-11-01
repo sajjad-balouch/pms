@@ -19,9 +19,9 @@
 
     // Home page par dikhane wale top tools
     $showcaseTools = [
-        ['route' => 'tools.legal-scanner',     'icon' => 'fa-shield-halved',         'badge' => 'AI',
-            'ur' => 'AI پراپرٹی وکیل',            'en' => 'AI Property Wakeel',
-            'desc_ur' => 'فرد، رجسٹری و ٹائٹل رسک اسکینر', 'desc_en' => 'Fard, registry & title risk scanner'],
+        ['route' => 'tools.legal-scanner',     'icon' => 'fa-file-circle-check',         'badge' => null,
+            'ur' => 'پراپرٹی دستاویز چیکر',            'en' => 'Property Document Checker',
+            'desc_ur' => 'فرد، رجسٹری اور الاٹمنٹ کی چیک لسٹ', 'desc_en' => 'Checklist for fard, registry and allotment'],
         ['route' => 'tools.tax-calculator',    'icon' => 'fa-calculator',            'badge' => null,
             'ur' => 'ٹیکس و رجسٹری کیلکولیٹر',    'en' => 'Tax & Registry Calculator',
             'desc_ur' => 'Stamp Duty, TMA, FBR 236-C/K', 'desc_en' => 'Stamp duty, TMA, FBR 236-C/K'],

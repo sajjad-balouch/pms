@@ -71,15 +71,15 @@
         <div class="text-center space-y-3 no-print w-full">
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold uppercase tracking-wider">
                 <i class="fa-solid fa-file-signature text-sm"></i>
-                <span>Automated Legal Stamp Paper Deed Builder</span>
+                <span>{{ __('Draft for e-stamp paper') }}</span>
             </div>
             
-            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight" style="font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif; line-height: 1.8;">
-                خودکار اقرار نامہ بیعانہ میکر
+            <h1 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                {{ __('Bayana Agreement Maker') }}
             </h1>
             
             <p class="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                پلاٹ، مکان یا زرعی رقبے کی خرید و فروخت پر کچہری وثیقہ نویس کے چکروں سے نجات۔ تمام قانونی شقوں کے ساتھ ای-اسٹامپ پیپر پر پرنٹ ہونے والا باضابطہ معاہدہ بیعانہ۔
+                {{ __('Prepare an Urdu token money agreement for a property sale, ready to print on e-stamp paper.') }}
             </p>
         </div>
 
@@ -89,106 +89,103 @@
             <div class="deed-form-col w-full bg-slate-900/90 rounded-3xl border border-slate-800 p-6 shadow-2xl space-y-5 no-print">
                 <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
                     <i class="fa-solid fa-pen-nib text-amber-400"></i>
-                    <span>اقرار نامہ کے کوائف درج کریں</span>
+                    <span>{{ __('Enter the agreement details') }}</span>
                 </h3>
 
-                <!-- Seller (بائع) -->
                 <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
-                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block">فریقِ اول (فروخت کنندہ / مالک)</span>
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block">{{ __('First party (seller)') }}</span>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model.live="seller_name" placeholder="مالک کا نام" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                        <input type="text" wire:model.live="seller_father" placeholder="ولدیت" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <input type="text" wire:model.live="seller_name" placeholder="{{ __('Owner name') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <input type="text" wire:model.live="seller_father" placeholder="{{ __('Father name') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model.live="seller_cnic" placeholder="شناختی کارڈ نمبر" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono">
-                        <input type="text" wire:model.live="seller_phone" placeholder="موبائل نمبر" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono">
+                        <input type="text" wire:model.live="seller_cnic" placeholder="{{ __('CNIC number') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono">
+                        <input type="text" wire:model.live="seller_phone" placeholder="{{ __('Mobile number') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono">
                     </div>
-                    <input type="text" wire:model.live="seller_address" placeholder="مکمل رہائشی پتہ" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <input type="text" wire:model.live="seller_address" placeholder="{{ __('Full home address') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                 </div>
 
-                <!-- Buyer (مشتری) -->
                 <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
-                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider block">فریقِ دوم (خریدار / مشتری)</span>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider block">{{ __('Second party (buyer)') }}</span>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model.live="buyer_name" placeholder="خریدار کا نام" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                        <input type="text" wire:model.live="buyer_father" placeholder="ولدیت" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <input type="text" wire:model.live="buyer_name" placeholder="{{ __('Buyer name') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <input type="text" wire:model.live="buyer_father" placeholder="{{ __('Father name') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model.live="buyer_cnic" placeholder="شناختی کارڈ نمبر" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono">
-                        <input type="text" wire:model.live="buyer_phone" placeholder="موبائل نمبر" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono">
+                        <input type="text" wire:model.live="buyer_cnic" placeholder="{{ __('CNIC number') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono">
+                        <input type="text" wire:model.live="buyer_phone" placeholder="{{ __('Mobile number') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono">
                     </div>
-                    <input type="text" wire:model.live="buyer_address" placeholder="مکمل رہائشی پتہ" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <input type="text" wire:model.live="buyer_address" placeholder="{{ __('Full home address') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                 </div>
 
                 <!-- Property Particulars -->
                 <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
-                    <span class="text-xs font-bold text-sky-400 uppercase tracking-wider block">جائیداد کی تفصیل</span>
-                    <input type="text" wire:model.live="property_title" placeholder="پلاٹ / مکان / دکان کی تفصیل" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <span class="text-xs font-bold text-sky-400 uppercase tracking-wider block">{{ __('Property details') }}</span>
+                    <input type="text" wire:model.live="property_title" placeholder="{{ __('Plot, house or shop details') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model.live="area_size" placeholder="رقبہ (مثلاً 5 مرلہ)" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                        <input type="text" wire:model.live="city" placeholder="شہر / ضلع" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <input type="text" wire:model.live="area_size" placeholder="{{ __('Area (for example 5 marla)') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                        <input type="text" wire:model.live="city" placeholder="{{ __('City / district') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                     </div>
-                    <input type="text" wire:model.live="location_mouza" placeholder="موضع / ہاؤسنگ سکیم کا پتہ" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                    <input type="text" wire:model.live="khasra_khewat" placeholder="کھیوٹ / خسرہ نمبر (اختیاری)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <input type="text" wire:model.live="location_mouza" placeholder="{{ __('Mouza or housing scheme') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                    <input type="text" wire:model.live="khasra_khewat" placeholder="{{ __('Khewat / khasra no. (optional)') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                 </div>
 
                 <!-- Financials & Timeline -->
                 <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
-                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block">مالی لین دین و ٹائم لائن</span>
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider block">{{ __('Payment and dates') }}</span>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[10px] text-slate-400 mb-0.5">کل طے شدہ رقم (PKR)</label>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">{{ __('Total price (PKR)') }}</label>
                             <input type="number" wire:model.live="total_amount" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono font-bold">
                         </div>
                         <div>
-                            <label class="block text-[10px] text-slate-400 mb-0.5">ادا شدہ بیعانہ (PKR)</label>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">{{ __('Advance paid (PKR)') }}</label>
                             <input type="number" wire:model.live="bayana_advance_amount" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-emerald-400 font-mono font-bold">
                         </div>
                     </div>
 
                     <div class="p-2.5 bg-slate-900 rounded-xl border border-slate-800 flex justify-between text-xs font-mono">
-                        <span class="text-slate-400">بقایا واجب الادا رقم:</span>
+                        <span class="text-slate-400">{{ __('Balance due:') }}</span>
                         <span class="text-amber-400 font-black">PKR {{ number_format($remaining_amount) }}</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[10px] text-slate-400 mb-0.5">طریقہ ادائیگی</label>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">{{ __('Payment method') }}</label>
                             <select wire:model.live="payment_method" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
-                                <option value="cash">نقد (Cash in Hand)</option>
-                                <option value="pay_order">پے آرڈر (Pay Order)</option>
-                                <option value="cheque">بینک چیک (Bank Cheque)</option>
-                                <option value="online">آن لائن ٹرانسفر (Online Transfer)</option>
+                                <option value="cash">{{ __('Cash') }}</option>
+                                <option value="pay_order">{{ __('Pay order') }}</option>
+                                <option value="cheque">{{ __('Bank cheque') }}</option>
+                                <option value="online">{{ __('Online transfer') }}</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] text-slate-400 mb-0.5">حوالہ نمبر / تفصیل</label>
-                            <input type="text" wire:model.live="payment_reference" placeholder="چیک یا پے آرڈر نمبر" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+                            <label class="block text-[10px] text-slate-400 mb-0.5">{{ __('Reference') }}</label>
+                            <input type="text" wire:model.live="payment_reference" placeholder="{{ __('Cheque or pay order no.') }}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 pt-1">
                         <div>
-                            <label class="block text-[10px] text-slate-400 mb-0.5">معاہدہ کی تاریخ</label>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">{{ __('Agreement date') }}</label>
                             <input type="date" wire:model.live="deed_date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono">
                         </div>
                         <div>
-                            <label class="block text-[10px] text-slate-400 mb-0.5">رجسٹری کی آخری تاریخ</label>
+                            <label class="block text-[10px] text-slate-400 mb-0.5">{{ __('Last date for registry') }}</label>
                             <input type="date" wire:model.live="target_registry_date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-amber-400 font-mono font-bold">
                         </div>
                     </div>
                 </div>
 
-                <!-- Witnesses (گواہان) -->
                 <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">گواہان کے کوائف</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">{{ __('Witnesses') }}</span>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model.live="witness1_name" placeholder="گواہ 1 کا نام معہ ولدیت" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
-                        <input type="text" wire:model.live="witness1_cnic" placeholder="گواہ 1 شناختی کارڈ" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono">
+                        <input type="text" wire:model.live="witness1_name" placeholder="{{ __('Witness 1 name and father name') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+                        <input type="text" wire:model.live="witness1_cnic" placeholder="{{ __('Witness 1 CNIC') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" wire:model.live="witness2_name" placeholder="گواہ 2 کا نام معہ ولدیت" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
-                        <input type="text" wire:model.live="witness2_cnic" placeholder="گواہ 2 شناختی کارڈ" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono">
+                        <input type="text" wire:model.live="witness2_name" placeholder="{{ __('Witness 2 name and father name') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+                        <input type="text" wire:model.live="witness2_cnic" placeholder="{{ __('Witness 2 CNIC') }}" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono">
                     </div>
                 </div>
 
@@ -198,18 +195,20 @@
             <div class="deed-preview-col w-full space-y-5">
                 
                 <!-- Action Controls (No-Print) -->
+                @include('livewire.tools.partials.deed-issues')
+
                 <div id="action-bar" class="no-print flex items-center justify-between gap-3 p-4 bg-slate-900 rounded-2xl border border-slate-800 w-full">
                     
                     <!-- Toggle e-Stamp Paper Header Space -->
                     <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
                         <input type="checkbox" wire:model.live="leave_stamp_space" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700">
-                        <span class="font-bold">ای-اسٹامپ پیپر پرنٹ موڈ (اوپر 4.5 انچ جگہ خالی چھوڑیں)</span>
+                        <span class="font-bold">{{ __('E-stamp print mode (leave 4.5 in blank at the top)') }}</span>
                     </label>
 
                     <div class="flex items-center gap-2">
                         <button onclick="window.print()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 text-slate-950 font-black rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer">
                             <i class="fa-solid fa-print"></i>
-                            <span>اسٹامپ پرنٹ / PDF ڈاؤن لوڈ</span>
+                            <span>{{ __('Print / Save PDF') }}</span>
                         </button>
                     </div>
                 </div>
@@ -260,7 +259,7 @@
                         </p>
 
                         <p>
-                            جبکہ بقیہ واجب الادا رقم بمبلغ <strong>PKR {{ number_format($remaining_amount) }}</strong> روپے بوقتِ رجسٹری و بائیو میٹرک انتقال مورخہ <strong class="font-mono">{{ \Carbon\Carbon::parse($target_registry_date)->format('d-m-Y') }}</strong> تک فریقِ دوم فریقِ اول کو ادا کرنے کا پابند ہوگا۔
+                            جبکہ بقیہ واجب الادا رقم بمبلغ <strong>PKR {{ number_format($remaining_amount) }}</strong> روپے بوقتِ رجسٹری و بائیو میٹرک انتقال مورخہ <strong class="font-mono">{{ optional(\App\Support\Tools\DeedHelper::date($target_registry_date))?->format('d-m-Y') }}</strong> تک فریقِ دوم فریقِ اول کو ادا کرنے کا پابند ہوگا۔
                         </p>
 
                         <!-- Legal Strict Clauses -->
@@ -285,7 +284,7 @@
                         </p>
 
                         <p class="text-left font-mono text-xs pt-2">
-                            تحریر بتاریخ: {{ \Carbon\Carbon::parse($deed_date)->format('d F, Y') }}
+                            تحریر بتاریخ: {{ optional(\App\Support\Tools\DeedHelper::date($deed_date))?->format('d F, Y') }}
                         </p>
 
                         <!-- Signatures & Thumb Impressions Table -->
@@ -323,4 +322,5 @@
         </div>
 
     </div>
+    @include('livewire.tools.partials.tool-footer', ['toolKey' => 'bayana'])
 </div>

@@ -5,9 +5,9 @@
 
     // Tools: desktop mega-menu aur mobile accordion, dono isi list se bante hain
     $tools = [
-        ['route' => 'tools.legal-scanner',          'icon' => 'fa-shield-halved',         'badge' => 'AI', 'tint' => 'bg-amber-400/10 text-amber-300 ring-amber-300/15',
-            'ur' => 'AI پراپرٹی وکیل',               'en' => 'AI Property Wakeel',
-            'desc_ur' => 'فرد، رجسٹری و ٹائٹل رسک اسکینر', 'desc_en' => 'Fard, registry & title risk scanner'],
+        ['route' => 'tools.legal-scanner',          'icon' => 'fa-file-circle-check',         'badge' => null, 'tint' => 'bg-amber-400/10 text-amber-300 ring-amber-300/15',
+            'ur' => 'پراپرٹی دستاویز چیکر',               'en' => 'Property Document Checker',
+            'desc_ur' => 'فرد، رجسٹری اور الاٹمنٹ کی چیک لسٹ', 'desc_en' => 'Checklist for fard, registry and allotment'],
         ['route' => 'tools.tax-calculator',         'icon' => 'fa-calculator',            'badge' => null, 'tint' => 'bg-amber-400/10 text-amber-300 ring-amber-300/15',
             'ur' => 'ٹیکس و رجسٹری کیلکولیٹر',       'en' => 'Tax & Registry Calculator',
             'desc_ur' => 'Stamp Duty, TMA, FBR 236-C/K', 'desc_en' => 'Stamp duty, TMA, FBR 236-C/K'],
@@ -29,7 +29,10 @@
         ['route' => 'tools.zakat-calculator',       'icon' => 'fa-hand-holding-heart',    'badge' => null, 'tint' => 'bg-amber-400/10 text-amber-300 ring-amber-300/15',
             'ur' => 'شرعی زکوٰۃ کیلکولیٹر',          'en' => 'Zakat Calculator',
             'desc_ur' => 'پلاٹ، نقدی، سونا و مالِ تجارت کا شرعی حساب', 'desc_en' => 'Plots, cash, gold & business assets'],
-        ['route' => 'tools.cv-maker',               'icon' => 'fa-id-card',               'badge' => null, 'tint' => 'bg-amber-400/10 text-amber-300 ring-amber-300/15',
+        ['route' => 'tools.government-links',       'icon' => 'fa-landmark',              'badge' => null, 'tint' => 'bg-amber-400/10 text-amber-300 ring-amber-300/15',
+            'ur' => 'سرکاری لنکس گائیڈ',             'en' => 'Government Links Guide',
+            'desc_ur' => 'فرد، ای-اسٹامپ، DC ویلیوایشن اور رجسٹری', 'desc_en' => 'Fard, e-Stamp, DC valuation & registry'],
+        ['route' => 'tools.cv-maker',               'icon' => 'fa-id-card',              'badge' => null, 'tint' => 'bg-amber-400/10 text-amber-300 ring-amber-300/15',
             'ur' => 'پیشہ ورانہ سی وی میکر',         'en' => 'Professional CV Maker',
             'desc_ur' => 'ATS فرینڈلی، لائیو پیش نظارہ و A4 پرنٹ', 'desc_en' => 'ATS-friendly, live preview, A4 print'],
     ];
