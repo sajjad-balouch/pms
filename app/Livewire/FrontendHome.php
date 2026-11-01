@@ -156,7 +156,7 @@ class FrontendHome extends Component
 
         $agents = $agentsQuery->latest()->get();
 
-        $propertiesQuery = Property::with(['town', 'user']);
+        $propertiesQuery = Property::with(['town', 'user', 'agent']);
 
         if (!empty($this->selectedTown)) {
             $propertiesQuery->where('town_id', $this->selectedTown);

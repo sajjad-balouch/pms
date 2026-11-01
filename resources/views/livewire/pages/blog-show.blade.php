@@ -24,7 +24,8 @@
     $imageUrl = $post->featured_image ? asset('public/' . $post->featured_image) : null;
 
     // ---- SEO ----
-    $seoTitle = Str::limit($post->display_title, 62, '…') . ' | Assan Zameen';
+    // Title kabhi na kaatein; lamba ho to sirf brand ka hissa chhor dein
+    $seoTitle = mb_strlen($post->display_title) <= 47 ? $post->display_title . ' | Assan Zameen' : $post->display_title;
     $seoDescription = Str::limit(trim(strip_tags((string) ($post->display_summary ?: $plainContent))), 158);
 
     view()->share([

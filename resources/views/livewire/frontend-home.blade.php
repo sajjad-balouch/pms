@@ -7,7 +7,8 @@
         <!-- Background Banner with Real Photographic FX -->
         <div class="absolute inset-0 z-0">
             <img src="{{ asset('public/hero-image.jpg') }}" 
-                 alt="AssanZameen Real Estate Banner" 
+                 alt="AssanZameen Real Estate Banner"
+                 fetchpriority="high"
                  class="w-full h-full object-cover object-[center_35%] sm:object-center contrast-[1.05] brightness-[0.95] select-none pointer-events-none scale-100">
             
             <!-- Balanced Professional Dark Overlays for Ultra-Clear Text Readability -->
@@ -133,9 +134,9 @@
                 <!-- Card Header Image -->
                 <div class="relative h-48 sm:h-52 bg-slate-900 overflow-hidden">
                     @if(!empty($property->images[0]))
-                        <img src="{{ asset('public/'.$property->images[0]) }}" alt="Property Image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
+                        <img src="{{ asset('public/'.$property->images[0]) }}" alt="Property Image" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
                     @else
-                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1073&auto=format&fit=crop" alt="Property Image" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
+                        <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1073&auto=format&fit=crop" alt="Property Image" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
                     @endif
                     
                     <!-- Badges -->
@@ -240,7 +241,7 @@
                         <div>
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="relative">
-                                    <img src="{{ $person->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($person->name).'&background=f59e0b&color=0f172a' }}" alt="{{ $person->name }}" class="w-12 h-12 rounded-full object-cover border-2 border-amber-500/30">
+                                    <img src="{{ $person->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($person->name).'&background=f59e0b&color=0f172a' }}" alt="{{ $person->name }}" loading="lazy" decoding="async" class="w-12 h-12 rounded-full object-cover border-2 border-amber-500/30">
                                     <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-800 rounded-full"></span>
                                 </div>
                                 <div class="overflow-hidden">

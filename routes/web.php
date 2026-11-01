@@ -22,8 +22,6 @@ use App\Http\Controllers\CustomerDocumentController;
 use App\Livewire\Agent\AgentDashboard;
 use App\Livewire\Agent\ManageLeads;
 use App\Livewire\Agent\ManageProperties;
-use App\Models\Town;
-use App\Models\Plot;
 use App\Models\Page;
 use App\Livewire\PropertyDetails;
 use App\Livewire\UserDashboard;
@@ -73,10 +71,7 @@ use App\Livewire\Tools\GovernmentLinks;
 
 // Public Routes
 Route::get('/', function () {
-    return view('welcome', [
-        'towns' => Town::all(),
-        'plots' => Plot::where('status', 'available')->get(),
-    ])->layout('layouts.front-app');
+    return view('welcome')->layout('layouts.front-app');
 })->name('home');
 
 

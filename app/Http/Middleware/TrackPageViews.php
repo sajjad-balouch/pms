@@ -14,8 +14,12 @@ class TrackPageViews
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
+        return $next($request);
+    }
 
+    // Response bhejne ke baad chalta hai, taake geo API ka intezar visitor ya Googlebot ko na karna pare
+    public function terminate(Request $request, Response $response): void
+    {
         // Sirf GET HTML web pages track karein (Livewire internal updates, APIs, aur assets ignore karein)
         if ($request->isMethod('GET') && !$request->ajax() && !$request->is('livewire/*') && !$request->is('admin/*')) {
             $ip = $request->ip();
@@ -60,7 +64,5 @@ class TrackPageViews
                 'viewed_at'  => now(),
             ]);
         }
-
-        return $response;
     }
 }
