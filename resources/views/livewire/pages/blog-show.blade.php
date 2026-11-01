@@ -179,7 +179,7 @@
             <figure class="mt-8 rounded-2xl overflow-hidden border border-slate-700/50 bg-slate-800">
                 <img src="{{ $imageUrl }}" alt="{{ $post->display_title }}" width="1200" height="630"
                      loading="eager" fetchpriority="high" decoding="async"
-                     class="w-full h-auto max-h-[460px] object-cover">
+                     class="w-full h-auto max-h-[460px] object-contain">
             </figure>
         @endif
 

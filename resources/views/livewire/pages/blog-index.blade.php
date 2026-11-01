@@ -123,11 +123,12 @@
         {{-- Featured post --}}
         @if($featured)
             <article class="az-card group relative mt-8 grid grid-cols-1 lg:grid-cols-2 rounded-2xl bg-slate-800/40 border border-slate-700/50 overflow-hidden">
-                <div class="relative aspect-[16/10] lg:aspect-auto lg:min-h-[18rem] bg-slate-800 overflow-hidden">
+                {{-- Cover images 1200x630 hain, is liye box bhi isi size ka: kuch katta nahi --}}
+                <div class="relative bg-slate-800 overflow-hidden" style="aspect-ratio: 1200 / 630; align-self: center;">
                     @if($featured->featured_image)
                         <img src="{{ asset('public/' . $featured->featured_image) }}" alt="{{ $featured->display_title }}"
-                             width="800" height="500" loading="eager" fetchpriority="high" decoding="async"
-                             class="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500">
+                             width="1200" height="630" loading="eager" fetchpriority="high" decoding="async"
+                             class="absolute inset-0 w-full h-full object-cover">
                     @else
                         <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900" aria-hidden="true">
                             <i class="fa-solid fa-newspaper text-5xl text-slate-600"></i>
@@ -168,23 +169,23 @@
             @forelse($gridPosts as $p)
                 <article wire:key="post-{{ $p->id ?? $p->slug }}" class="az-card group relative flex flex-col rounded-2xl bg-slate-800/40 border border-slate-700/50 overflow-hidden">
 
-                    <div class="relative aspect-[16/10] bg-slate-800 overflow-hidden">
+                    <div class="relative bg-slate-800 overflow-hidden" style="aspect-ratio: 1200 / 630;">
                         @if($p->featured_image)
                             <img src="{{ asset('public/' . $p->featured_image) }}" alt="{{ $p->display_title }}"
-                                 width="640" height="400" loading="lazy" decoding="async"
-                                 class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500">
+                                 width="1200" height="630" loading="lazy" decoding="async"
+                                 class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900" aria-hidden="true">
                                 <i class="fa-solid fa-newspaper text-4xl text-slate-600"></i>
                             </div>
                         @endif
-                        <span class="absolute top-3 ltr:left-3 rtl:right-3 inline-flex items-center gap-1.5 bg-slate-950/75 backdrop-blur text-amber-300 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-amber-300/20">
-                            <i class="fa-solid {{ $catIcon($p->category) }} text-[10px]" aria-hidden="true"></i>{{ $catLabel($p->category) }}
-                        </span>
                     </div>
 
                     <div class="flex flex-col flex-1 gap-3 p-5">
-                        <div class="flex items-center gap-2 text-[11px] text-slate-500">
+                        <div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[11px] text-slate-500">
+                            <span class="inline-flex items-center gap-1.5 bg-amber-400/10 text-amber-300 font-semibold px-2.5 py-1 rounded-full border border-amber-300/20">
+                                <i class="fa-solid {{ $catIcon($p->category) }} text-[10px]" aria-hidden="true"></i>{{ $catLabel($p->category) }}
+                            </span>
                             <time datetime="{{ optional($p->created_at)->toDateString() }}">{{ optional($p->created_at)->format('M d, Y') }}</time>
                             @if($p->read_time)
                                 <span aria-hidden="true">•</span>
