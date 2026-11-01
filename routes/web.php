@@ -87,7 +87,11 @@ Route::middleware(['web'])->group(function () {
         if (in_array($locale, ['en', 'ur'])) {
             Session::put('locale', $locale);
         }
-        return redirect()->back();
+
+        // Pichle URL ka ?lang= hatao, warna woh abhi chuni hui zaban ko wapas badal deta
+        $back = preg_replace(['/([?&])lang=(?:en|ur)&/', '/[?&]lang=(?:en|ur)$/'], ['$1', ''], url()->previous());
+
+        return redirect()->to($back);
     })->name('lang.switch');
     // Public / Frontend Routes
     Route::get('/page/{slug}', DynamicPage::class)->name('dynamic.page');

@@ -47,8 +47,8 @@
     foreach ($posts as $p) {
         $blogPosts[] = array_filter([
             '@type'         => 'BlogPosting',
-            'headline'      => $p->title,
-            'url'           => route('blog.show', $p->slug),
+            'headline'      => $p->display_title,
+            'url'           => $p->displayUrl(),
             'datePublished' => optional($p->created_at)->toAtomString(),
             'image'         => $p->featured_image ? asset('public/' . $p->featured_image) : null,
             'author'        => ['@type' => 'Person', 'name' => $p->author->name ?? 'Editorial Team'],
@@ -125,7 +125,7 @@
             <article class="az-card group relative mt-8 grid grid-cols-1 lg:grid-cols-2 rounded-2xl bg-slate-800/40 border border-slate-700/50 overflow-hidden">
                 <div class="relative aspect-[16/10] lg:aspect-auto lg:min-h-[18rem] bg-slate-800 overflow-hidden">
                     @if($featured->featured_image)
-                        <img src="{{ asset('public/' . $featured->featured_image) }}" alt="{{ $featured->title }}"
+                        <img src="{{ asset('public/' . $featured->featured_image) }}" alt="{{ $featured->display_title }}"
                              width="800" height="500" loading="eager" fetchpriority="high" decoding="async"
                              class="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500">
                     @else
@@ -148,9 +148,9 @@
                     </div>
 
                     <h2 class="text-2xl sm:text-3xl font-bold text-slate-50 leading-snug group-hover:text-amber-300 transition-colors">
-                        <a href="{{ route('blog.show', $featured->slug) }}" class="after:absolute after:inset-0">{{ $featured->title }}</a>
+                        <a href="{{ $featured->displayUrl() }}" class="after:absolute after:inset-0">{{ $featured->display_title }}</a>
                     </h2>
-                    <p class="text-sm sm:text-base text-slate-400 leading-relaxed line-clamp-3">{{ $featured->summary }}</p>
+                    <p class="text-sm sm:text-base text-slate-400 leading-relaxed line-clamp-3">{{ $featured->display_summary }}</p>
 
                     <div class="flex items-center justify-between text-xs pt-2">
                         <span class="text-slate-500">{{ $t('By', 'از') }} {{ $featured->author->name ?? $t('Editorial Team', 'ایڈیٹوریل ٹیم') }}</span>
@@ -170,7 +170,7 @@
 
                     <div class="relative aspect-[16/10] bg-slate-800 overflow-hidden">
                         @if($p->featured_image)
-                            <img src="{{ asset('public/' . $p->featured_image) }}" alt="{{ $p->title }}"
+                            <img src="{{ asset('public/' . $p->featured_image) }}" alt="{{ $p->display_title }}"
                                  width="640" height="400" loading="lazy" decoding="async"
                                  class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500">
                         @else
@@ -193,10 +193,10 @@
                         </div>
 
                         <h2 class="text-base font-semibold text-slate-50 leading-snug line-clamp-2 group-hover:text-amber-300 transition-colors">
-                            <a href="{{ route('blog.show', $p->slug) }}" class="after:absolute after:inset-0">{{ $p->title }}</a>
+                            <a href="{{ $p->displayUrl() }}" class="after:absolute after:inset-0">{{ $p->display_title }}</a>
                         </h2>
 
-                        <p class="text-sm text-slate-400 leading-relaxed line-clamp-3">{{ $p->summary }}</p>
+                        <p class="text-sm text-slate-400 leading-relaxed line-clamp-3">{{ $p->display_summary }}</p>
 
                         <div class="mt-auto pt-4 border-t border-slate-700/50 flex items-center justify-between text-xs">
                             <span class="text-slate-500 truncate">{{ $t('By', 'از') }} {{ $p->author->name ?? $t('Editorial Team', 'ایڈیٹوریل ٹیم') }}</span>

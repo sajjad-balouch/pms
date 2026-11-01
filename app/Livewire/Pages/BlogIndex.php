@@ -28,7 +28,8 @@ class BlogIndex extends Component
         }
 
         if ($this->search) {
-            $query->where('title', 'like', '%' . $this->search . '%');
+            $query->where(fn ($q) => $q->where('title', 'like', '%' . $this->search . '%')
+                ->orWhere('title_ur', 'like', '%' . $this->search . '%'));
         }
 
         return view('livewire.pages.blog-index', [

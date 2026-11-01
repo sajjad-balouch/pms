@@ -30,8 +30,16 @@ class SitemapController extends Controller
         Page::where('is_active', true)->where('slug', '!=', 'about-us')->get(['slug', 'updated_at'])
             ->each(fn ($p) => $urls->push([route('dynamic.page', $p->slug), $p->updated_at]));
 
-        Post::where('status', 'published')->get(['slug', 'updated_at'])
-            ->each(fn ($p) => $urls->push([route('blog.show', $p->slug), $p->updated_at]));
+        // Har post ki jitni zabanen hain utne URLs
+        Post::where('status', 'published')->get(['slug', 'title', 'title_ur', 'content_ur', 'updated_at'])
+            ->each(function ($p) use ($urls) {
+                if ($p->hasEnglish()) {
+                    $urls->push([$p->languageUrl('en'), $p->updated_at]);
+                }
+                if ($p->hasUrdu()) {
+                    $urls->push([$p->languageUrl('ur'), $p->updated_at]);
+                }
+            });
 
         Town::get(['id', 'updated_at'])
             ->each(fn ($t) => $urls->push([route('housing-schemes.show', $t->id), $t->updated_at]));

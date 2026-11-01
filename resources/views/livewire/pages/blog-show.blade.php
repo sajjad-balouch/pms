@@ -5,16 +5,17 @@
     $t    = fn (string $en, string $ur) => $isUr ? $ur : $en;
 
     // ---- Content ----
-    $contentHtml  = html_entity_decode((string) $post->content);
+    $contentHtml  = html_entity_decode((string) $post->display_content);
     $plainContent = trim(preg_replace('/\s+/u', ' ', strip_tags($contentHtml)));
 
     // Article ki zubaan: Arabic/Urdu script ho to RTL, warna LTR (pehle hamesha RTL tha)
-    $contentIsRtl = (bool) preg_match('/\p{Arabic}/u', $plainContent);
+    $contentIsRtl = $post->displayLang() === 'ur';
     $contentDir   = $contentIsRtl ? 'rtl' : 'ltr';
     $contentLang  = $contentIsRtl ? 'ur' : 'en';
 
     $authorName  = $post->author->name ?? 'AssanZameen Expert';
-    $postUrl     = route('blog.show', $post->slug);
+    // Canonical wahi zaban jo dikh rahi hai, taa-ke dono versions alag index hon
+    $postUrl     = $post->languageUrl($post->displayLang());
     $reviewCount = count($reviews);
     $views       = (int) ($post->views_count ?? 0);
     $likes       = (int) ($post->likes_count ?? 0);
@@ -23,8 +24,8 @@
     $imageUrl = $post->featured_image ? asset('public/' . $post->featured_image) : null;
 
     // ---- SEO ----
-    $seoTitle = Str::limit($post->title, 62, '…') . ' | Assan Zameen';
-    $seoDescription = Str::limit(trim(strip_tags((string) ($post->summary ?: $plainContent))), 158);
+    $seoTitle = Str::limit($post->display_title, 62, '…') . ' | Assan Zameen';
+    $seoDescription = Str::limit(trim(strip_tags((string) ($post->display_summary ?: $plainContent))), 158);
 
     view()->share([
         'title'       => $seoTitle,
@@ -42,13 +43,13 @@
                 'itemListElement' => [
                     ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',            'item' => url('/')],
                     ['@type' => 'ListItem', 'position' => 2, 'name' => 'Blog',            'item' => route('blog.index')],
-                    ['@type' => 'ListItem', 'position' => 3, 'name' => $post->title,      'item' => $postUrl],
+                    ['@type' => 'ListItem', 'position' => 3, 'name' => $post->display_title,      'item' => $postUrl],
                 ],
             ],
             array_filter([
                 '@type'            => 'BlogPosting',
                 'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $postUrl],
-                'headline'         => Str::limit($post->title, 110, ''),
+                'headline'         => Str::limit($post->display_title, 110, ''),
                 'description'      => $seoDescription,
                 'image'            => $imageUrl ? [$imageUrl] : null,
                 'datePublished'    => optional($post->created_at)->toAtomString(),
@@ -65,7 +66,7 @@
         ],
     ];
 
-    $whatsappShare = 'https://wa.me/?text=' . rawurlencode($post->title . ' - ' . $postUrl);
+    $whatsappShare = 'https://wa.me/?text=' . rawurlencode($post->display_title . ' - ' . $postUrl);
     $facebookShare = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($postUrl);
 
     $fieldClass = 'w-full bg-slate-800/60 border border-slate-700/60 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/70 focus:ring-2 focus:ring-amber-400/15 transition';
@@ -74,6 +75,13 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-24">
 
     @push('head')
+        @if($post->hasEnglish())
+            <link rel="alternate" hreflang="en" href="{{ $post->languageUrl('en') }}">
+        @endif
+        @if($post->hasUrdu())
+            <link rel="alternate" hreflang="ur" href="{{ $post->languageUrl('ur') }}">
+        @endif
+        <link rel="alternate" hreflang="x-default" href="{{ $post->languageUrl($post->hasEnglish() ? 'en' : 'ur') }}">
         <meta property="article:published_time" content="{{ optional($post->created_at)->toAtomString() }}">
         <meta property="article:modified_time" content="{{ optional($post->updated_at ?? $post->created_at)->toAtomString() }}">
         <meta property="article:section" content="{{ $post->category }}">
@@ -81,7 +89,10 @@
         <style>
             /* Article reading typography (Tailwind typography plugin ki zaroorat nahi) */
             .az-article { color: #cbd5e1; font-size: 1.0625rem; overflow-wrap: anywhere; }
-            .az-article--rtl { line-height: 2.2; }
+            /* Site English mode mein ho tab bhi Urdu article Nastaliq mein dikhe */
+            .az-article--rtl, .az-article--rtl h2, .az-article--rtl h3, .az-article--rtl h4, .az-title--rtl { font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; }
+            .az-article--rtl { font-size: 1.3rem; line-height: 2.2; }
+            .az-title--rtl { line-height: 1.9; letter-spacing: normal; }
             .az-article--ltr { line-height: 1.85; }
             .az-article > * + * { margin-top: 1.1em; }
             .az-article h2 { font-size: 1.55em; font-weight: 700; color: #f8fafc; margin-top: 2em; line-height: 1.5; }
@@ -125,7 +136,21 @@
                 <i class="fa-solid fa-tag text-[10px]" aria-hidden="true"></i>{{ $post->category }}
             </p>
 
-            <h1 class="text-3xl sm:text-4xl font-bold text-slate-50 leading-tight tracking-tight">{{ $post->title }}</h1>
+            <h1 dir="{{ $contentDir }}" class="text-3xl sm:text-4xl font-bold text-slate-50 leading-tight tracking-tight {{ $contentIsRtl ? 'az-title--rtl' : '' }}">{{ $post->display_title }}</h1>
+
+            @if($post->hasEnglish() && $post->hasUrdu())
+                <p class="text-sm">
+                    @if($contentIsRtl)
+                        <a href="{{ route('blog.show', ['slug' => $post->slug, 'lang' => 'en']) }}" hreflang="en" class="text-amber-300 hover:text-amber-200 underline">Read this article in English</a>
+                    @else
+                        <a href="{{ $post->languageUrl('ur') }}" hreflang="ur" lang="ur" dir="rtl" class="text-amber-300 hover:text-amber-200 underline">یہ مضمون اردو میں پڑھیں</a>
+                    @endif
+                </p>
+            @elseif(! $post->hasEnglish() && app()->getLocale() !== 'ur')
+                <p class="text-sm text-slate-400">This article is available in Urdu only for now.</p>
+            @elseif(! $post->hasUrdu() && app()->getLocale() === 'ur')
+                <p class="text-sm text-slate-400">یہ مضمون فی الحال صرف انگریزی میں دستیاب ہے۔</p>
+            @endif
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-400 border-b border-slate-800 pb-5">
                 <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
@@ -152,7 +177,7 @@
         {{-- Featured image --}}
         @if($imageUrl)
             <figure class="mt-8 rounded-2xl overflow-hidden border border-slate-700/50 bg-slate-800">
-                <img src="{{ $imageUrl }}" alt="{{ $post->title }}" width="1200" height="630"
+                <img src="{{ $imageUrl }}" alt="{{ $post->display_title }}" width="1200" height="630"
                      loading="eager" fetchpriority="high" decoding="async"
                      class="w-full h-auto max-h-[460px] object-cover">
             </figure>

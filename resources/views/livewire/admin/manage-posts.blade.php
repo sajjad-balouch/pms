@@ -142,7 +142,11 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-white line-clamp-1">{{ $post->title }}</div>
+                                        <div class="font-bold text-white line-clamp-1">{{ $post->hasEnglish() ? $post->title : $post->title_ur }}</div>
+                                        <div class="flex gap-1 my-0.5">
+                                            <span class="px-1.5 rounded text-[10px] font-bold {{ $post->hasEnglish() ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-700 text-slate-400' }}">EN</span>
+                                            <span class="px-1.5 rounded text-[10px] font-bold {{ $post->hasUrdu() ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-700 text-slate-400' }}">UR</span>
+                                        </div>
                                         <div class="text-[11px] text-slate-400">{{ $post->created_at->format('d M, Y') }} • By {{ $post->author->name ?? 'Admin' }}</div>
                                     </div>
                                 </div>
@@ -222,19 +226,81 @@
             @endif
 
             <form wire:submit="save" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
-                <!-- Title -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Article Title *</label>
-                    <input type="text" wire:model.live.debounce.300ms="title" placeholder="Maslan: Punjab Mein Plot Registry Ka Naya Sarkari Fee Schedule" 
-                           class="w-full bg-slate-950 border {{ $errors->has('title') ? 'border-rose-500 ring-1 ring-rose-500/30' : 'border-slate-800' }} rounded-xl px-3.5 py-2.5 text-xs text-white font-bold focus:outline-none focus:border-amber-500">
-                    @error('title') 
-                        <span class="text-rose-400 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i> {{ $message }}
-                        </span> 
-                    @enderror
+                <!-- Language tabs: English default, Urdu optional -->
+                <div x-data="{ tab: 'en' }" class="space-y-4">
+                    <div role="tablist" class="flex gap-2 border-b border-slate-800 pb-3">
+                        <button type="button" role="tab" @click="tab = 'en'" :aria-selected="tab === 'en'" :class="tab === 'en' ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'" class="px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
+                            English
+                            @if(trim((string) $title) !== '') <i class="fa-solid fa-check ms-1"></i> @endif
+                        </button>
+                        <button type="button" role="tab" @click="tab = 'ur'" :aria-selected="tab === 'ur'" :class="tab === 'ur' ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'" class="px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
+                            اردو
+                            @if(trim((string) $title_ur) !== '') <i class="fa-solid fa-check ms-1"></i> @endif
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Write at least one language. A language you leave empty will not get its own page, and readers will see the other language.</p>
+
+                    @foreach([
+                        'en' => ['title' => 'title', 'summary' => 'summary', 'content' => 'content', 'dir' => 'ltr', 'titleLabel' => 'Article title', 'summaryLabel' => 'Short summary (shown on Google and cards)', 'contentLabel' => 'Full article'],
+                        'ur' => ['title' => 'title_ur', 'summary' => 'summary_ur', 'content' => 'content_ur', 'dir' => 'rtl', 'titleLabel' => 'مضمون کا عنوان', 'summaryLabel' => 'مختصر خلاصہ (گوگل اور کارڈز پر نظر آئے گا)', 'contentLabel' => 'مکمل مضمون'],
+                    ] as $lang => $f)
+                        <div x-show="tab === '{{ $lang }}'" @if($lang !== 'en') x-cloak @endif class="space-y-4" dir="{{ $f['dir'] }}" wire:key="post-lang-{{ $lang }}">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 mb-1">{{ $f['titleLabel'] }}</label>
+                                <input type="text" dir="{{ $f['dir'] }}" wire:model.live.debounce.300ms="{{ $f['title'] }}"
+                                       class="w-full bg-slate-950 border {{ $errors->has($f['title']) ? 'border-rose-500' : 'border-slate-800' }} rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                                @error($f['title']) <span class="text-rose-400 text-[11px] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 mb-1">{{ $f['summaryLabel'] }}</label>
+                                <textarea dir="{{ $f['dir'] }}" wire:model="{{ $f['summary'] }}" rows="2"
+                                          class="w-full bg-slate-950 border {{ $errors->has($f['summary']) ? 'border-rose-500' : 'border-slate-800' }} rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"></textarea>
+                                @error($f['summary']) <span class="text-rose-400 text-[11px] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 mb-1">{{ $f['contentLabel'] }}</label>
+                                <div wire:ignore>
+                                    <div x-data="{
+                                        content: @entangle($f['content']),
+                                        quill: null,
+                                        init() {
+                                            this.quill = new Quill($refs.editor, {
+                                                theme: 'snow',
+                                                modules: {
+                                                    toolbar: [
+                                                        [{ 'header': [1, 2, 3, false] }],
+                                                        ['bold', 'italic', 'underline', 'strike'],
+                                                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                                        ['blockquote', 'code-block'],
+                                                        [{ 'color': [] }, { 'background': [] }],
+                                                        ['link', 'clean']
+                                                    ]
+                                                }
+                                            });
+                                            this.quill.root.setAttribute('dir', '{{ $f['dir'] }}');
+                                            if (this.content) {
+                                                this.quill.root.innerHTML = this.content;
+                                            }
+                                            this.quill.on('text-change', () => {
+                                                this.content = this.quill.root.innerHTML;
+                                            });
+                                            this.$watch('content', value => {
+                                                if (value !== this.quill.root.innerHTML) {
+                                                    this.quill.root.innerHTML = value || '';
+                                                }
+                                            });
+                                        }
+                                    }">
+                                        <div x-ref="editor"></div>
+                                    </div>
+                                </div>
+                                @error($f['content']) <span class="text-rose-400 text-[11px] font-semibold mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <!-- Slug -->
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">SEO URL Slug *</label>
@@ -283,65 +349,6 @@
                         </span> 
                     @enderror
                 </div>
-
-                <!-- Summary -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Article Summary (Short Snippet) *</label>
-                    <textarea wire:model="summary" rows="2" placeholder="2 se 3 lines mein article ka khulasa likhein jo Google aur cards par show hoga..." 
-                              class="w-full bg-slate-950 border {{ $errors->has('summary') ? 'border-rose-500 ring-1 ring-rose-500/30' : 'border-slate-800' }} rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500"></textarea>
-                    @error('summary') 
-                        <span class="text-rose-400 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i> {{ $message }}
-                        </span> 
-                    @enderror
-                </div>
-
-                <!-- WYSIWYG Content Editor -->
-                <div wire:ignore>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Full Article Content (Rich Text Editor) *</label>
-                    
-                    <div x-data="{
-                        content: @entangle('content'),
-                        quill: null,
-                        init() {
-                            this.quill = new Quill($refs.editor, {
-                                theme: 'snow',
-                                placeholder: 'Yahan apna mukammal article headings, bold text, bullet points aur links ke sath likhein...',
-                                modules: {
-                                    toolbar: [
-                                        [{ 'header': [1, 2, 3, false] }],
-                                        ['bold', 'italic', 'underline', 'strike'],
-                                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                                        ['blockquote', 'code-block'],
-                                        [{ 'color': [] }, { 'background': [] }],
-                                        ['link', 'clean']
-                                    ]
-                                }
-                            });
-
-                            if (this.content) {
-                                this.quill.root.innerHTML = this.content;
-                            }
-
-                            this.quill.on('text-change', () => {
-                                this.content = this.quill.root.innerHTML;
-                            });
-
-                            this.$watch('content', value => {
-                                if (value !== this.quill.root.innerHTML) {
-                                    this.quill.root.innerHTML = value || '';
-                                }
-                            });
-                        }
-                    }">
-                        <div x-ref="editor"></div>
-                    </div>
-                </div>
-                @error('content') 
-                    <span class="text-rose-400 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation text-[10px]"></i> آرٹیکل کا تفصیلی مواد لکھنا لازمی ہے ({{ $message }})
-                    </span> 
-                @enderror
 
                 <div class="grid grid-cols-2 gap-3 pt-2">
                     <div>

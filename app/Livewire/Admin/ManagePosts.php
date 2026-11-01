@@ -22,10 +22,13 @@ class ManagePosts extends Component
     public $isModalOpen = false;
     public $post_id;
     public $title;
+    public $title_ur;
     public $slug;
     public $category = 'Property Guides';
     public $summary;
+    public $summary_ur;
     public $content;
+    public $content_ur;
     public $tags;
     public $read_time = 3;
     public $is_featured = false;
@@ -36,11 +39,15 @@ class ManagePosts extends Component
     protected function rules()
     {
         return [
-            'title' => 'required|string|max:255',
+            // Kam az kam ek zaban poori ho; English default zaban hai
+            'title' => 'nullable|required_without:title_ur|string|max:255',
+            'title_ur' => 'nullable|string|max:255',
             'slug' => 'required|string|max:255|unique:posts,slug,' . $this->post_id,
             'category' => 'required|string|max:100',
-            'summary' => 'required|string|max:500',
-            'content' => 'required|string',
+            'summary' => 'required_with:title|nullable|string|max:500',
+            'summary_ur' => 'required_with:title_ur|nullable|string|max:500',
+            'content' => 'required_with:title|nullable|string',
+            'content_ur' => 'required_with:title_ur|nullable|string',
             'tags' => 'nullable|string|max:255',
             'read_time' => 'required|numeric|min:1',
             'status' => 'required|in:published,draft',
@@ -65,10 +72,13 @@ class ManagePosts extends Component
     {
         $this->post_id = null;
         $this->title = '';
+        $this->title_ur = '';
         $this->slug = '';
         $this->category = 'Property Guides';
         $this->summary = '';
+        $this->summary_ur = '';
         $this->content = '';
+        $this->content_ur = '';
         $this->tags = 'Pakistan, Real Estate, Registry, Land';
         $this->read_time = 3;
         $this->is_featured = false;
@@ -80,7 +90,17 @@ class ManagePosts extends Component
 
     public function save()
     {
+        // Khali editor bhi '<p><br></p>' bhejta hai
+        foreach (['content', 'content_ur'] as $field) {
+            if (trim(strip_tags((string) $this->{$field})) === '') {
+                $this->{$field} = '';
+            }
+        }
+
+        $this->slug = Str::slug((string) $this->slug);
         $this->validate();
+
+        $hasEnglish = trim((string) $this->title) !== '';
 
         try {
             $imagePath = $this->existing_image;
@@ -99,12 +119,16 @@ class ManagePosts extends Component
                 ['id' => $this->post_id],
                 [
                     'user_id' => Auth::id(),
-                    'title' => $this->title,
+                    // Sirf Urdu likhi ho to main fields required hain, is liye wahi text
+                    'title' => $hasEnglish ? $this->title : $this->title_ur,
+                    'title_ur' => $this->title_ur ?: null,
                     'slug' => Str::slug($this->slug),
                     'category' => $this->category,
                     'featured_image' => $imagePath,
-                    'summary' => $this->summary,
-                    'content' => $this->content,
+                    'summary' => $hasEnglish ? $this->summary : $this->summary_ur,
+                    'summary_ur' => $this->summary_ur ?: null,
+                    'content' => $hasEnglish ? $this->content : $this->content_ur,
+                    'content_ur' => $this->content_ur ?: null,
                     'tags' => $this->tags,
                     'read_time' => $this->read_time,
                     'is_featured' => $this->is_featured ? true : false,
@@ -124,11 +148,15 @@ class ManagePosts extends Component
     {
         $post = Post::findOrFail($id);
         $this->post_id = $post->id;
-        $this->title = $post->title;
+        // Jis post ka English abhi nahi likha us ka English tab khali dikhe
+        $this->title = $post->hasEnglish() ? $post->title : '';
+        $this->title_ur = $post->title_ur;
         $this->slug = $post->slug;
         $this->category = $post->category;
-        $this->summary = $post->summary;
-        $this->content = $post->content;
+        $this->summary = $post->hasEnglish() ? $post->summary : '';
+        $this->summary_ur = $post->summary_ur;
+        $this->content = $post->hasEnglish() ? $post->content : '';
+        $this->content_ur = $post->content_ur;
         $this->tags = $post->tags;
         $this->read_time = $post->read_time;
         $this->is_featured = $post->is_featured;
@@ -155,6 +183,7 @@ class ManagePosts extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhere('title_ur', 'like', '%' . $this->search . '%')
                   ->orWhere('tags', 'like', '%' . $this->search . '%');
             });
         }
