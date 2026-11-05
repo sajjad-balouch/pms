@@ -84,6 +84,60 @@ class InheritanceEngineTest extends TestCase
         $this->assertEqualsWithDelta(1 / 2, $r['map']['sister'], 1e-9);
     }
 
+    public function test_only_daughters_remainder_goes_to_closest_residuary(): void
+    {
+        // Biwi 1/8, 2 betiyan 2/3, baqi 5/24 bhai ko
+        $r = $this->shares(['wives' => 1, 'daughters' => 2, 'brothers' => 1, 'nephews' => 3, 'uncles' => 1]);
+        $this->assertEqualsWithDelta(2 / 3, $r['map']['daughter'], 1e-9);
+        $this->assertEqualsWithDelta(5 / 24, $r['map']['brother'], 1e-9);
+        $this->assertArrayNotHasKey('nephew', $r['map']);
+        $this->assertFalse($r['radd']);
+
+        // Bhai nahi: bhateeje; woh bhi nahi: chacha; woh bhi nahi: chacha zad
+        $this->assertEqualsWithDelta(1 / 2, $this->shares(['daughters' => 1, 'nephews' => 2, 'uncles' => 1])['map']['nephew'], 1e-9);
+        $this->assertEqualsWithDelta(1 / 3, $this->shares(['daughters' => 2, 'uncles' => 1, 'cousins' => 4])['map']['uncle'], 1e-9);
+        $this->assertEqualsWithDelta(1 / 3, $this->shares(['daughters' => 2, 'cousins' => 4])['map']['cousin'], 1e-9);
+
+        // Koi asaba nahi: baqi radd se betiyon ko, biwi ko nahi
+        $r = $this->shares(['wives' => 1, 'daughters' => 2]);
+        $this->assertTrue($r['radd']);
+        $this->assertEqualsWithDelta(7 / 8, $r['map']['daughter'], 1e-9);
+        $this->assertTotalIsWhole($r);
+    }
+
+    public function test_grandfather_takes_fathers_place_and_blocks_brothers(): void
+    {
+        $r = $this->shares(['daughters' => 1, 'grandfather' => true, 'brothers' => 2]);
+        $this->assertEqualsWithDelta(1 / 2, $r['map']['grandfather'], 1e-9); // 1/6 + baqi
+        $this->assertArrayNotHasKey('brother', $r['map']);
+
+        // Walid ho to dada kuch nahi
+        $r = $this->shares(['daughters' => 1, 'father' => true, 'grandfather' => true]);
+        $this->assertArrayNotHasKey('grandfather', $r['map']);
+    }
+
+    public function test_paternal_half_siblings(): void
+    {
+        // Ek haqeeqi behan 1/2, allati behan takmila 1/6, baqi allati bhai ko nahi (woh ho to behan ke saath asaba)
+        $r = $this->shares(['sisters' => 1, 'paternal_sisters' => 1, 'uncles' => 1]);
+        $this->assertEqualsWithDelta(1 / 2, $r['map']['sister'], 1e-9);
+        $this->assertEqualsWithDelta(1 / 6, $r['map']['paternal_sister'], 1e-9);
+        $this->assertEqualsWithDelta(1 / 3, $r['map']['uncle'], 1e-9);
+
+        // Haqeeqi bhai allati bhai ko rokta hai
+        $r = $this->shares(['brothers' => 1, 'paternal_brothers' => 2]);
+        $this->assertEqualsWithDelta(1.0, $r['map']['brother'], 1e-9);
+
+        // Beti ke saath haqeeqi behan asaba: allati bhai mahroom
+        $r = $this->shares(['daughters' => 1, 'sisters' => 1, 'paternal_brothers' => 1]);
+        $this->assertEqualsWithDelta(1 / 2, $r['map']['sister'], 1e-9);
+        $this->assertArrayNotHasKey('paternal_brother', $r['map']);
+
+        $r = $this->shares(['daughters' => 2, 'paternal_brothers' => 1, 'paternal_sisters' => 1]);
+        $this->assertEqualsWithDelta(2 / 9, $r['map']['paternal_brother'], 1e-9);
+        $this->assertEqualsWithDelta(1 / 9, $r['map']['paternal_sister'], 1e-9);
+    }
+
     public function test_only_wife_reports_unassigned_remainder(): void
     {
         $r = $this->shares(['wives' => 2]);

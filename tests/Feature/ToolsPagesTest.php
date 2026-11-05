@@ -25,6 +25,79 @@ class ToolsPagesTest extends TestCase
             ->assertSet('sons_count', 50);
     }
 
+    public function test_shajra_add_remove_and_restore(): void
+    {
+        $c = Livewire::test(\App\Livewire\Tools\ShajraNasab::class)
+            ->call('clearAll')
+            ->set('form.relation', 'son')->set('form.name', 'Ali')->set('form.status', 'died_after')
+            ->call('addPerson')->assertHasNoErrors()
+            ->assertSee('1/1');
+
+        // Fout bete ke neeche uski biwi; ek se zyada maan nahi
+        $c->call('addUnder', 'n1')
+            ->set('form.relation', 'mother')->set('form.name', 'Zainab')->call('addPerson')
+            ->set('form.relation', 'mother')->set('form.name', 'Other')->call('addPerson')
+            ->assertHasErrors('form.relation');
+
+        // Beta "talaq yafta" nahi ho sakta: form foran wapas "zinda" kar deta hai
+        $c->call('addUnder', 'root')
+            ->set('form.relation', 'son')->set('form.name', 'X')->set('form.status', 'divorced')
+            ->assertSet('form.status', 'alive');
+
+        // Do biwiyan: bacha doosri biwi se; biwi hatane par bachay ki maan khaali
+        $c->call('addUnder', 'root')
+            ->set('form.relation', 'wife')->set('form.name', 'W1')->call('addPerson')
+            ->set('form.relation', 'wife')->set('form.name', 'W2')->call('addPerson')
+            ->set('form.relation', 'son')->set('form.mother', 'n4')->set('form.name', 'Usman')
+            ->set('form.minor', true)->set('form.guardian', 'W2')->call('addPerson')
+            ->assertHasNoErrors()
+            ->assertSet('people.4.mother', 'n4')
+            ->assertSee('Born of')
+            ->call('removePerson', 'n4')
+            ->assertSet('people.3.mother', '');
+        $c->call('removePerson', 'n2')->call('removePerson', 'n3')->call('removePerson', 'n5');
+
+        $c->call('removePerson', 'n1')->assertSet('people', []);
+
+        // Ghalat/bahar ke data se kuch nahi tootna; yateem node chhor diye jate hain
+        $c->call('restore', ['people' => [
+            ['id' => 'n5', 'parent' => 'root', 'relation' => 'daughter', 'name' => 'Sana', 'status' => 'alive'],
+            ['id' => 'n6', 'parent' => 'n99', 'relation' => 'son', 'name' => 'Lost'],
+            ['id' => 'bad', 'parent' => 'root', 'relation' => 'son'],
+            'junk',
+        ], 'record' => ['kanal' => '-4', 'marla' => 'abc']])
+            ->assertCount('people', 1)
+            ->assertSet('record.kanal', 0.0)
+            ->assertSet('nextId', 6);
+    }
+
+    public function test_shajra_asks_marriage_instead_of_guessing_lawalad(): void
+    {
+        $c = Livewire::test(\App\Livewire\Tools\ShajraNasab::class)
+            ->call('clearAll')
+            ->set('form.relation', 'daughter')->set('form.name', 'Amna')->call('addPerson')
+            // Bhai pehle fout, shadi shuda: form khud us ke neeche chala jata hai
+            ->set('form.relation', 'brother')->set('form.status', 'died_before')->set('form.name', 'Karim')
+            ->set('form.married', 'yes')->set('form.issue', 'yes')->call('addPerson')
+            ->assertSet('form.parent', 'n2')
+            ->assertDontSee('لاولد</span>', false);
+
+        // Us ke bete bhateeje ban kar baqi lete hain
+        $c->set('form.relation', 'son')->set('form.name', 'Saqib')->call('addPerson')->assertHasNoErrors()
+            ->assertSee('Saqib');
+        $this->assertSame('1/2', collect($c->viewData('result')['holders'])->firstWhere('name', 'Saqib')['fraction']);
+
+        // "Shadi nahi hui" chunne par us ke neeche wale hat jate hain aur "ghair shadi shuda" likha jata hai
+        $c->set('people.1.married', 'no')
+            ->assertCount('people', 2)
+            ->assertSet('people.1.issue', '');
+        // Ab koi asaba nahi: akeli beti ko 1/2 + radd = poora
+        $this->assertSame('1/1', collect($c->viewData('result')['holders'])->firstWhere('name', 'Amna')['fraction']);
+
+        // Zinda bhai par shadi ka sawal hi nahi
+        $c->set('people.1.status', 'alive')->assertSet('people.1.married', '');
+    }
+
     public function test_tax_uses_configured_slabs_and_clean_rates(): void
     {
         Livewire::test(RegistryTaxCalculator::class)

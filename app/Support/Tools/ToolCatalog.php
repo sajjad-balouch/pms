@@ -74,6 +74,17 @@ class ToolCatalog
                     'Grandchildren, half siblings and other relatives can change the result. Ask a scholar or lawyer, and in Pakistan a predeceased child\'s children may also have a right under family law.',
                 ],
             ],
+            'shajra' => [
+                'route' => 'tools.shajra-nasab', 'icon' => 'fa-sitemap',
+                'name' => 'Shajra Nasab Maker',
+                'seo' => 'Digital Shajra Nasab Maker for Inheritance Mutation (Wirasat)',
+                'desc' => 'Draw the family tree of the deceased for an inheritance mutation, with each heir\'s share of the land, including heirs who died later.',
+                'guide' => [
+                    'Enter the deceased and the land from the fard, then add each heir with the correct relation and CNIC.',
+                    'If an heir died after the deceased, mark them "Died after" and add their own heirs under them. If a son or daughter died before, add their children under them.',
+                    'This is a draft for guidance. The official shajra and mutation are made by the patwari and the revenue office from the record and the family registration certificate.',
+                ],
+            ],
             'rent' => [
                 'route' => 'tools.rent-generator', 'icon' => 'fa-file-contract',
                 'name' => 'Rent Agreement Maker',

@@ -63,6 +63,7 @@ use App\Livewire\Tools\PatwariLandConverter;
 use App\Livewire\Tools\BayanaDeedGenerator;
 use App\Livewire\Tools\SocietyNocDirectory;
 use App\Livewire\Tools\InheritanceCalculator;
+use App\Livewire\Tools\ShajraNasab;
 use App\Livewire\Tools\RentAgreementGenerator;
 use App\Livewire\Tools\ZakatCalculator;
 use App\Livewire\Tools\CvMaker;
@@ -116,6 +117,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/tools/bayana-deed-generator', BayanaDeedGenerator::class)->name('tools.bayana-generator');
     Route::get('/tools/society-noc-directory', SocietyNocDirectory::class)->name('tools.society-directory');
     Route::get('/tools/inheritance-calculator', InheritanceCalculator::class)->name('tools.inheritance-calculator');
+    Route::get('/tools/shajra-nasab', ShajraNasab::class)->name('tools.shajra-nasab');
     Route::get('/tools/rent-agreement-generator', RentAgreementGenerator::class)->name('tools.rent-generator');
     Route::get('/tools/zakat-calculator', ZakatCalculator::class)->name('tools.zakat-calculator');
     Route::get('/tools/cv-maker', CvMaker::class)->name('tools.cv-maker');
