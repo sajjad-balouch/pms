@@ -1588,5 +1588,21 @@
     "You have edited this report. It no longer updates from the shajra.": "آپ نے یہ رپورٹ خود بدلی ہے، اب یہ شجرے سے خودبخود نہیں بدلے گی۔",
     "Discard your changes and write the report again from the shajra?": "اپنی تبدیلیاں ختم کر کے رپورٹ دوبارہ شجرے سے لکھیں؟",
     "Restore automatic report": "خودکار رپورٹ واپس لائیں",
-    "Written from the shajra. Click in the box to change any word.": "شجرے سے خود لکھی گئی ہے۔ کوئی بھی لفظ بدلنے کے لیے خانے میں کلک کریں۔"
+    "Written from the shajra. Click in the box to change any word.": "شجرے سے خود لکھی گئی ہے۔ کوئی بھی لفظ بدلنے کے لیے خانے میں کلک کریں۔",
+    "LRMIS Land Calculator": "LRMIS رقبہ کیلکولیٹر",
+    "LRMIS Land Area Calculator: Add Kanal Marla Feet": "LRMIS رقبہ کیلکولیٹر: کنال مرلہ فٹ جمع و تفریق",
+    "Add or subtract land in kanal, marla and feet, and see the total in kanal-marla-feet, total marlas and acres.": "کنال، مرلہ اور فٹ میں رقبہ جمع یا تفریق کریں، اور کل رقبہ کنال-مرلہ-فٹ، کل مرلوں اور ایکڑ میں دیکھیں۔",
+    "Type kanal, marla and feet from the fard and press Enter. Each entry is added to the total and listed on the side.": "فرد سے کنال، مرلہ اور فٹ لکھ کر Enter دبائیں۔ ہر اندراج کل میں جمع ہو کر ساتھ والی فہرست میں آ جاتا ہے۔",
+    "Tick Subtract to take an area away, for example land already sold. Remove a wrong entry with the cross next to it.": "رقبہ منفی کرنے کے لیے (مثلاً پہلے بیچا گیا رقبہ) Subtract پر نشان لگائیں۔ غلط اندراج اس کے ساتھ والے کراس سے ہٹائیں۔",
+    "Revenue records use 1 marla = 272.25 sq ft. Choose 225 sq ft only for society plots.": "ریونیو ریکارڈ میں 1 مرلہ = 272.25 مربع فٹ ہے۔ 225 مربع فٹ صرف سوسائٹی پلاٹ کے لیے چنیں۔",
+    "1 marla = :ft sq ft": "1 مرلہ = :ft مربع فٹ",
+    "Enter kanal, marla or feet first.": "پہلے کنال، مرلہ یا فٹ لکھیں۔",
+    "Up to :max entries can be added.": "زیادہ سے زیادہ :max اندراج کیے جا سکتے ہیں۔",
+    "Subtract (Enter)": "تفریق کریں (Enter)",
+    "Add (Enter)": "جمع کریں (Enter)",
+    "Clear all added land?": "سارا جمع کیا ہوا رقبہ صاف کر دیں؟",
+    "Marla size": "مرلہ کا سائز",
+    "272.25 sq ft (revenue / LRMIS)": "272.25 مربع فٹ (ریونیو / LRMIS)",
+    "225 sq ft (society)": "225 مربع فٹ (سوسائٹی)",
+    "The total is negative: more land was subtracted than added.": "کل منفی ہے: جمع سے زیادہ رقبہ تفریق کیا گیا ہے۔"
 }

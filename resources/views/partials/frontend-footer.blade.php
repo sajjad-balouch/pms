@@ -26,6 +26,7 @@
         ['route' => 'tools.rent-generator',    'ur' => 'کرایہ نامہ میکر',          'en' => 'Rent Agreement Maker'],
         ['route' => 'tools.inheritance-calculator', 'ur' => 'وراثت کیلکولیٹر', 'en' => 'Inheritance Calculator'],
         ['route' => 'tools.shajra-nasab', 'ur' => 'ڈیجیٹل شجرہ نسب', 'en' => 'Shajra Nasab Maker'],
+        ['route' => 'tools.raqba-calculator', 'ur' => 'رقبہ کیلکولیٹر', 'en' => 'LRMIS Land Calculator'],
         ['route' => 'tools.zakat-calculator', 'ur' => 'زکوٰۃ کیلکولیٹر', 'en' => 'Zakat Calculator'],
         ['route' => 'tools.government-links', 'ur' => 'سرکاری لنکس گائیڈ', 'en' => 'Government Links Guide'],
         ['route' => 'tools.cv-maker', 'ur' => 'سی وی میکر', 'en' => 'CV Maker'],

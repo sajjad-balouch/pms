@@ -23,7 +23,7 @@ class SitemapController extends Controller
         $urls = collect([
             'home', 'housing-schemes', 'available-plots', 'about-us', 'contact', 'disclaimer', 'blog.index',
             'tools.index', 'tools.legal-scanner', 'tools.tax-calculator', 'tools.land-converter', 'tools.bayana-generator',
-            'tools.society-directory', 'tools.inheritance-calculator', 'tools.shajra-nasab', 'tools.rent-generator',
+            'tools.society-directory', 'tools.inheritance-calculator', 'tools.shajra-nasab', 'tools.raqba-calculator', 'tools.rent-generator',
             'tools.zakat-calculator', 'tools.government-links', 'tools.cv-maker',
         ])->map(fn ($name) => [route($name), null]);
 

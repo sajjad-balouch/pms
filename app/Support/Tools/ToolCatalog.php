@@ -85,6 +85,17 @@ class ToolCatalog
                     'This is a draft for guidance. The official shajra and mutation are made by the patwari and the revenue office from the record and the family registration certificate.',
                 ],
             ],
+            'raqba' => [
+                'route' => 'tools.raqba-calculator', 'icon' => 'fa-calculator',
+                'name' => 'LRMIS Land Calculator',
+                'seo' => 'LRMIS Land Area Calculator: Add Kanal Marla Feet',
+                'desc' => 'Add or subtract land in kanal, marla and feet, and see the total in kanal-marla-feet, total marlas and acres.',
+                'guide' => [
+                    'Type kanal, marla and feet from the fard and press Enter. Each entry is added to the total and listed on the side.',
+                    'Tick Subtract to take an area away, for example land already sold. Remove a wrong entry with the cross next to it.',
+                    'Revenue records use 1 marla = 272.25 sq ft. Choose 225 sq ft only for society plots.',
+                ],
+            ],
             'rent' => [
                 'route' => 'tools.rent-generator', 'icon' => 'fa-file-contract',
                 'name' => 'Rent Agreement Maker',

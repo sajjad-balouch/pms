@@ -124,6 +124,34 @@ class ToolsPagesTest extends TestCase
             ->assertSet('report.custom', false);
     }
 
+    public function test_raqba_calculator_adds_subtracts_and_totals(): void
+    {
+        $c = Livewire::test(\App\Livewire\Tools\RaqbaCalculator::class)
+            ->call('add')->assertHasErrors('kanal') // khaali par kuch nahi
+            ->set('kanal', '2')->set('marla', '15')->set('feet', '200')->call('add')
+            ->assertHasNoErrors()->assertSet('kanal', '')
+            ->set('kanal', '1')->set('marla', '10')->set('feet', '100')->call('add');
+
+        $t = $c->viewData('total');
+        $this->assertSame([4, 6, 27.75], [$t['kanal'], $t['marla'], $t['feet']]);
+        $this->assertCount(2, $c->get('entries'));
+
+        // Tafreeq: 2 kanal minus
+        $c->set('subtract', true)->set('kanal', '2')->call('add');
+        $t = $c->viewData('total');
+        $this->assertSame([2, 6], [$t['kanal'], $t['marla']]);
+        $this->assertSame(1, $c->viewData('subtracted'));
+
+        // Ghalat entry hatao, phir sab saaf
+        $c->call('removeEntry', 2);
+        $this->assertSame(4, $c->viewData('total')['kanal']);
+        $c->call('resetAll')->assertSet('entries', [])->assertSet('subtract', false);
+
+        // Browser se aaya ghalat data
+        $c->call('restore', ['standard' => 'x', 'entries' => [['sign' => -1, 'kanal' => '1'], ['kanal' => -5], 'junk']])
+            ->assertSet('standard', 'revenue')->assertCount('entries', 1);
+    }
+
     public function test_tax_uses_configured_slabs_and_clean_rates(): void
     {
         Livewire::test(RegistryTaxCalculator::class)
