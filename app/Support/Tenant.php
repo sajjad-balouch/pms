@@ -45,6 +45,7 @@ class Tenant
         'town_owner.expenses' => 'expenses',
         'town_owner.leads' => 'leads',
         'town_owner.team' => 'team', // owner only
+        'town_owner.wallet' => 'team', // owner only (staff ke SMS bhi owner ke wallet se)
     ];
 
     public static function ownerId(): ?int

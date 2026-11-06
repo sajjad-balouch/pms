@@ -123,6 +123,16 @@ new class extends Component
                             @endif
                         @endif
 
+                        <!-- Wallet (agent + town owner; staff ka wallet owner ka hai) -->
+                        @if($role === 'agent' || ($role === 'town_owner' && \App\Support\Tenant::isOwner()))
+                            @php $walletRoute = $role === 'agent' ? 'agent.wallet' : 'town_owner.wallet'; @endphp
+                            <x-nav-link :href="route($walletRoute)" :active="request()->routeIs($walletRoute)" wire:navigate
+                                class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 {{ request()->routeIs($walletRoute) ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30 shadow-md shadow-amber-500/5' : 'text-slate-300 hover:text-white hover:bg-slate-800/70 font-semibold' }}">
+                                <i class="fa-solid fa-wallet mr-2 {{ request()->routeIs($walletRoute) ? 'text-amber-400' : 'text-slate-400' }}"></i>
+                                Rs. {{ number_format((float) auth()->user()->wallet_balance) }}
+                            </x-nav-link>
+                        @endif
+
                         <!-- Agent Menu Items -->
                         @if($role === 'agent')
                             <!-- Leads (Direct Link) -->
@@ -406,6 +416,14 @@ new class extends Component
                         <i class="fa-solid fa-user-shield text-amber-400"></i> {{ __('My Team') }}
                     </a>
                     @endif
+                @endif
+
+                @if($role === 'agent' || ($role === 'town_owner' && \App\Support\Tenant::isOwner()))
+                    @php $walletRoute = $role === 'agent' ? 'agent.wallet' : 'town_owner.wallet'; @endphp
+                    <a href="{{ route($walletRoute) }}" class="flex items-center justify-between px-4 py-3 rounded-xl text-xs font-extrabold {{ request()->routeIs($walletRoute) ? 'text-amber-300 bg-amber-500/15 border border-amber-500/30' : 'text-slate-200 hover:bg-slate-800' }}">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-wallet text-amber-400"></i> {{ __('My Wallet') }}</span>
+                        <span class="text-amber-300">Rs. {{ number_format((float) auth()->user()->wallet_balance) }}</span>
+                    </a>
                 @endif
 
                 @if($role === 'agent')

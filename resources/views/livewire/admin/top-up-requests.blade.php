@@ -58,7 +58,10 @@
                             <tr class="hover:bg-slate-800/30 transition">
                                 <td class="p-4 font-semibold text-white">
                                     {{ $tx->user->name ?? 'N/A' }}
-                                    <span class="block text-[10px] text-slate-400 font-normal">{{ $tx->user->email ?? '' }}</span>
+                                    @if ($tx->user?->role)
+                                        <span class="ms-1 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase {{ ['town_owner' => 'bg-indigo-500/20 text-indigo-300', 'agent' => 'bg-amber-500/20 text-amber-300'][$tx->user->role] ?? 'bg-slate-700 text-slate-300' }}">{{ str_replace('_', ' ', $tx->user->role) }}</span>
+                                    @endif
+                                    <span class="block text-[10px] text-slate-400 font-normal">{{ $tx->user->email ?? '' }} · Rs. {{ number_format((float) ($tx->user->wallet_balance ?? 0)) }} {{ __('balance') }}</span>
                                 </td>
                                 <td class="p-4 font-bold text-amber-400 text-sm">
                                     PKR {{ number_format($tx->amount) }}

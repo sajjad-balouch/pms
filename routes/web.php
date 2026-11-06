@@ -205,6 +205,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/employees/{townId?}', ManageEmployees::class)->name('employees');
         Route::get('/expenses/{townId?}', ManageExpenses::class)->name('expenses');
         Route::get('/leads', ManageLeads::class)->name('leads');
+        Route::get('/wallet', \App\Livewire\Wallet::class)->name('wallet'); // sirf owner (staff nahi)
 
     });
 
@@ -223,6 +224,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/poster-maker/{propertyId?}', PosterMaker::class)->name('poster.maker');
         Route::get('/commission-ledger', CommissionLedger::class)->name('commission.ledger');
         Route::get('/registry-tax-calculator', RegistryTaxCalculator::class)->name('tax.calculator');
+        Route::get('/wallet', \App\Livewire\Wallet::class)->name('wallet');
 
     });
 
