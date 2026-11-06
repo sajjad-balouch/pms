@@ -20,15 +20,15 @@ namespace App\Support\Tools;
  */
 class ShajraLayout
 {
-    public const W = 132;
+    public const W = 120;
 
-    public const H = 78;
+    public const H = 76;
 
-    public const GX = 16;
+    public const GX = 10;
 
-    public const GM = 40;
+    public const GM = 30;
 
-    public const GY = 70;
+    public const GY = 44;
 
     public const ROW = 15;
 
@@ -203,13 +203,13 @@ class ShajraLayout
         // Baayen se daayen tarteeb, taa-ke har maan ki aulad usi ke neeche aaye
         usort($groups, fn ($a, $b) => $a['x'] <=> $b['x']);
 
-        // Har maan ki aulad ki apni ufuqi line, alag satah par, taa-ke groups aapas mein na milein
+        // Har maan ki aulad ki apni ufuqi line, alag satah par (chhote faasle, taa-ke poora shajra ek safhe par aaye)
         $levels = max(1, count($groups));
-        $y0 = $rowH + max(self::GY, 34 + $levels * 16 + 18);
+        $y0 = $rowH + max(self::GY, 14 + $levels * 10 + 16);
         $cursor = -INF;
         foreach ($groups as $gi => $g) {
             // Baad wale (daayen) group ki line oopar: is tarah lineen ek doosre ko nahi kaatteen
-            $busY = $rowH + 34 + ($levels - 1 - $gi) * 16;
+            $busY = $rowH + 14 + ($levels - 1 - $gi) * 10;
             $blocks = array_map(fn ($c) => $this->family($c, false, $depth + 1), $g['kids']);
             $gw = array_sum(array_column($blocks, 'w')) + self::GX * (count($blocks) - 1);
             $left = max($g['x'] - $gw / 2, $cursor);

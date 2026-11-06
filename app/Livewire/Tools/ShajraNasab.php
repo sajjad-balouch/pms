@@ -506,7 +506,8 @@ class ShajraNasab extends Component
     {
         $auto = ShajraReport::build($this->deceased, $this->record, $this->people, $result, $this->report);
         if (! $this->report['custom']) {
-            $this->report['text'] = implode("\n", $auto['paragraphs']);
+            // Ek musalsal paragraph: line khatam ho to agli line par khud chali jati hai
+            $this->report['text'] = implode(' ', $auto['paragraphs']);
         }
 
         return ['title' => $this->report['title'] ?: $auto['title'], 'text' => $this->report['text'], 'custom' => $this->report['custom']];

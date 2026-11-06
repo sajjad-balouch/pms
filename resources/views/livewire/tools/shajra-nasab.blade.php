@@ -113,7 +113,7 @@
     $input = 'w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500';
     $lbl = 'block text-[10px] font-bold text-slate-400 uppercase mb-1';
 @endphp
-<div class="min-h-screen bg-[#070a13] text-slate-100 py-10 px-4 sm:px-6 lg:px-8 w-full overflow-x-hidden"
+<div class="shajra-root min-h-screen bg-[#070a13] text-slate-100 py-10 px-4 sm:px-6 lg:px-8 w-full overflow-x-hidden"
      x-data="{
         key: 'az_shajra_v2',
         save() {
@@ -165,15 +165,15 @@
         .pf-cell { width: 19px; border-inline-start: 1px solid #9ca3af; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 13px; }
         .pf-dash { width: 14px; display: flex; align-items: center; justify-content: center; border-inline-start: 1px solid #9ca3af; }
         /* Shajra aur report ka box saath saath (landscape) */
-        .pf-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
-        .pf-tree { flex: 1 1 520px; min-width: 0; }
-        .pf-report { flex: 0 0 380px; max-width: 100%; color: #111827; font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif;
-            border: 1.5px solid #111827; border-radius: 8px; padding: 10px 14px; background: #fff; }
+        /* Shajra oopar, report us ke neeche poori chaurai mein (shajra kitna bhi bara ho) */
+        .pf-tree { min-width: 0; }
+        .pf-report { margin-top: 10px; color: #111827; font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif;
+            border: 1.5px solid #111827; border-radius: 8px; padding: 6px 14px 8px; background: #fff; break-inside: avoid; }
         .pf-report-title { display: block; width: 100%; font-size: 20px; font-weight: 700; text-decoration: underline; text-underline-offset: 6px; margin: 0 0 4px; line-height: 1.9; }
         .pf-report-text { font-size: 14.5px; line-height: 2.05; text-align: justify; white-space: pre-wrap; }
         .pf-edit { font-family: inherit; color: inherit; background: #fffef9; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 2px 6px; outline: none; }
         .pf-edit:focus { border-color: #f59e0b; background: #fffbeb; }
-        textarea.pf-report-text { display: block; width: 100%; min-height: 360px; field-sizing: content; resize: vertical; }
+        textarea.pf-report-text { display: block; width: 100%; min-height: 90px; field-sizing: content; resize: vertical; }
         .pf-print-only { display: none; }
         .pf-report-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 4px; font: 11px/1.5 system-ui, sans-serif; color: #64748b; }
         .pf-report-tools button { cursor: pointer; border-radius: 6px; background: #fef3c7; color: #92400e; padding: 1px 8px; font-weight: 700; }
@@ -185,7 +185,7 @@
         .sh-canvas line { stroke: var(--ink); }
         .pw-node { position: absolute; text-align: center; color: var(--ink); }
         .pw-shape { position: absolute; top: 0; left: 0; overflow: visible; stroke: var(--ink); pointer-events: none; }
-        .pw-name { position: absolute; top: 16px; left: 0; right: 0; height: 28px; line-height: 28px; padding: 0 16px;
+        .pw-name { position: absolute; top: 16px; left: 0; right: 0; height: 28px; line-height: 28px; padding: 0 10px;
             font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pw-name > span { background: #fffdf6; padding: 0 5px; }
         /* Patta khaali: kaghazi rang se bhara taa-ke neeche ki line chhup jaye, andar sirf naam */
@@ -216,6 +216,11 @@
             body, html { background: #fff !important; color: #000 !important; margin: 0 !important; padding: 0 !important;
                 -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             .shajra-page { padding: 0 !important; background: #fff !important; min-height: 0 !important; }
+            /* Ek hi safha: bahar ki saari khaali jagah khatam, aur kaghaz ke andar safha na toote */
+            .shajra-root, main { padding: 0 !important; margin: 0 !important; min-height: 0 !important; }
+            .shajra-page > *, #shajra-sheet { margin: 0 !important; }
+            #shajra-sheet > .pw-paper { margin: 0 auto !important; }
+            .pw-paper, .pf-report { break-inside: avoid; page-break-inside: avoid; }
             #shajra-sheet { border: 2px solid #0f172a !important; border-radius: 0 !important; background: #fff !important; box-shadow: none !important; padding: 10px !important; }
             #shajra-sheet * { color: #000 !important; }
             #shajra-sheet .pw-paper { border: 0 !important; padding: 0 !important; }
@@ -228,7 +233,6 @@
             #shajra-sheet > *:not(.pw-paper) { display: none !important; }
             .pw-legend, .pf-meta { display: none !important; }
             .pf-print-only { display: block !important; }
-            .pf-row { flex-wrap: nowrap !important; }
             .pf-logo { border: 0 !important; }
             .pf-form, .pf-form *, .pf-report, .pf-report * { color: #000 !important; }
             /* Safhe ka size neeche report ke option se (@page alag style mein) */
@@ -675,7 +679,7 @@
                         </div>
                     </div>
                 </div>
-                {{-- Landscape: shajra aur report box saath saath --}}
+                {{-- Shajra, phir us ke neeche report (poori chaurai) --}}
                 <div class="pf-row" dir="rtl">
                 <div class="pf-tree" dir="ltr">
                 <div class="sh-wrap" dir="ltr"
@@ -686,12 +690,23 @@
                              const paper = $el.closest('.pw-paper');
                              window.addEventListener('beforeprint', () => {
                                  const pw = +paper.dataset.printW || 1063, ph = +paper.dataset.printH || 731;
-                                 const box = paper.querySelector('.pf-report');
-                                 // Kaghaz itna chaura ke shajra aur report box ek line mein aa jayein
-                                 paper.style.zoom = ''; const w = Math.max(pw, c.offsetWidth + 30 + (box ? box.offsetWidth + 16 : 0)); paper.style.width = w + 'px';
                                  // Legend aur upar ki chhoti line print mein chhup jati hain; un ki lambai hisaab se nikaal do
-                                 const hidden = [...paper.querySelectorAll('.pw-legend, .pf-meta')].reduce((s, e) => s + e.offsetHeight, 0);
-                                 paper.style.zoom = Math.min(1, pw / w, ph / (paper.scrollHeight - hidden));
+                                 const height = () => paper.scrollHeight - [...paper.querySelectorAll('.pw-legend, .pf-meta')].reduce((s, e) => s + e.offsetHeight, 0);
+                                 // Bahar ke dabbe ki padding/border ki gunjaish: kaghaz kabhi safhe se chaura na ho
+                                 const fw = pw - 40;
+                                 // Kaghaz safhe jitna chaura, ya shajre jitna (jo bara ho); phir chaurai aur lambai dono mein samane tak chhota
+                                 paper.style.zoom = '';
+                                 let w = Math.max(fw, c.offsetWidth + 30);
+                                 paper.style.width = w + 'px';
+                                 // 4% ki gunjaish, taa-ke kabhi doosra safha na bane
+                                 let z = Math.min(1, fw / w, (ph * 0.96) / height());
+                                 // Lambai ki wajah se chhota hua to kaghaz chaura kar do, taa-ke safhe ki poori chaurai bhare
+                                 if (z < fw / w) {
+                                     w = fw / z;
+                                     paper.style.width = w + 'px';
+                                     z = Math.min(1, fw / w, (ph * 0.96) / height());
+                                 }
+                                 paper.style.zoom = z;
                              });
                              window.addEventListener('afterprint', () => { paper.style.zoom = ''; paper.style.width = ''; });">
                     <div class="sh-canvas" style="width: {{ $layout['width'] }}px; height: {{ $layout['height'] }}px;">
