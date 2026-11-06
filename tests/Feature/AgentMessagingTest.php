@@ -70,7 +70,7 @@ class AgentMessagingTest extends TestCase
         $this->assertSame('SMS', Messenger::channelName());
     }
 
-    public function test_whatsapp_api_mode_sends_directly_and_falls_back_to_link_on_error(): void
+    public function test_whatsapp_api_mode_sends_directly_and_never_falls_back_to_link(): void
     {
         Http::fake(['graph.facebook.com/*' => Http::sequence()->push(['messages' => [['id' => 'wamid.9']]])->push(['error' => ['message' => 'outside 24h window']], 400)]);
         $this->useDriver('whatsapp_cloud', ['phone_number_id' => '1', 'token' => 'T']);
@@ -78,7 +78,7 @@ class AgentMessagingTest extends TestCase
 
         $c = Livewire::actingAs($this->agent)->test(CommissionLedger::class);
         $c->call('sendPaymentReminder', $deal->id)->assertNotDispatched('trigger-whatsapp');
-        $c->call('sendPaymentReminder', $deal->id)->assertDispatched('trigger-whatsapp');
+        $c->call('sendPaymentReminder', $deal->id)->assertNotDispatched('trigger-whatsapp');
 
         $this->assertSame(['sent', 'failed'], MessageLog::orderBy('id')->pluck('status')->all());
         Http::assertSent(fn ($r) => $r['type'] === 'text' && str_contains($r['text']['body'], 'Hamza'));
@@ -104,5 +104,29 @@ class AgentMessagingTest extends TestCase
         $this->postJson('http://localhost/api/v1/messages', ['phone' => '03111234567', 'message' => 'Salam'])
             ->assertOk()->assertJsonPath('data.status', 'queued');
         $this->assertEquals(80, (float) $this->agent->fresh()->wallet_balance);
+
+        // Tayyar paighamat ke WhatsApp links SMS mode mein band; text milta hai
+        $deal = $this->deal();
+        $this->getJson('http://localhost/api/v1/agent/deals')->assertOk()
+            ->assertJsonPath('data.0.reminder_whatsapp_url', null)
+            ->assertJsonPath('data.0.reminder_message', fn ($m) => str_contains($m, 'Hamza'));
+    }
+
+    public function test_agent_dashboard_lead_button_uses_sms_even_when_phone_offline(): void
+    {
+        $this->useDriver('gateway', ['sms_rate' => 1]); // koi phone nahi joda
+        $lead = \App\Models\Lead::create([
+            'agent_id' => $this->agent->id, 'client_name' => 'Hamza', 'client_phone' => '03111234567',
+            'status' => 'new', 'priority' => 'hot', 'source' => 'portal',
+        ]);
+
+        Livewire::actingAs($this->agent)->test(\App\Livewire\Agent\AgentDashboard::class)
+            ->assertSeeHtml("sendLeadMessage({$lead->id}, 'portal')")
+            ->assertDontSeeHtml('wa.me/923111234567')
+            ->call('sendLeadMessage', $lead->id, 'portal')
+            ->assertNotDispatched('trigger-whatsapp');
+
+        $this->assertSame(['queued', 'agent_dashboard'], [MessageLog::sole()->status, MessageLog::sole()->context['source']]);
+        $this->assertSame('contacted', $lead->fresh()->status);
     }
 }

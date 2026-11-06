@@ -13,8 +13,33 @@ use Livewire\Component;
 
 class AgentDashboard extends Component
 {
+    use \App\Livewire\Concerns\SendsMessages;
+
     const OPEN = ['new', 'contacted', 'site_visit', 'negotiation'];
     const STALE_DAYS = 30;
+
+    /** Follow-up ('followup') ya naye portal lead ('portal') ka paigham */
+    protected function leadMessage(Lead $l, string $kind): string
+    {
+        return $kind === 'portal'
+            ? __('Assalam o Alaikum :client, you showed interest in :property on AssanZameen. I am :agent — shall I send you photos and full details?', [
+                'client' => $l->client_name,
+                'property' => $l->property?->title ?? __('a property'),
+                'agent' => Auth::user()->name,
+            ])
+            : __('Assalam o Alaikum :client, this is :agent from AssanZameen regarding your property inquiry.', [
+                'client' => $l->client_name,
+                'agent' => Auth::user()->name,
+            ]);
+    }
+
+    /** Admin ka chuna hua tareeqa (API / SMS) — dashboard ke paigham button */
+    public function sendLeadMessage($leadId, $kind = 'followup')
+    {
+        $lead = Lead::with('property:id,title')->where('agent_id', Auth::id())->findOrFail($leadId);
+        $this->deliverMessage($lead->client_phone, $this->leadMessage($lead, $kind === 'portal' ? 'portal' : 'followup'), ['lead_id' => $lead->id, 'source' => 'agent_dashboard']);
+        $lead->update(['status' => $lead->status === 'new' ? 'contacted' : $lead->status, 'last_whatsapp_at' => now()]);
+    }
 
     // Follow-up done from the dashboard: mark contacted + next follow-up
     public function snooze($leadId, $days = 1)
@@ -66,12 +91,7 @@ class AgentDashboard extends Component
             ->orderBy('next_followup_at')
             ->limit(10)
             ->get()
-            ->each(function ($l) {
-                $l->whatsapp = WhatsApp::url($l->client_phone, __('Assalam o Alaikum :client, this is :agent from AssanZameen regarding your property inquiry.', [
-                    'client' => $l->client_name,
-                    'agent' => Auth::user()->name,
-                ]));
-            });
+            ->each(fn ($l) => $l->whatsapp = WhatsApp::url($l->client_phone, $this->leadMessage($l, 'followup')));
 
         $lateCount = (clone $leads)->whereIn('status', self::OPEN)->whereNotNull('next_followup_at')->where('next_followup_at', '<', $now)->count();
         $todayCount = (clone $leads)->whereIn('status', self::OPEN)->whereBetween('next_followup_at', [$now->copy()->startOfDay(), $now->copy()->endOfDay()])->count();
@@ -84,13 +104,7 @@ class AgentDashboard extends Component
             ->latest()
             ->limit(5)
             ->get()
-            ->each(function ($l) {
-                $l->whatsapp = WhatsApp::url($l->client_phone, __('Assalam o Alaikum :client, you showed interest in :property on AssanZameen. I am :agent — shall I send you photos and full details?', [
-                    'client' => $l->client_name,
-                    'property' => $l->property?->title ?? __('a property'),
-                    'agent' => Auth::user()->name,
-                ]));
-            });
+            ->each(fn ($l) => $l->whatsapp = WhatsApp::url($l->client_phone, $this->leadMessage($l, 'portal')));
 
         // Commission
         $commission = DealLedger::where('agent_id', $agentId)
@@ -139,6 +153,8 @@ class AgentDashboard extends Component
             'listingStats' => $listingStats,
             'topListings' => $topListings,
             'summaryToSelf' => WhatsApp::url(Auth::user()->phone, $summary),
+            'autoSend' => \App\Services\Messaging\Messenger::isAutomatic(),
+            'channel' => \App\Services\Messaging\Messenger::channelName(),
             'recentLeads' => (clone $leads)->with(['town', 'plot'])->latest()->take(5)->get(),
         ])->layout('layouts.app');
     }

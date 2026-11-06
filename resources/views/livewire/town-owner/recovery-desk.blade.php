@@ -133,12 +133,11 @@
                     <!-- Actions -->
                     <div class="flex flex-wrap items-center gap-2 lg:justify-end">
                         @if ($c->whatsapp && $autoSend)
-                            {{-- Admin ne API/SMS lagaya hai: seedha bhejo (link bhi saath, agar API nakaam ho) --}}
+                            {{-- Admin ne API/SMS lagaya hai: sirf usi raste se (WhatsApp link nahi) --}}
                             <button type="button" wire:click="sendReminder({{ $c->plot->id }})" wire:loading.attr="disabled" wire:target="sendReminder({{ $c->plot->id }})"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border disabled:opacity-50 {{ $c->reminded_today ? 'bg-gray-800 text-gray-400 border-gray-700' : 'bg-green-600/20 hover:bg-green-600/30 text-green-300 border-green-500/30' }}">
                                 <i class="fa-solid fa-paper-plane" wire:loading.class="fa-spin" wire:target="sendReminder({{ $c->plot->id }})"></i> {{ $c->reminded_today ? 'Dobara bhejein' : 'Bhejein' }}
                             </button>
-                            <a href="{{ $c->whatsapp }}" target="_blank" rel="noopener" title="WhatsApp link" class="inline-flex items-center px-2 py-1.5 rounded-xl text-xs border bg-gray-800 text-gray-300 border-gray-700">💬</a>
                         @elseif ($c->whatsapp)
                             <a href="{{ $c->whatsapp }}" target="_blank" rel="noopener" wire:click="logReminder({{ $c->plot->id }})"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border {{ $c->reminded_today ? 'bg-gray-800 text-gray-400 border-gray-700' : 'bg-green-600/20 hover:bg-green-600/30 text-green-300 border-green-500/30' }}">

@@ -84,6 +84,9 @@
                         <input type="number" min="0" wire:model="ownerDailyLimit" class="{{ $input }}">
                     </div>
                 </div>
+                @if ($devices->where('is_active', true)->isEmpty())
+                    <p class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">Abhi koi phone chalu nahi. Users ke SMS queue mein jama ho rahe hain aur phone jorte hi chale jayenge. Neeche "Gateway phones" mein phone jorein.</p>
+                @endif
                 <p class="text-xs text-slate-400">Paise user ke <b>wallet</b> se katte hain (wahi wallet jo top-up se bharta hai). SMS na jaye to paise khud wapas. Phones neeche "Gateway phones" mein jorein.</p>
             @endif
 

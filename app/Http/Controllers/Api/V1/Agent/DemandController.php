@@ -75,7 +75,9 @@ class DemandController extends ApiController
         return $this->ok([
             'name' => $demand->agent->name,
             'phone' => $demand->agent->phone,
-            'whatsapp_url' => WhatsApp::url($demand->agent->phone, $message),
+            'message' => $message,
+            // Admin ne API/SMS chuna ho to null: app POST /messages {phone, message}
+            'whatsapp_url' => \App\Services\Messaging\Messenger::manualLink($demand->agent->phone, $message),
         ]);
     }
 

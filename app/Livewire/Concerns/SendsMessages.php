@@ -8,7 +8,7 @@ use App\Services\Messaging\Messenger;
  * Agents (aur doosre users) ke paighamat admin ke chune hue tareeqe se:
  * - "WhatsApp link" chuna ho: pehle ki tarah WhatsApp khul jata hai, user khud bhejta hai
  * - WhatsApp API / HTTP / apna SMS gateway: seedha chala jata hai (gateway par wallet se paise)
- * - Nakaam ho (balance kam, had poori, API error): wajah dikhti hai aur WhatsApp khul jata hai taa-ke paigham ruke nahi
+ * - Nakaam ho (balance kam, had poori, API error): sirf wajah dikhti hai; WhatsApp nahi khulta (admin ka tareeqa hi chalega)
  */
 trait SendsMessages
 {
@@ -24,11 +24,15 @@ trait SendsMessages
             return $r;
         }
 
-        if ($r['status'] !== 'link') {
-            session()->flash('message', __('Paigham khud nahi gaya: :error — WhatsApp se bhej dein.', ['error' => $r['error'] ?: __('wajah maloom nahi')]));
+        if ($r['status'] === 'link') {
+            // Admin ne "WhatsApp link" chuna hai
+            $this->openWhatsApp($phone, $r['body']);
+
+            return $r;
         }
 
-        $this->openWhatsApp($phone, $r['body']);
+        // Admin ne API/SMS chuna hai: WhatsApp ka chor-rasta nahi, sirf wajah (balance kam, had poori...)
+        session()->flash('message', __('Paigham nahi gaya: :error', ['error' => $r['error'] ?: __('wajah maloom nahi')]));
 
         return $r;
     }

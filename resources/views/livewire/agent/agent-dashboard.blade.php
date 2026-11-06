@@ -5,6 +5,10 @@
         $funnelMax = max(1, collect($funnel)->max('count'));
     @endphp
 
+    @if (session('message'))
+        <div wire:key="flash-{{ md5(session('message')) }}" class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{{ session('message') }}</div>
+    @endif
+
     <!-- Hero / Header Banner -->
     <div class="relative overflow-hidden bg-gradient-to-r from-indigo-900/90 via-slate-900 to-indigo-950 rounded-2xl p-6 sm:p-8 text-white shadow-lg border border-indigo-500/20">
         <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -86,7 +90,9 @@
                         </div>
                         <div class="flex flex-wrap gap-1.5">
                             <a href="tel:{{ $l->client_phone }}" title="{{ __('Call') }}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-sky-600/20 text-sky-300 border border-sky-500/30">📞</a>
-                            @if ($l->whatsapp)
+                            @if ($l->whatsapp && $autoSend)
+                                <button type="button" wire:click="sendLeadMessage({{ $l->id }}, 'followup')" wire:loading.attr="disabled" title="{{ $channel }}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-green-600/20 text-green-300 border border-green-500/30 disabled:opacity-50">📤</button>
+                            @elseif ($l->whatsapp)
                                 <a href="{{ $l->whatsapp }}" target="_blank" rel="noopener" title="{{ __('WhatsApp') }}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-green-600/20 text-green-300 border border-green-500/30">💬</a>
                             @endif
                             <button type="button" wire:click="snooze({{ $l->id }}, 1)" title="{{ __('Done — follow up again tomorrow') }}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-200">✓ {{ __('Tomorrow') }}</button>
@@ -135,7 +141,9 @@
                             <p class="text-xs text-slate-400 truncate">{{ $l->property?->title ?? $l->town?->name ?? __('Profile') }} · {{ $l->created_at->diffForHumans() }}</p>
                         </div>
                         <a href="tel:{{ $l->client_phone }}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-sky-600/20 text-sky-300 border border-sky-500/30">📞 {{ __('Call') }}</a>
-                        @if ($l->whatsapp)
+                        @if ($l->whatsapp && $autoSend)
+                            <button type="button" wire:click="sendLeadMessage({{ $l->id }}, 'portal')" wire:loading.attr="disabled" title="{{ $channel }}" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-green-600/20 text-green-300 border border-green-500/30 disabled:opacity-50">📤</button>
+                        @elseif ($l->whatsapp)
                             <a href="{{ $l->whatsapp }}" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-green-600/20 text-green-300 border border-green-500/30">💬</a>
                         @endif
                     </div>

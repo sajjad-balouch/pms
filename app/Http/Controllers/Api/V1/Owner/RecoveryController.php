@@ -70,9 +70,11 @@ class RecoveryController extends OwnerController
             ];
 
             $portal = $token ? ' ' . __('Your account: :url', ['url' => route('portal.show', $token)]) : '';
-            $case['whatsapp_url'] = WhatsApp::url($phone, $case['late_amount'] > 0
+            $case['message'] = ($case['late_amount'] > 0
                 ? __('Assalam o Alaikum :client, :place: :count installment(s) of Rs. :amount are late. Please pay soon.', ['client' => $name, 'place' => $plot->town?->name . ' — Plot #' . $plot->plot_number, 'count' => $case['late_count'], 'amount' => number_format($case['late_amount'])]) . $portal
                 : __('Assalam o Alaikum :client, :place: reminder — your next installment of Rs. :amount is due soon.', ['client' => $name, 'place' => $plot->town?->name . ' — Plot #' . $plot->plot_number, 'amount' => number_format($case['today_amount'] ?: $case['upcoming_amount'])]) . $portal);
+            // Admin ne API/SMS chuna ho to null: app POST /messages {phone, message}
+            $case['whatsapp_url'] = \App\Services\Messaging\Messenger::manualLink($phone, $case['message']);
 
             return $case;
         });

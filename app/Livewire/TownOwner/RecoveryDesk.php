@@ -294,7 +294,7 @@ class RecoveryDesk extends Component
             $this->logReminder($plot->id);
             session()->flash('success', 'Reminder bhej diya: ' . ($case->name ?: 'Plot #' . $plot->plot_number));
         } else {
-            session()->flash('error', 'Paigham nahi gaya: ' . ($r['error'] ?: 'wajah maloom nahi') . ' — WhatsApp link se bhej dein.');
+            session()->flash('error', 'Paigham nahi gaya: ' . ($r['error'] ?: 'wajah maloom nahi') . '.');
         }
     }
 

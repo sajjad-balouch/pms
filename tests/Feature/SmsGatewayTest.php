@@ -149,15 +149,18 @@ class SmsGatewayTest extends TestCase
         $this->pull([], 'gw_wrong')->assertStatus(401);
     }
 
-    public function test_admin_messages_are_free_and_no_phone_means_not_automatic(): void
+    public function test_admin_messages_are_free_and_phone_offline_still_queues_sms_not_whatsapp(): void
     {
         $admin = User::factory()->create(['role' => 'admin', 'wallet_balance' => 0]);
         $this->assertTrue(Messenger::send('03111234567', 'installment_due_soon', $this->vars, [], $admin->id)['ok']);
         $this->assertEquals(0, (float) MessageLog::sole()->cost);
 
-        $this->device->update(['is_active' => false]);
+        // Phone band / abhi joda nahi: phir bhi SMS hi (queue mein), WhatsApp link nahi
+        $this->device->delete();
         Messenger::flush();
-        $this->assertSame('link', Messenger::send('03111234567', 'installment_due_soon', $this->vars, [], $admin->id)['status']);
+        $this->assertTrue(Messenger::isAutomatic());
+        $this->assertSame('queued', Messenger::send('03111234567', 'installment_due_soon', $this->vars, [], $admin->id)['status']);
+        $this->assertNull(Messenger::manualLink('03111234567', 'x'));
     }
 
     public function test_admin_cancel_refunds_user(): void

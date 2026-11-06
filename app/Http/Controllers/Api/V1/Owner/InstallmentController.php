@@ -8,7 +8,7 @@ use App\Models\Installment;
 use App\Models\Plot;
 use App\Models\PlotBooking;
 use App\Services\BookingService;
-use App\Support\WhatsApp;
+use App\Services\Messaging\Messenger;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,16 +44,20 @@ class InstallmentController extends OwnerController
             'late_fee_percent' => (float) ($plot->town->late_fee_percent ?? 0),
             'portal' => $portalUrl ? [
                 'url' => $portalUrl,
-                'share_whatsapp_url' => WhatsApp::url($buyerPhone, __(':place — see your full account, installments and receipts here: :url', [
+                'share_message' => $share = __(':place — see your full account, installments and receipts here: :url', [
                     'place' => $plot->town->name . ' — Plot #' . $plot->plot_number, 'url' => $portalUrl,
-                ])),
+                ]),
+                // Admin ne API/SMS chuna ho to *_whatsapp_url null: app POST /messages {phone: buyer_phone, message}
+                'share_whatsapp_url' => Messenger::manualLink($buyerPhone, $share),
             ] : null,
+            'buyer_phone' => $buyerPhone,
             'installments' => $installments->map(function ($i) use ($plot, $buyerPhone, $buyerName, $portalUrl, $booking) {
                 $row = Transform::installment($i);
                 // receipt_url needs a website login; this one opens without login (shareable, safe for the app's browser)
                 $row['public_receipt_url'] = $i->status === 'paid' && $booking?->portal_token ? route('portal.receipt', [$booking->portal_token, $i->id]) : null;
                 $row['suggested_late_fee'] = $this->suggestedLateFee($i, $plot, today());
-                $row['whatsapp_url'] = WhatsApp::url($buyerPhone, $this->message($i, $plot, $buyerName, $portalUrl));
+                $row['message'] = $this->message($i, $plot, $buyerName, $portalUrl);
+                $row['whatsapp_url'] = Messenger::manualLink($buyerPhone, $row['message']);
 
                 return $row;
             }),
@@ -88,8 +92,12 @@ class InstallmentController extends OwnerController
         $installment->load('receivedBy:id,name');
         $buyerPhone = $booking?->customer?->phone ?? $installment->buyer_phone;
 
+        $receipt = $this->message($installment, $plot->load('town'), $booking?->customer?->name ?? $installment->buyer_name, $booking?->portalUrl());
+
         return $this->ok(Transform::installment($installment) + [
-            'receipt_whatsapp_url' => WhatsApp::url($buyerPhone, $this->message($installment, $plot->load('town'), $booking?->customer?->name ?? $installment->buyer_name, $booking?->portalUrl())),
+            'buyer_phone' => $buyerPhone,
+            'receipt_message' => $receipt,
+            'receipt_whatsapp_url' => Messenger::manualLink($buyerPhone, $receipt),
         ], __('Payment received.'));
     }
 

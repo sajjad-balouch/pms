@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1\Agent;
 use App\Http\Controllers\Api\V1\ApiController;
 use App\Http\Controllers\Api\V1\Transform;
 use App\Models\DealLedger;
-use App\Support\WhatsApp;
+use App\Services\Messaging\Messenger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -86,6 +86,12 @@ class DealController extends ApiController
 
     protected function present(DealLedger $d): array
     {
+        $reminder = $d->pending_amount > 0
+            ? __('Assalam o Alaikum :client, a reminder about the pending commission of Rs. :amount for :deal. Thank you.', [
+                'client' => $d->client_name, 'amount' => number_format((float) $d->pending_amount), 'deal' => $d->deal_title,
+            ])
+            : null;
+
         return [
             'id' => $d->id,
             'property_id' => $d->property_id,
@@ -101,11 +107,9 @@ class DealController extends ApiController
             'partner_share' => (float) $d->partner_share,
             'status' => $d->status, // paid | partial | pending
             'notes' => $d->notes,
-            'reminder_whatsapp_url' => $d->pending_amount > 0
-                ? WhatsApp::url($d->client_phone, __('Assalam o Alaikum :client, a reminder about the pending commission of Rs. :amount for :deal. Thank you.', [
-                    'client' => $d->client_name, 'amount' => number_format((float) $d->pending_amount), 'deal' => $d->deal_title,
-                ]))
-                : null,
+            // Admin ne API/SMS chuna ho to url null: app POST /messages {phone: client_phone, message: reminder_message}
+            'reminder_message' => $reminder,
+            'reminder_whatsapp_url' => $reminder ? Messenger::manualLink($d->client_phone, $reminder) : null,
         ];
     }
 }

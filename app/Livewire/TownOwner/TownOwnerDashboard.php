@@ -495,7 +495,7 @@ class TownOwnerDashboard extends Component
             session()->flash('success', "{$sent} paigham bhej diye gaye." . ($failed ? " {$failed} nahi gaye." : ''));
         }
         if (! $sent && $failed) {
-            session()->flash('error', 'Paigham nahi gaya: ' . ($error ?: 'wajah maloom nahi') . ' — WhatsApp link se bhej dein.');
+            session()->flash('error', 'Paigham nahi gaya: ' . ($error ?: 'wajah maloom nahi') . '.');
         }
     }
 

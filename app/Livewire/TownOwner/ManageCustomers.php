@@ -317,7 +317,8 @@ class ManageCustomers extends Component
             'documents' => $customer->documents,
             'missing' => collect(['cnic_front', 'cnic_back', 'photo'])->reject(fn ($t) => $docs->has($t))->values(),
             'photo' => $docs->get('photo')?->first(),
-            'whatsapp' => WhatsApp::url($customer->phone, 'Assalam o Alaikum ' . $customer->name . ','),
+            // Admin ne API/SMS chuna ho to WhatsApp ka chor-rasta nahi
+            'whatsapp' => \App\Services\Messaging\Messenger::isAutomatic() ? null : WhatsApp::url($customer->phone, 'Assalam o Alaikum ' . $customer->name . ','),
         ];
     }
 

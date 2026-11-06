@@ -332,6 +332,25 @@ Categories: `Utilities, Maintenance, Construction, Marketing, Legal, Office, Tra
 
 ---
 
+## 9b. Messages (agent, town owner) — always the admin's chosen method
+
+The admin picks one method for the whole platform (WhatsApp link / WhatsApp API / HTTP gateway / own SMS gateway). The app must follow it:
+
+### 🔒 GET `/messages/channel` → `{ channel: "WhatsApp"|"SMS"|"Message", mode: "link"|"automatic", sms_rate }`
+Use `channel` as the button label (`Send SMS`).
+
+### 🔒 POST `/messages` — `phone*`, `message*`, `context` (`lead_id`, `deal_id`, `property_id`, `plot_id`, `demand_id`)
+- `200 { status: "sent"|"queued" }` → done (`queued` = own SMS gateway, goes out in a few seconds; the wallet is charged per SMS and refunded if it fails).
+- `200 { status: "link", link }` → admin chose WhatsApp link: open `link`.
+- `402 { status: "no_balance" }` → wallet top-up needed. `422 { status: "limited"|"failed" }` → show `message`. **Do not** fall back to WhatsApp.
+
+Every ready-made message in the API comes as text **plus** a WhatsApp url: `reminder_message`/`reminder_whatsapp_url` (deals),
+`message`/`whatsapp_url` (dealer exchange contact, installments, recovery cases), `portal.share_message`/`portal.share_whatsapp_url`,
+`receipt_message`/`receipt_whatsapp_url`, leads `whatsapp.*.text`/`url`.
+**When `mode = automatic` every `*whatsapp_url` / `url` is `null`** — send the text with `POST /messages` instead.
+
+---
+
 ## 10. Android notes
 
 - **Retrofit + OkHttp:** add an interceptor that sets `Accept`, `Accept-Language` (from the app's language setting) and `Authorization`. On any 401, clear the token and open login.

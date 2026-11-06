@@ -125,7 +125,7 @@ class LeadController extends ApiController
             'site_visit' => __("Assalam o Alaikum :client!\n\nI am contacting you about a site visit for *:property*. Can you make time this evening or tomorrow to see it?\n\nContact: :agent", $vars),
             'negotiation' => __("Assalam o Alaikum :client!\n\nWe have discussed your offer with the owner. Can you visit the office today so we can finalise it face to face?\n\nContact: :agent", $vars),
             'token' => __("Assalam o Alaikum :client!\n\nMore buyers are coming for *:property*. If you want to finalise the deal, please contact us today for the token advance.\n\nContact: :agent", $vars),
-        ])->map(fn ($text) => ['text' => $text, 'url' => WhatsApp::url($lead->client_phone, $text)])->all();
+        ])->map(fn ($text) => ['text' => $text, 'url' => \App\Services\Messaging\Messenger::manualLink($lead->client_phone, $text)])->all();
     }
 
     protected function owned()

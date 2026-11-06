@@ -324,7 +324,7 @@ class ManageInstallments extends Component
         $r = Messenger::send($phone, $key, $vars, ['plot_id' => $plot->id, 'installment_id' => $installmentId ?: null, 'source' => 'installments']);
         $r['ok']
             ? session()->flash('success', 'Paigham bhej diya gaya.')
-            : session()->flash('error', 'Paigham nahi gaya: ' . ($r['error'] ?: 'wajah maloom nahi') . ' — WhatsApp link se bhej dein.');
+            : session()->flash('error', 'Paigham nahi gaya: ' . ($r['error'] ?: 'wajah maloom nahi') . '.');
     }
 
     protected function ownedPlotQuery()

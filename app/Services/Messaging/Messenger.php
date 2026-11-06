@@ -51,7 +51,9 @@ class Messenger
     {
         $driver = self::settings()->driver;
 
-        return $driver === 'gateway' ? SmsGateway::hasActiveDevice() : ($driver !== 'link' && self::channel() !== null);
+        // Apna gateway: phone abhi band ho tab bhi paigham queue mein rehta hai aur phone aate hi chala jata hai.
+        // (Admin ne SMS chuna hai to users ko WhatsApp par wapas nahi bhejna.)
+        return $driver === 'gateway' || ($driver !== 'link' && self::channel() !== null);
     }
 
     public static function template(string $key): string
@@ -102,6 +104,15 @@ class Messenger
         return self::dispatch($phone, trim($body), null, [trim($body)], $context, $ownerId);
     }
 
+    /**
+     * Mobile app ke liye wa.me link sirf tab jab admin ne "WhatsApp link" chuna ho.
+     * API/SMS chuna ho to null: app POST /api/v1/messages se bheje (admin ka tareeqa, wallet charge).
+     */
+    public static function manualLink(?string $phone, string $body): ?string
+    {
+        return self::isAutomatic() ? null : self::link($phone, $body);
+    }
+
     /** Buttons / paighamat mein dikhane ke liye: abhi paigham kis raste jata hai */
     public static function channelName(): string
     {
@@ -142,7 +153,7 @@ class Messenger
         if ($limit > 0 && self::sentToday($ownerId) >= $limit) {
             self::log($ownerId, $key, $to, $body, 'limited', null, "Rozana had ({$limit}) poori", $context);
 
-            return $result(false, 'limited', "Aaj ki had ({$limit} paighamat) poori ho gayi. Link se bhej dein.");
+            return $result(false, 'limited', "Aaj ki had ({$limit} paighamat) poori ho gayi. Kal dobara bhejein.");
         }
 
         if (self::settings()->driver === 'gateway') {
