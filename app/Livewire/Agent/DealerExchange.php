@@ -9,7 +9,7 @@ use Livewire\WithPagination;
 
 class DealerExchange extends Component
 {
-    use WithPagination;
+    use WithPagination, \App\Livewire\Concerns\SendsMessages;
 
     // Filter states
     public $activeTab = 'all'; // 'all', 'my_demands'
@@ -140,19 +140,7 @@ class DealerExchange extends Component
             'agency' => $myAgency,
         ]);
 
-        // Phone cleaning: 0300... -> 92300...
-        $cleanPhone = preg_replace('/[^0-9]/', '', $poster->phone);
-        if (str_starts_with($cleanPhone, '0')) {
-            $cleanPhone = '92' . substr($cleanPhone, 1);
-        }
-
-        $encoded = urlencode($msg);
-
-        // Native App protocol aur Direct Web protocol
-        $this->dispatch('trigger-whatsapp', 
-            appUrl: "whatsapp://send?phone={$cleanPhone}&text={$encoded}",
-            webUrl: "https://web.whatsapp.com/send?phone={$cleanPhone}&text={$encoded}"
-        );
+        $this->deliverMessage($poster->phone, $msg, ['demand_id' => $demand->id, 'source' => 'dealer_exchange']);
     }
 
     public function render()

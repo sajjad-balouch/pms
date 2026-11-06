@@ -92,6 +92,26 @@ class Messenger
         return self::dispatch($phone, $body, $key, $params, $context, $ownerId);
     }
 
+    /**
+     * Apna likha hua paigham (agents ke follow-up, dealer ko paigham waghera). Admin ka chuna hua tareeqa hi chalta hai:
+     * link => wa.me; WhatsApp API / HTTP => seedha; apna gateway => SMS (bhejne wale ke wallet se).
+     * Note: Meta Cloud API par template ke baghair paigham sirf 24 ghante ki khidki mein jata hai; warna 'failed' + link.
+     */
+    public static function sendText(?string $phone, string $body, array $context = [], ?int $ownerId = null): array
+    {
+        return self::dispatch($phone, trim($body), null, [trim($body)], $context, $ownerId);
+    }
+
+    /** Buttons / paighamat mein dikhane ke liye: abhi paigham kis raste jata hai */
+    public static function channelName(): string
+    {
+        return match (self::isAutomatic() ? self::settings()->driver : 'link') {
+            'gateway' => 'SMS',
+            'http' => __('Message'),
+            default => 'WhatsApp',
+        };
+    }
+
     /** Admin ka "test message" (template ke baghair) */
     public static function sendRaw(?string $phone, string $body, ?int $ownerId = null): array
     {

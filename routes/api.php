@@ -63,6 +63,12 @@ Route::prefix('v1')->middleware(['api.token', 'api.locale', 'throttle:api'])->gr
         Route::get('my/saved-properties', [UnlockController::class, 'savedProperties']);
         Route::post('properties/{property}/save', [UnlockController::class, 'toggleSave']);
 
+        // Paighamat (agents and town owners): admin ka chuna hua tareeqa — WhatsApp link / API / apna SMS gateway
+        Route::middleware('api.role:agent,town_owner')->group(function () {
+            Route::get('messages/channel', [\App\Http\Controllers\Api\V1\MessageController::class, 'channel']);
+            Route::post('messages', [\App\Http\Controllers\Api\V1\MessageController::class, 'send'])->middleware('throttle:api-unlock');
+        });
+
         // Leads CRM (agents and town owners)
         Route::middleware(['api.role:agent,town_owner', 'api.section:leads'])->group(function () {
             Route::get('leads', [LeadController::class, 'index']);

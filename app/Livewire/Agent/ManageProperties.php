@@ -15,7 +15,7 @@ use Livewire\WithPagination;
 
 class ManageProperties extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithPagination, WithFileUploads, \App\Livewire\Concerns\SendsMessages;
 
     const MAX_IMAGES = 15;
     const STALE_DAYS = 30; // itne din se update na hui listing "purani" dikhegi
@@ -166,18 +166,9 @@ class ManageProperties extends Component
             $msg .= "\n\n📌 *" . __('Note') . ":* " . $this->custom_note;
         }
 
-        $cleanPhone = preg_replace('/[^0-9]/', '', $this->client_phone);
-        if (str_starts_with($cleanPhone, '0')) {
-            $cleanPhone = '92' . substr($cleanPhone, 1);
-        }
-
-        $encoded = urlencode($msg);
         $this->isFollowUpModalOpen = false;
-        
-        $this->dispatch('trigger-whatsapp', 
-            appUrl: "whatsapp://send?phone={$cleanPhone}&text={$encoded}", 
-            webUrl: "https://web.whatsapp.com/send?phone={$cleanPhone}&text={$encoded}"
-        );
+
+        $this->deliverMessage($this->client_phone, $msg, ['property_id' => $prop->id, 'source' => 'agent_followup']);
     }
 
     // ==========================================

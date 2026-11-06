@@ -10,7 +10,7 @@ use Livewire\WithPagination;
 
 class CommissionLedger extends Component
 {
-    use WithPagination;
+    use WithPagination, \App\Livewire\Concerns\SendsMessages;
 
     public $search = '';
     public $statusFilter = '';
@@ -145,17 +145,7 @@ class CommissionLedger extends Component
              . "Barah-e-karam jald az jald iski adayegi ya intizam farma dein. Shukriya!\n\n"
              . "Talib-e-Dua: {$agentName}\n({$agency})";
 
-        $cleanPhone = preg_replace('/[^0-9]/', '', $deal->client_phone);
-        if (str_starts_with($cleanPhone, '0')) {
-            $cleanPhone = '92' . substr($cleanPhone, 1);
-        }
-
-        $encoded = urlencode($msg);
-
-        $this->dispatch('trigger-whatsapp', 
-            appUrl: "whatsapp://send?phone={$cleanPhone}&text={$encoded}",
-            webUrl: "https://web.whatsapp.com/send?phone={$cleanPhone}&text={$encoded}"
-        );
+        $this->deliverMessage($deal->client_phone, $msg, ['deal_id' => $deal->id, 'source' => 'agent_commission']);
     }
 
     public function render()

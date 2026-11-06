@@ -348,7 +348,7 @@
                     <button type="button" wire:click="$set('isWhatsAppModalOpen', false)" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">{{ __('Cancel') }}</button>
                     <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer">
                         <i class="fa-brands fa-whatsapp text-sm"></i>
-                        <span>{{ __('Launch WhatsApp') }}</span>
+                        <span>{{ __('Send') }} {{ \App\Services\Messaging\Messenger::channelName() }}</span>
                     </button>
                 </div>
             </form>

@@ -13,7 +13,7 @@ use Livewire\WithPagination;
 
 class ManageLeads extends Component
 {
-    use WithPagination;
+    use WithPagination, \App\Livewire\Concerns\SendsMessages;
 
     // View Toggle
     public $viewMode = 'kanban'; // 'kanban' ya 'table'
@@ -204,24 +204,15 @@ class ManageLeads extends Component
             $msg .= "\n\n📌 *" . __('Note') . ":* " . $this->customMessageNote;
         }
 
-        $cleanPhone = preg_replace('/[^0-9]/', '', $lead->client_phone);
-        if (str_starts_with($cleanPhone, '0')) {
-            $cleanPhone = '92' . substr($cleanPhone, 1);
-        }
-
         if ($lead->status === 'new') {
             $lead->update(['status' => 'contacted']);
         }
 
         $lead->update(['last_whatsapp_at' => now()]);
-
-        $encoded = urlencode($msg);
         $this->isWhatsAppModalOpen = false;
 
-        $this->dispatch('trigger-whatsapp', 
-            appUrl: "whatsapp://send?phone={$cleanPhone}&text={$encoded}", 
-            webUrl: "https://web.whatsapp.com/send?phone={$cleanPhone}&text={$encoded}"
-        );
+        // Admin ka chuna hua tareeqa (WhatsApp link / API / SMS)
+        $this->deliverMessage($lead->client_phone, $msg, ['lead_id' => $lead->id, 'source' => 'agent_leads']);
     }
 
     public function render()
