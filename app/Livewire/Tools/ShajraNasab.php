@@ -4,6 +4,7 @@ namespace App\Livewire\Tools;
 
 use App\Support\Tools\ShajraEngine;
 use App\Support\Tools\ShajraLayout;
+use App\Support\Tools\ShajraReport;
 use App\Support\Tools\ToolCatalog;
 use Livewire\Component;
 
@@ -17,6 +18,13 @@ class ShajraNasab extends Component
 
     public const FIQH = ['hanafi', 'jafari', 'ahl_hadith', 'other'];
 
+    /** Print ka safha: CSS size, aur margin ke baad dastyab chaurai/lambai (px, 96 dpi) */
+    public const PAGES = [
+        'a4p' => ['css' => 'A4 portrait', 'w' => 734, 'h' => 1060],
+        'a4l' => ['css' => 'A4 landscape', 'w' => 1063, 'h' => 731],
+        'legal' => ['css' => 'legal portrait', 'w' => 756, 'h' => 1280],
+    ];
+
     public const STATUSES =['alive', 'died_after', 'died_before', 'missing', 'divorced'];
 
     public array $deceased = [
@@ -29,6 +37,9 @@ class ShajraNasab extends Component
         'markaz' => '', 'informant' => '', 'fiqh' => 'hanafi', 'w1_name' => '', 'w1_cnic' => '', 'w2_name' => '', 'w2_cnic' => '',
         'kanal' => 8, 'marla' => 0, 'sarsahi' => 0,
     ];
+
+    /** Shajre ke neeche patwari report: kaun se kaghzaat tasdeeq hue, patwari ka naam, izafi kaifiyat */
+    public array $report = ['on' => true, 'death_cert' => false, 'frc' => false, 'cnic' => false, 'patwari' => '', 'date' => '', 'remarks' => '', 'page' => 'a4p'];
 
     public array $people = [];
 
@@ -75,6 +86,7 @@ class ShajraNasab extends Component
     public function clearAll(): void
     {
         $this->deceased = ['name' => '', 'father_rel' => 'so', 'father_name' => '', 'gender' => 'male', 'death_date' => '', 'cnic' => '', 'caste' => '', 'married' => '', 'issue' => ''];
+        $this->report = ['on' => true, 'death_cert' => false, 'frc' => false, 'cnic' => false, 'patwari' => '', 'date' => '', 'remarks' => '', 'page' => 'a4p'];
         $this->record = ['mauza' => '', 'tehsil' => '', 'district' => '', 'khewat' => '', 'khatoni' => '', 'intiqal' => '', 'kanal' => 0, 'marla' => 0, 'sarsahi' => 0,
             'markaz' => '', 'informant' => '', 'fiqh' => 'hanafi', 'w1_name' => '', 'w1_cnic' => '', 'w2_name' => '', 'w2_cnic' => ''];
         $this->people = [];
@@ -112,6 +124,18 @@ class ShajraNasab extends Component
             $this->record[$k] = substr(preg_replace('/\D/', '', (string) ($r[$k] ?? '')), 0, 13);
         }
         $this->record['fiqh'] = in_array($r['fiqh'] ?? '', self::FIQH, true) ? $r['fiqh'] : 'hanafi';
+
+        $rp = is_array($state['report'] ?? null) ? $state['report'] : [];
+        $this->report = [
+            'on' => ! array_key_exists('on', $rp) || ! empty($rp['on']),
+            'death_cert' => ! empty($rp['death_cert']),
+            'frc' => ! empty($rp['frc']),
+            'cnic' => ! empty($rp['cnic']),
+            'patwari' => $str($rp['patwari'] ?? ''),
+            'date' => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($rp['date'] ?? '')) ? $rp['date'] : '',
+            'remarks' => $str($rp['remarks'] ?? '', 600),
+            'page' => array_key_exists($rp['page'] ?? '', self::PAGES) ? $rp['page'] : 'a4p',
+        ];
         foreach (['kanal', 'marla', 'sarsahi'] as $k) {
             $this->record[$k] = $this->num($r[$k] ?? 0);
         }
@@ -160,6 +184,19 @@ class ShajraNasab extends Component
         if (in_array($name, ['record.w1_cnic', 'record.w2_cnic'], true)) {
             $k = substr($name, 7);
             $this->record[$k] = substr(preg_replace('/\D/', '', (string) $this->record[$k]), 0, 13);
+        }
+        if (str_starts_with($name, 'report.')) {
+            foreach (['on', 'death_cert', 'frc', 'cnic'] as $k) {
+                $this->report[$k] = (bool) $this->report[$k];
+            }
+            $this->report['remarks'] = mb_substr((string) $this->report['remarks'], 0, 600);
+            $this->report['patwari'] = mb_substr((string) $this->report['patwari'], 0, 120);
+            if (! array_key_exists($this->report['page'] ?? '', self::PAGES)) {
+                $this->report['page'] = 'a4p';
+            }
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $this->report['date'])) {
+                $this->report['date'] = '';
+            }
         }
         if ($name === 'record.fiqh' && ! in_array($this->record['fiqh'], self::FIQH, true)) {
             $this->record['fiqh'] = 'hanafi';
@@ -459,6 +496,7 @@ class ShajraNasab extends Component
 
         return view('livewire.tools.shajra-nasab', [
             'result' => $result,
+            'patwariReport' => $this->report['on'] ? ShajraReport::build($this->deceased, $this->record, $this->people, $result, $this->report) : null,
             'layout' => $layout,
             'parentOptions' => $this->parentOptions(),
             'formRelations' => $this->allowedFor($this->form['parent']),

@@ -119,7 +119,7 @@
         key: 'az_shajra_v2',
         save() {
             try {
-                localStorage.setItem(this.key, JSON.stringify({ deceased: $wire.deceased, record: $wire.record, people: $wire.people }));
+                localStorage.setItem(this.key, JSON.stringify({ deceased: $wire.deceased, record: $wire.record, people: $wire.people, report: $wire.report }));
             } catch (e) {}
         },
         init() {
@@ -165,6 +165,15 @@
         .pf-cnic { display: flex; align-items: stretch; justify-content: flex-end; height: 26px; margin: -2px -6px; }
         .pf-cell { width: 19px; border-inline-start: 1px solid #9ca3af; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 13px; }
         .pf-dash { width: 14px; display: flex; align-items: center; justify-content: center; border-inline-start: 1px solid #9ca3af; }
+        .pf-report { color: #111827; font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; border-top: 2px solid #111827; margin-top: 12px; padding-top: 8px; }
+        .pf-report-title { font-size: 22px; font-weight: 700; text-decoration: underline; text-underline-offset: 6px; margin: 0 0 4px; }
+        .pf-report p { font-size: 15px; line-height: 2.05; margin: 0; text-align: justify; }
+        .pf-heirs { border-collapse: collapse; margin: 4px 0 6px; font-size: 13px; }
+        .pf-heirs th, .pf-heirs td { border: 1px solid #6b7280; padding: 0 8px; line-height: 1.9; text-align: start; }
+        .pf-heirs th { background: #f3f4f6; font-weight: 400; }
+        .pf-heirs td[dir=ltr] { font-family: ui-monospace, monospace; font-size: 12px; text-align: center; }
+        .pf-report-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 26px; font-size: 14px; line-height: 1.9; text-align: center; }
+        .pf-sign-line { display: block; border-top: 1px solid #111827; margin: 0 12px 2px; }
         .sh-wrap { overflow-x: auto; padding-bottom: 6px; }
         .sh-canvas { position: relative; margin: 0 auto; }
         .sh-canvas > svg { position: absolute; inset: 0; overflow: visible; }
@@ -214,8 +223,9 @@
             /* Pehla safha: form + shajra; hisson ki table agle safhe par */
             .pf-after { break-before: page; }
             .pf-logo { border: 0 !important; }
-            .pf-form, .pf-form * { color: #000 !important; }
-            @page { size: A4 landscape; margin: 8mm; }
+            .pf-form, .pf-form *, .pf-report, .pf-report * { color: #000 !important; }
+            .pf-heirs th { background: #f3f4f6 !important; }
+            /* Safhe ka size neeche report ke option se (@page alag style mein) */
         }
     </style>
 
@@ -352,6 +362,53 @@
                         @endforeach
                     </div>
                     <p class="text-[10px] text-slate-500">{{ __('Signatures and thumb impressions are left blank for the witnesses to sign on paper.') }}</p>
+                </div>
+
+                {{-- Patwari report ke options --}}
+                <div class="bg-slate-900/90 rounded-3xl border border-slate-800 p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-file-pen text-emerald-400"></i> {{ __('Patwari report') }}
+                        </h3>
+                        <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                            <input type="checkbox" wire:model.live="report.on" class="rounded bg-slate-950 border-slate-600 text-amber-500"> {{ __('Show under the shajra') }}
+                        </label>
+                    </div>
+                    @if($report['on'])
+                        <p class="text-[10px] text-slate-400">{{ __('The report is written from the shajra. Tick only the documents you have actually checked.') }}</p>
+                        <div class="space-y-1.5">
+                            @foreach(['death_cert' => __('Death certificate from the Union Council checked'), 'frc' => __('NADRA Family Registration Certificate (FRC) checked'), 'cnic' => __('CNICs of the heirs checked')] as $k => $label)
+                                <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                                    <input type="checkbox" wire:model.live="report.{{ $k }}" class="rounded bg-slate-950 border-slate-600 text-amber-500"> {{ $label }}
+                                </label>
+                            @endforeach
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="{{ $lbl }}">{{ __('Patwari name') }}</label>
+                                <input type="text" dir="auto" wire:model.live.debounce.400ms="report.patwari" class="{{ $input }}">
+                            </div>
+                            <div>
+                                <label class="{{ $lbl }}">{{ __('Report date') }}</label>
+                                <input type="date" wire:model.live="report.date" class="{{ $input }}">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="{{ $lbl }}">{{ __('Extra remarks (optional)') }}</label>
+                                <textarea dir="auto" rows="2" maxlength="600" wire:model.live.debounce.600ms="report.remarks" class="{{ $input }}"></textarea>
+                            </div>
+                        </div>
+                    @endif
+                    {{-- Safhe ka size report ke bina bhi kaam aata hai (form + shajra ek safhe par) --}}
+                    <div>
+                        <label class="{{ $lbl }}">{{ __('Print page') }}</label>
+                        <select wire:model.live="report.page" class="{{ $input }}">
+                            <option value="a4p">{{ __('A4 portrait (best for long trees and the report)') }}</option>
+                            <option value="a4l">{{ __('A4 landscape (wide trees)') }}</option>
+                            <option value="legal">{{ __('Legal portrait') }}</option>
+                        </select>
+                    </div>
+                    @if(false)
+                    @endif
                 </div>
             </div>
 
@@ -566,7 +623,9 @@
                         {{ __('Show shares under names') }}
                     </label>
                 </div>
-                <div class="pw-paper">
+                @php $page = \App\Livewire\Tools\ShajraNasab::PAGES[$report['page'] ?? 'a4p'] ?? \App\Livewire\Tools\ShajraNasab::PAGES['a4p']; @endphp
+                <style>@media print { @page { size: {{ $page['css'] }}; margin: 8mm; } }</style>
+                <div class="pw-paper" data-print-w="{{ $page['w'] }}" data-print-h="{{ $page['h'] }}">
 
                 {{-- Sarkari form ka saancha (hamesha Urdu): header, unwan, hasb-e-guftah, fiqh, do gawah --}}
                 @php
@@ -619,8 +678,14 @@
                      x-data
                      x-init="$nextTick(() => { $el.scrollLeft = ($el.scrollWidth - $el.clientWidth) / 2 });
                              const c = $el.querySelector('.sh-canvas');
-                             window.addEventListener('beforeprint', () => { c.style.zoom = Math.min(1, 1020 / c.offsetWidth); });
-                             window.addEventListener('afterprint', () => { c.style.zoom = ''; });">
+                             // Print: form + shajra + report ek hi safhe mein (chuna hua size); poora kaghaz chhota kar ke
+                             const paper = $el.closest('.pw-paper');
+                             window.addEventListener('beforeprint', () => {
+                                 const pw = +paper.dataset.printW || 734, ph = +paper.dataset.printH || 1060;
+                                 paper.style.zoom = ''; const w = Math.max(pw, c.offsetWidth + 30); paper.style.width = w + 'px';
+                                 paper.style.zoom = Math.min(1, pw / w, ph / paper.scrollHeight);
+                             });
+                             window.addEventListener('afterprint', () => { paper.style.zoom = ''; paper.style.width = ''; });">
                     <div class="sh-canvas" style="width: {{ $layout['width'] }}px; height: {{ $layout['height'] }}px;">
                         <svg width="{{ $layout['width'] }}" height="{{ $layout['height'] }}" aria-hidden="true">
                             @foreach($layout['lines'] as $l)
@@ -645,6 +710,32 @@
                         <span><b>{{ $mark }}</b> {{ $meaning }}</span>
                     @endforeach
                 </div>
+
+                {{-- Rapor patwari: shajre ke mutabiq khud likhi hui, isi safhe par --}}
+                @if($patwariReport)
+                    <div class="pf-report" dir="rtl" lang="ur">
+                        <h3 class="pf-report-title">{{ $patwariReport['title'] }}</h3>
+                        @foreach($patwariReport['paragraphs'] as $i => $para)
+                            @if($i === 2)
+                                {{-- Warisan aur un ke hisse --}}
+                                <table class="pf-heirs">
+                                    <thead><tr><th>نمبر</th><th>نام وارث</th><th>رشتہ</th><th>حصہ</th>@if($result['total_parts'])<th>از {{ number_format($result['total_parts']) }}</th>@endif<th>رقبہ (ک-م-س)</th></tr></thead>
+                                    <tbody>
+                                        @foreach($patwariReport['heirs'] as $n => $h)
+                                            <tr><td>{{ $n + 1 }}</td><td>{{ $h['name'] ?: '—' }}</td><td>{{ $h['relation'] }}</td><td dir="ltr">{{ $h['fraction'] }}</td>@if($result['total_parts'])<td dir="ltr">{{ number_format($h['parts']) }}</td>@endif<td dir="ltr">{{ $h['land'] }}</td></tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            @endif
+                            <p>{{ $para }}</p>
+                        @endforeach
+                        <div class="pf-report-sign">
+                            <div><span class="pf-sign-line"></span>پٹواری حلقہ @if($report['patwari'])<b>{{ $report['patwari'] }}</b>@endif<br>تاریخ: <span dir="ltr">{{ $report['date'] ? \Illuminate\Support\Carbon::parse($report['date'])->format('d-m-Y') : '__________' }}</span></div>
+                            <div><span class="pf-sign-line"></span>گرداور / قانونگو</div>
+                            <div><span class="pf-sign-line"></span>ریونیو آفیسر</div>
+                        </div>
+                    </div>
+                @endif
                 </div>
 
                 {{-- Holders --}}
