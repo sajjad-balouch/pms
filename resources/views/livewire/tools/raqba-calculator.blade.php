@@ -22,7 +22,7 @@
             });
         }
      }"
-     @raqba-focus.window="$nextTick(() => $refs.kanal.focus())">
+>
 
     <style>
         .rq-grid { display: grid; gap: 1.25rem; align-items: start; }
@@ -45,17 +45,32 @@
         <div class="rq-grid">
             {{-- Baayen: khaane aur nateeja --}}
             <div class="space-y-5">
-                <form wire:submit="add" class="bg-slate-900/90 rounded-3xl border border-slate-800 p-5 space-y-4">
+                {{-- Khaane sirf browser mein: Enter par foran khaali, qeematein server ko; tez likhne par bhi kuch nahi mit-ta --}}
+                <form x-data="{
+                          row: { kanal: '', marla: '', feet: '' }, empty: false,
+                          submitRow() {
+                              const r = this.row;
+                              if (!(+r.kanal > 0 || +r.marla > 0 || +r.feet > 0)) { this.empty = true; return; }
+                              this.empty = false;
+                              $wire.addEntry(r.kanal, r.marla, r.feet);
+                              this.clear();
+                          },
+                          clear() { this.row = { kanal: '', marla: '', feet: '' }; this.empty = false; $refs.kanal.focus(); }
+                      }"
+                      wire:ignore.self
+                      @submit.prevent="submitRow()"
+                      class="bg-slate-900/90 rounded-3xl border border-slate-800 p-5 space-y-4">
                     <div class="grid grid-cols-3 gap-3" dir="rtl">
                         @foreach(['kanal' => 'کنال', 'marla' => 'مرلہ', 'feet' => 'فٹ'] as $field => $label)
                             <div class="text-center">
                                 <label for="rq-{{ $field }}" class="rq-label block text-amber-300" style="{{ $urdu }}">{{ $label }}</label>
                                 <input id="rq-{{ $field }}" @if($field === 'kanal') x-ref="kanal" autofocus @endif
-                                       type="number" min="0" step="any" inputmode="decimal" wire:model="{{ $field }}"
+                                       type="number" min="0" step="any" inputmode="decimal" x-model="row.{{ $field }}"
                                        class="w-full rounded-xl border border-slate-600 bg-slate-950 px-3 py-3 text-center font-mono text-2xl font-black text-white outline-none focus:border-amber-500">
                             </div>
                         @endforeach
                     </div>
+                    <p x-show="empty" x-cloak class="text-xs text-rose-400 text-center">{{ __('Enter kanal, marla or feet first.') }}</p>
                     @error('kanal')<p class="text-xs text-rose-400 text-center">{{ $message }}</p>@enderror
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -63,7 +78,7 @@
                             <i class="fa-solid {{ $subtract ? 'fa-minus' : 'fa-plus' }}"></i>
                             {{ $subtract ? __('Subtract (Enter)') : __('Add (Enter)') }}
                         </button>
-                        <button type="button" wire:click="resetInputs" class="px-4 py-3 rounded-xl bg-slate-950 border border-slate-600 text-white font-bold hover:bg-slate-800 cursor-pointer">Reset</button>
+                        <button type="button" @click="clear()" class="px-4 py-3 rounded-xl bg-slate-950 border border-slate-600 text-white font-bold hover:bg-slate-800 cursor-pointer">Reset</button>
                         <button type="button" wire:click="resetAll" wire:confirm="{{ __('Clear all added land?') }}" class="px-4 py-3 rounded-xl bg-slate-950 border border-slate-600 text-white font-bold hover:bg-slate-800 cursor-pointer">Reset All</button>
                         <label class="flex items-center gap-2 px-3 py-3 rounded-xl border cursor-pointer {{ $subtract ? 'border-rose-400 bg-rose-500/10 text-rose-300' : 'border-slate-700 text-rose-300' }}">
                             <input type="checkbox" wire:model.live="subtract" class="rounded bg-slate-950 border-slate-600 text-rose-500">
@@ -118,10 +133,7 @@
                     </p>
                 </div>
 
-                <div class="flex items-center justify-between rounded-2xl bg-slate-900/80 border border-slate-800 px-5 py-3" dir="rtl">
-                    <span class="text-lg font-bold text-white" style="{{ $urdu }}">سجاد خان پٹواری</span>
-                    <span class="text-sm text-slate-400">Created by</span>
-                </div>
+                
             </div>
 
             {{-- Daayen: kul jama karda aur fehrist --}}

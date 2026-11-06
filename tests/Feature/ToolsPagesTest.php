@@ -127,17 +127,17 @@ class ToolsPagesTest extends TestCase
     public function test_raqba_calculator_adds_subtracts_and_totals(): void
     {
         $c = Livewire::test(\App\Livewire\Tools\RaqbaCalculator::class)
-            ->call('add')->assertHasErrors('kanal') // khaali par kuch nahi
-            ->set('kanal', '2')->set('marla', '15')->set('feet', '200')->call('add')
-            ->assertHasNoErrors()->assertSet('kanal', '')
-            ->set('kanal', '1')->set('marla', '10')->set('feet', '100')->call('add');
+            ->call('addEntry', '', '0', '')->assertHasErrors('kanal') // khaali par kuch nahi
+            ->call('addEntry', '2', '15', '200')
+            ->assertHasNoErrors()
+            ->call('addEntry', '1', '10', '100');
 
         $t = $c->viewData('total');
         $this->assertSame([4, 6, 27.75], [$t['kanal'], $t['marla'], $t['feet']]);
         $this->assertCount(2, $c->get('entries'));
 
         // Tafreeq: 2 kanal minus
-        $c->set('subtract', true)->set('kanal', '2')->call('add');
+        $c->set('subtract', true)->call('addEntry', '2', '', '');
         $t = $c->viewData('total');
         $this->assertSame([2, 6], [$t['kanal'], $t['marla']]);
         $this->assertSame(1, $c->viewData('subtracted'));

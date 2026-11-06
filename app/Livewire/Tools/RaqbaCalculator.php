@@ -14,12 +14,6 @@ class RaqbaCalculator extends Component
 {
     public const MAX_ENTRIES = 500;
 
-    public $kanal = '';
-
-    public $marla = '';
-
-    public $feet = '';
-
     public bool $subtract = false;
 
     public string $standard = 'revenue';
@@ -27,11 +21,15 @@ class RaqbaCalculator extends Component
     /** @var array<int,array{sign:int,kanal:float,marla:float,feet:float,sqft:float}> */
     public array $entries = [];
 
-    public function add(): void
+    /**
+     * Khaane browser mein rehte hain (Enter par foran khaali), qeematein yahan bheji jati hain.
+     * Is tarah tez likhne wale ka agla raqba server ke jawab se nahi mit-ta.
+     */
+    public function addEntry($kanal, $marla, $feet): void
     {
-        $k = $this->num($this->kanal);
-        $m = $this->num($this->marla);
-        $f = $this->num($this->feet);
+        $k = $this->num($kanal);
+        $m = $this->num($marla);
+        $f = $this->num($feet);
 
         if ($k + $m + $f <= 0) {
             $this->addError('kanal', __('Enter kanal, marla or feet first.'));
@@ -48,8 +46,7 @@ class RaqbaCalculator extends Component
             'sign' => $this->subtract ? -1 : 1,
             'kanal' => $k, 'marla' => $m, 'feet' => $f,
         ];
-        $this->resetInputs();
-        $this->dispatch('raqba-focus');
+        $this->resetErrorBag();
     }
 
     public function removeEntry(int $index): void
@@ -58,15 +55,9 @@ class RaqbaCalculator extends Component
         $this->entries = array_values($this->entries);
     }
 
-    public function resetInputs(): void
-    {
-        $this->kanal = $this->marla = $this->feet = '';
-        $this->resetErrorBag();
-    }
-
     public function resetAll(): void
     {
-        $this->resetInputs();
+        $this->resetErrorBag();
         $this->entries = [];
         $this->subtract = false;
     }
