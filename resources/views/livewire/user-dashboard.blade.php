@@ -188,7 +188,7 @@
                             @forelse($transactions as $tx)
                                 <tr>
                                     <td class="p-3">
-                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase {{ $tx->type === 'deposit' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400' }}">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase {{ in_array($tx->type, ['deposit', 'refund']) ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400' }}">
                                             {{ $tx->type }}
                                         </span>
                                         @if($tx->payment_method)
@@ -203,8 +203,8 @@
                                             <span class="text-slate-500">-</span>
                                         @endif
                                     </td>
-                                    <td class="p-3 font-extrabold text-sm {{ $tx->type === 'deposit' ? 'text-emerald-400' : 'text-rose-400' }}">
-                                        {{ $tx->type === 'deposit' ? '+' : '-' }} PKR {{ number_format($tx->amount) }}
+                                    <td class="p-3 font-extrabold text-sm {{ in_array($tx->type, ['deposit', 'refund']) ? 'text-emerald-400' : 'text-rose-400' }}">
+                                        {{ in_array($tx->type, ['deposit', 'refund']) ? '+' : '-' }} PKR {{ number_format($tx->amount) }}
                                     </td>
                                     <td class="p-3">
                                         @if($tx->status === 'approved')

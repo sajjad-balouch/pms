@@ -8,7 +8,7 @@ use App\Models\Installment;
 use App\Models\Plot;
 use App\Models\PlotBooking;
 use App\Services\BookingService;
-use App\Support\WhatsApp;
+use App\Services\Messaging\Messenger;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -240,28 +240,13 @@ class ManageInstallments extends Component
         $buyerName = $booking?->customer?->name ?? $first?->buyer_name;
         $buyerPhone = $booking?->customer?->phone ?? $first?->buyer_phone;
         $portalUrl = $booking?->portalUrl();
-        $greeting = 'Assalam o Alaikum' . ($buyerName ? " {$buyerName}" : '');
         $place = "{$plot->town->name} — Plot #{$plot->plot_number}";
 
-        // Ready WhatsApp messages per installment
+        // Har qist ka tayyar paigham (markazi template se; admin portal se alfaaz badle ja sakte hain)
         $whatsapp = [];
         foreach ($installments as $i) {
-            $what = $i->installment_number == 0 ? 'down payment' : "qist #{$i->installment_number}";
-            $amount = 'Rs. ' . number_format((float) $i->amount);
-
-            if ($i->status === 'paid') {
-                $balanceAfter = $stats['remaining'];
-                $message = "{$greeting}, {$place}: aap ki {$what} {$amount} " . Carbon::parse($i->paid_date)->format('d M Y')
-                    . " ko wusool ho gayi. Shukriya! Baqi raqam: Rs. " . number_format($balanceAfter) . '.'
-                    . ($booking?->portal_token ? ' Receipt: ' . route('portal.receipt', [$booking->portal_token, $i->id]) : '');
-            } else {
-                $due = Carbon::parse($i->due_date);
-                $message = "{$greeting}, {$place}: aap ki {$what} {$amount} " . $due->format('d M Y')
-                    . ($due->isPast() && ! $due->isToday() ? ' ko due thi aur abhi tak ada nahi hui. Barah-e-karam jald ada karein.' : ' ko due hai.')
-                    . ($portalUrl ? " Apna hisaab yahan dekhein: {$portalUrl}" : '');
-            }
-
-            $whatsapp[$i->id] = WhatsApp::url($buyerPhone, $message);
+            [$key, $vars] = $this->messageFor($i, $buyerName, $place, $booking, $portalUrl, $stats['remaining']);
+            $whatsapp[$i->id] = Messenger::link($buyerPhone, Messenger::render($key, $vars));
         }
 
         return view('livewire.town-owner.manage-installments', [
@@ -273,8 +258,9 @@ class ManageInstallments extends Component
             'buyerPhone' => $buyerPhone,
             'portalUrl' => $portalUrl,
             'portalShare' => $portalUrl
-                ? WhatsApp::url($buyerPhone, "{$greeting}, {$place} — aap ke plot ka mukammal hisaab, qistein aur receipts is link par dekhein: {$portalUrl}")
+                ? Messenger::link($buyerPhone, Messenger::render('portal_link', ['name' => $buyerName, 'place' => $place, 'url' => $portalUrl]))
                 : null,
+            'autoSend' => Messenger::isAutomatic(),
             'whatsapp' => $whatsapp,
             'receiving' => $this->receivingId ? $installments->firstWhere('id', (int) $this->receivingId) : null,
             'justPaid' => $this->justPaidId ? $installments->firstWhere('id', (int) $this->justPaidId) : null,
@@ -283,6 +269,62 @@ class ManageInstallments extends Component
             'lateFeePercent' => (float) ($plot->town->late_fee_percent ?? 0),
             'totalLateFees' => (float) $installments->sum('late_fee'),
         ])->layout('layouts.app');
+    }
+
+    /** Wusool shuda qist => raseed; baqi => due/late yaad-dehani */
+    protected function messageFor(Installment $i, ?string $name, string $place, $booking, ?string $portalUrl, $remaining): array
+    {
+        $what = $i->installment_number == 0 ? 'down payment' : "qist #{$i->installment_number}";
+        $vars = ['name' => $name, 'place' => $place, 'what' => $what, 'amount' => number_format((float) $i->amount)];
+
+        if ($i->status === 'paid') {
+            return ['payment_received', $vars + [
+                'date' => Carbon::parse($i->paid_date)->format('d M Y'),
+                'balance' => number_format((float) $remaining),
+                'receipt' => $booking?->portal_token ? ' Receipt: ' . route('portal.receipt', [$booking->portal_token, $i->id]) : '',
+            ]];
+        }
+
+        $due = Carbon::parse($i->due_date);
+        $late = $due->isPast() && ! $due->isToday();
+
+        return ['installment_unpaid', $vars + [
+            'due_date' => $due->format('d M Y'),
+            'status' => $late ? 'ko due thi aur abhi tak ada nahi hui. Barah-e-karam jald ada karein.' : 'ko due hai.',
+            'portal' => $portalUrl ? " Apna hisaab yahan dekhein: {$portalUrl}" : '',
+        ]];
+    }
+
+    /** API/SMS laga ho to raseed / yaad-dehani seedha bhejna ($installmentId = 0: hisaab ka link) */
+    public function sendMessage(int $installmentId = 0): void
+    {
+        $plot = $this->plot;
+        $booking = $this->activeBooking();
+        $installments = $this->ledgerQuery()->orderBy('installment_number')->orderBy('due_date')->get();
+        $first = $installments->first();
+        $name = $booking?->customer?->name ?? $first?->buyer_name;
+        $phone = $booking?->customer?->phone ?? $first?->buyer_phone;
+        $place = "{$plot->town->name} — Plot #{$plot->plot_number}";
+
+        if ($installmentId === 0) {
+            $portalUrl = $booking?->portalUrl();
+            if (! $portalUrl) {
+                return;
+            }
+            [$key, $vars] = ['portal_link', ['name' => $name, 'place' => $place, 'url' => $portalUrl]];
+        } else {
+            $i = $installments->firstWhere('id', $installmentId);
+            if (! $i) {
+                return;
+            }
+            $remaining = BuyerPortalController::ledgerStats($installments)['remaining'];
+            [$key, $vars] = $this->messageFor($i, $name, $place, $booking, $booking?->portalUrl(), $remaining);
+        }
+
+        $r = Messenger::send($phone, $key, $vars, ['plot_id' => $plot->id, 'installment_id' => $installmentId ?: null, 'source' => 'installments']);
+        $r['ok']
+            ? session()->flash('success', 'Paigham bhej diya gaya.')
+            : session()->flash('error', 'Paigham nahi gaya: ' . ($r['error'] ?: 'wajah maloom nahi') . ' — WhatsApp link se bhej dein.');
     }
 
     protected function ownedPlotQuery()

@@ -219,10 +219,10 @@ class Transform
     {
         return [
             'id' => $t->id,
-            'type' => $t->type, // deposit | unlock_fee | refund | adjustment
+            'type' => $t->type, // deposit | unlock_fee | message_fee | refund | adjustment
             'amount' => round((float) $t->amount, 2),
             'direction' => match (true) {
-                $t->type === 'unlock_fee' => 'debit',
+                in_array($t->type, ['unlock_fee', 'message_fee'], true) => 'debit',
                 $t->type === 'adjustment' && $t->admin_note === 'debit' => 'debit',
                 default => 'credit',
             },

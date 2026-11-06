@@ -181,6 +181,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/analytics', PageAnalytics::class)->name('analytics');
 
         Route::get('/whatsapp-marketing', WhatsAppMarketing::class)->name('whatsapp.marketing');
+        Route::get('/messaging', \App\Livewire\Admin\MessagingSettings::class)->name('messaging');
 
         Route::get('/posts', ManagePosts::class)->name('posts');
         Route::get('/activity-log', \App\Livewire\Admin\ActivityLog::class)->name('activity-log');

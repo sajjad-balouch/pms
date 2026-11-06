@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Payment karne wala user
             $table->foreignId('unlocked_user_id')->constrained('users')->onDelete('cascade'); // Agent ya Town Owner
-            $table->bigint('plot_id'); // Agent ya Town Owner
+            $table->unsignedBigInteger('plot_id'); // Plot (Laravel mein bigint() method nahi hota)
             $table->timestamp('expires_at'); // 1 month baad ki date
             $table->timestamps();
 

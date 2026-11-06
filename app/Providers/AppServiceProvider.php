@@ -25,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api-auth', fn (Request $r) => Limit::perMinute(10)->by($r->ip()));
         RateLimiter::for('api-topup', fn (Request $r) => Limit::perMinute(10)->by($by($r)));
         RateLimiter::for('api-unlock', fn (Request $r) => Limit::perMinute(20)->by($by($r)));
+        RateLimiter::for('gateway', fn (Request $r) => Limit::perMinute(60)->by($r->ip()));
 
         // Livewire script path
         Livewire::setScriptRoute(function ($handle) {

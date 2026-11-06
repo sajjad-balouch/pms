@@ -87,11 +87,17 @@
                 </header>
             @endif
 
-            <!-- Main Page Content Slot -->
-            <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            @php $townNav = auth()->check() && auth()->user()->role === 'town_owner'; @endphp
+
+            <!-- Main Page Content Slot (mobile par neeche menu ke liye jagah) -->
+            <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 {{ $townNav ? 'pb-24 md:pb-8' : '' }}">
                 {{ $slot }}
             </main>
         </div>
+
+        @if ($townNav)
+            @include('partials.town-owner-bottom-nav')
+        @endif
 
         <!-- Fully Generic Livewire Script Endpoint -->
         <script

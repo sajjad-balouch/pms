@@ -9,6 +9,7 @@ use App\Models\PlotBooking;
 use App\Models\PlotFollowup;
 use App\Models\Town;
 use App\Services\BookingService;
+use App\Services\Messaging\Messenger;
 use App\Support\WhatsApp;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -169,31 +170,7 @@ class RecoveryDesk extends Component
             ->get()
             ->groupBy('plot_id');
 
-        $cases = $unpaid->groupBy('plot_id')->map(function ($items) use ($todayStr, $bookings, $lastFollowups) {
-            $plot = $items->first()->plot;
-            $late = $items->filter(fn ($i) => (string) $i->due_date < $todayStr);
-            $dueToday = $items->filter(fn ($i) => (string) $i->due_date === $todayStr);
-            $upcoming = $items->filter(fn ($i) => (string) $i->due_date > $todayStr);
-            $history = $lastFollowups->get($plot->id, collect());
-            $promise = $history->first(fn ($f) => $f->promise_date !== null);
-
-            return (object) [
-                'plot' => $plot,
-                'town' => $plot->town?->name,
-                'name' => $plot->customer?->name ?? $items->first()->buyer_name,
-                'phone' => $plot->customer?->phone ?? $items->first()->buyer_phone,
-                'late_amount' => (float) $late->sum('amount'),
-                'late_count' => $late->count(),
-                'oldest_due' => $late->min('due_date'),
-                'today_amount' => (float) $dueToday->sum('amount'),
-                'upcoming_amount' => (float) $upcoming->sum('amount'),
-                'next_due' => $upcoming->min('due_date'),
-                'booking' => $bookings->get($plot->id),
-                'last' => $history->first(),
-                'promise' => $promise,
-                'reminded_today' => $history->contains(fn ($f) => $f->channel === 'whatsapp' && $f->created_at->isToday()),
-            ];
-        });
+        $cases = $unpaid->groupBy('plot_id')->map(fn ($items) => $this->makeCase($items, $todayStr, $bookings, $lastFollowups));
 
         $stats = [
             'late' => $cases->sum('late_amount'),
@@ -222,11 +199,12 @@ class RecoveryDesk extends Component
         }
 
         $list = $list->values()->each(function ($c) {
-            $c->whatsapp = WhatsApp::url($c->phone, $this->reminderMessage($c));
+            $c->whatsapp = Messenger::link($c->phone, $this->reminderMessage($c));
         });
 
         return view('livewire.town-owner.recovery-desk', [
             'towns' => $this->towns,
+            'autoSend' => Messenger::isAutomatic(),
             'list' => $list,
             'stats' => $stats,
             'channels' => PlotFollowup::CHANNELS,
@@ -238,23 +216,86 @@ class RecoveryDesk extends Component
         ])->layout('layouts.app');
     }
 
+    /** Ek plot (customer) ki tamam baqi qistein => recovery case */
+    protected function makeCase($items, string $todayStr, $bookings, $lastFollowups): object
+    {
+        $plot = $items->first()->plot;
+        $late = $items->filter(fn ($i) => (string) $i->due_date < $todayStr);
+        $dueToday = $items->filter(fn ($i) => (string) $i->due_date === $todayStr);
+        $upcoming = $items->filter(fn ($i) => (string) $i->due_date > $todayStr);
+        $history = $lastFollowups->get($plot->id, collect());
+        $promise = $history->first(fn ($f) => $f->promise_date !== null);
+
+        return (object) [
+            'plot' => $plot,
+            'town' => $plot->town?->name,
+            'name' => $plot->customer?->name ?? $items->first()->buyer_name,
+            'phone' => $plot->customer?->phone ?? $items->first()->buyer_phone,
+            'late_amount' => (float) $late->sum('amount'),
+            'late_count' => $late->count(),
+            'oldest_due' => $late->min('due_date'),
+            'today_amount' => (float) $dueToday->sum('amount'),
+            'upcoming_amount' => (float) $upcoming->sum('amount'),
+            'next_due' => $upcoming->min('due_date'),
+            'booking' => $bookings->get($plot->id),
+            'last' => $history->first(),
+            'promise' => $promise,
+            'reminded_today' => $history->contains(fn ($f) => $f->channel === 'whatsapp' && $f->created_at->isToday()),
+        ];
+    }
+
     protected function reminderMessage($c): string
     {
-        $greeting = 'Assalam o Alaikum' . ($c->name ? " {$c->name}" : '');
-        $place = "{$c->town} — Plot #{$c->plot->plot_number}";
-        $portal = $c->booking?->portal_token ? ' Apna hisaab yahan dekhein: ' . route('portal.show', $c->booking->portal_token) : '';
+        return Messenger::render(...$this->reminderTemplate($c));
+    }
+
+    /** Late / aaj due / aane wali: markazi template aur us ke variables (admin portal se alfaaz badle ja sakte hain) */
+    protected function reminderTemplate($c): array
+    {
+        $vars = [
+            'name' => $c->name,
+            'place' => "{$c->town} — Plot #{$c->plot->plot_number}",
+            'portal' => $c->booking?->portal_token ? ' Apna hisaab yahan dekhein: ' . route('portal.show', $c->booking->portal_token) : '',
+        ];
 
         if ($c->late_amount > 0) {
-            return "{$greeting}, {$place}: aap ki {$c->late_count} qist(ein) Rs. " . number_format($c->late_amount)
-                . ' late hain (sab se purani ' . Carbon::parse($c->oldest_due)->format('d M Y') . ' se). Barah-e-karam jald ada karein.' . $portal . ' Shukriya.';
+            return ['installment_overdue', $vars + ['count' => $c->late_count, 'amount' => number_format($c->late_amount), 'since' => Carbon::parse($c->oldest_due)->format('d M Y')]];
         }
-
         if ($c->today_amount > 0) {
-            return "{$greeting}, {$place}: aap ki qist Rs. " . number_format($c->today_amount) . ' aaj due hai.' . $portal . ' Shukriya.';
+            return ['installment_due_today', $vars + ['amount' => number_format($c->today_amount)]];
         }
 
-        return "{$greeting}, {$place}: yaad-dehani — aap ki agli qist Rs. " . number_format($c->upcoming_amount)
-            . ' ' . Carbon::parse($c->next_due)->format('d M Y') . ' ko due hai.' . $portal . ' Shukriya.';
+        return ['installment_due_soon', $vars + ['amount' => number_format($c->upcoming_amount), 'due_date' => Carbon::parse($c->next_due)->format('d M Y')]];
+    }
+
+    /** API/SMS laga ho to seedha reminder; kamyab ho to follow-up log mein bhi */
+    public function sendReminder($plotId)
+    {
+        $plot = $this->ownedPlot($plotId);
+        $items = Installment::with(['plot:id,town_id,plot_number,block_name,size,customer_id,status', 'plot.town:id,name', 'plot.customer:id,name,phone'])
+            ->where('plot_id', $plot->id)
+            ->whereIn('status', BookingService::UNPAID)
+            ->where('due_date', '<=', today()->addDays(self::LOOKAHEAD_DAYS)->toDateString())
+            ->orderBy('due_date')
+            ->get();
+
+        if ($items->isEmpty()) {
+            session()->flash('error', 'Is customer ki koi baqi qist nahi.');
+
+            return;
+        }
+
+        $bookings = PlotBooking::where('plot_id', $plot->id)->where('status', 'active')->get(['id', 'plot_id', 'portal_token'])->keyBy('plot_id');
+        $case = $this->makeCase($items, today()->toDateString(), $bookings, collect());
+        [$key, $vars] = $this->reminderTemplate($case);
+
+        $r = Messenger::send($case->phone, $key, $vars, ['plot_id' => $plot->id, 'source' => 'recovery']);
+        if ($r['ok']) {
+            $this->logReminder($plot->id);
+            session()->flash('success', 'Reminder bhej diya: ' . ($case->name ?: 'Plot #' . $plot->plot_number));
+        } else {
+            session()->flash('error', 'Paigham nahi gaya: ' . ($r['error'] ?: 'wajah maloom nahi') . ' — WhatsApp link se bhej dein.');
+        }
     }
 
     protected function ownedPlotQuery()

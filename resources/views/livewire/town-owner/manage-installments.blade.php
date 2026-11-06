@@ -33,7 +33,9 @@
              class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-3.5 rounded-xl text-sm font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-center gap-3"><span>✅</span><span>{{ session('success') }}</span></div>
             <div class="flex items-center gap-3">
-                @if ($justPaid && ($whatsapp[$justPaid->id] ?? null))
+                @if ($justPaid && ($whatsapp[$justPaid->id] ?? null) && $autoSend)
+                    <button type="button" wire:click="sendMessage({{ $justPaid->id }})" wire:loading.attr="disabled" class="inline-flex items-center gap-1.5 bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 px-3 py-1.5 rounded-xl text-xs font-bold">📤 Receipt bhejein</button>
+                @elseif ($justPaid && ($whatsapp[$justPaid->id] ?? null))
                     <a href="{{ $whatsapp[$justPaid->id] }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 px-3 py-1.5 rounded-xl text-xs font-bold">💬 Receipt WhatsApp par bhejein</a>
                 @endif
                 <button type="button" @click="show = false" class="text-emerald-400/60 hover:text-emerald-400">&times;</button>
@@ -94,7 +96,9 @@
                     <button type="button" x-on:click="navigator.clipboard.writeText(@js($portalUrl)); copied = true; setTimeout(() => copied = false, 2000)" class="inline-flex items-center gap-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 px-3 py-2 rounded-xl text-xs font-bold">
                         <span x-text="copied ? '✓ Copied' : '📋 Copy Link'"></span>
                     </button>
-                    @if ($portalShare)
+                    @if ($portalShare && $autoSend)
+                        <button type="button" wire:click="sendMessage(0)" wire:loading.attr="disabled" class="inline-flex items-center gap-1.5 bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 px-3 py-2 rounded-xl text-xs font-bold">📤 Link bhejein</button>
+                    @elseif ($portalShare)
                         <a href="{{ $portalShare }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 px-3 py-2 rounded-xl text-xs font-bold">💬 Send on WhatsApp</a>
                     @endif
                 </div>
@@ -185,12 +189,16 @@
                                 <td class="px-6 py-4 text-right whitespace-nowrap space-x-1">
                                     @if (! $isPaid)
                                         <button type="button" wire:click="startReceive({{ $inst->id }})" class="inline-flex items-center gap-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl text-xs font-bold">Receive Payment</button>
-                                        @if ($whatsapp[$inst->id] ?? null)
+                                        @if (($whatsapp[$inst->id] ?? null) && $autoSend)
+                                            <button type="button" wire:click="sendMessage({{ $inst->id }})" wire:loading.attr="disabled" title="Reminder bhejein" class="inline-flex items-center bg-green-600/10 hover:bg-green-600/20 text-green-300 border border-green-500/20 px-2.5 py-1.5 rounded-xl text-xs font-bold">📤</button>
+                                        @elseif ($whatsapp[$inst->id] ?? null)
                                             <a href="{{ $whatsapp[$inst->id] }}" target="_blank" rel="noopener" title="WhatsApp reminder" class="inline-flex items-center bg-green-600/10 hover:bg-green-600/20 text-green-300 border border-green-500/20 px-2.5 py-1.5 rounded-xl text-xs font-bold">💬</a>
                                         @endif
                                     @else
                                         <a href="{{ route('town_owner.receipt.print', $inst->id) }}" target="_blank" class="inline-flex items-center gap-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-xl text-xs font-bold">🖨️ Receipt</a>
-                                        @if ($whatsapp[$inst->id] ?? null)
+                                        @if (($whatsapp[$inst->id] ?? null) && $autoSend)
+                                            <button type="button" wire:click="sendMessage({{ $inst->id }})" wire:loading.attr="disabled" title="Receipt bhejein" class="inline-flex items-center bg-green-600/10 hover:bg-green-600/20 text-green-300 border border-green-500/20 px-2.5 py-1.5 rounded-xl text-xs font-bold">📤</button>
+                                        @elseif ($whatsapp[$inst->id] ?? null)
                                             <a href="{{ $whatsapp[$inst->id] }}" target="_blank" rel="noopener" title="Receipt WhatsApp par bhejein" class="inline-flex items-center bg-green-600/10 hover:bg-green-600/20 text-green-300 border border-green-500/20 px-2.5 py-1.5 rounded-xl text-xs font-bold">💬</a>
                                         @endif
                                         <button type="button" wire:click="undoPayment({{ $inst->id }})" wire:confirm="Ye wusooli ghalat darj hui thi? Qist dobara pending ho jayegi." title="Undo payment" class="inline-flex items-center bg-gray-800 hover:bg-gray-700 text-gray-400 border border-gray-700 px-2.5 py-1.5 rounded-xl text-xs font-bold">↩</button>

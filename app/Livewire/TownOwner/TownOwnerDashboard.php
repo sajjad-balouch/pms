@@ -9,6 +9,7 @@ use App\Models\Plot;
 use App\Models\PlotBooking;
 use App\Models\PlotTransfer;
 use App\Models\Town;
+use App\Services\Messaging\Messenger;
 use App\Support\WhatsApp;
 use App\Models\TownExpense;
 use Carbon\Carbon;
@@ -70,6 +71,10 @@ class TownOwnerDashboard extends Component
             'myTowns' => $myTowns,
             'periodLabel' => $this->periodLabel(),
             'daily' => $this->dailySummary($myTowns, $stats),
+            // Team member ko sirf woh fori kaam dikhayein jin ki ijazat hai
+            'can' => collect(array_keys(Tenant::SECTIONS))->push('team')->mapWithKeys(fn ($s) => [$s => Tenant::can($s)])->all(),
+            // Admin ne API/SMS lagaya ho to buttons seedha bhejte hain
+            'autoSend' => Messenger::isAutomatic(),
         ])->layout('layouts.app');
     }
 
@@ -241,12 +246,34 @@ class TownOwnerDashboard extends Component
             $relations[] = 'plot.customer';
         }
 
+        // Defaulters kitni der se late hain: 1-30, 31-60, 61-90, 90+ din (raqam aur ginti)
+        $d30 = $today->copy()->subDays(30)->toDateString();
+        $d60 = $today->copy()->subDays(60)->toDateString();
+        $d90 = $today->copy()->subDays(90)->toDateString();
+        $agingRow = Installment::whereIn('plot_id', $plotIdsQuery)
+            ->whereIn('status', ['pending', 'overdue'])
+            ->where('due_date', '<', $todayStr)
+            ->toBase()
+            ->selectRaw('
+                COALESCE(SUM(CASE WHEN due_date >= ? THEN amount ELSE 0 END), 0) AS a1, COALESCE(SUM(CASE WHEN due_date >= ? THEN 1 ELSE 0 END), 0) AS n1,
+                COALESCE(SUM(CASE WHEN due_date < ? AND due_date >= ? THEN amount ELSE 0 END), 0) AS a2, COALESCE(SUM(CASE WHEN due_date < ? AND due_date >= ? THEN 1 ELSE 0 END), 0) AS n2,
+                COALESCE(SUM(CASE WHEN due_date < ? AND due_date >= ? THEN amount ELSE 0 END), 0) AS a3, COALESCE(SUM(CASE WHEN due_date < ? AND due_date >= ? THEN 1 ELSE 0 END), 0) AS n3,
+                COALESCE(SUM(CASE WHEN due_date < ? THEN amount ELSE 0 END), 0) AS a4, COALESCE(SUM(CASE WHEN due_date < ? THEN 1 ELSE 0 END), 0) AS n4
+            ', [$d30, $d30, $d30, $d60, $d30, $d60, $d60, $d90, $d60, $d90, $d90, $d90])
+            ->first();
+        $aging = [
+            ['label' => '1–30', 'amount' => (float) $agingRow->a1, 'count' => (int) $agingRow->n1, 'tone' => 'amber'],
+            ['label' => '31–60', 'amount' => (float) $agingRow->a2, 'count' => (int) $agingRow->n2, 'tone' => 'orange'],
+            ['label' => '61–90', 'amount' => (float) $agingRow->a3, 'count' => (int) $agingRow->n3, 'tone' => 'red'],
+            ['label' => '90+', 'amount' => (float) $agingRow->a4, 'count' => (int) $agingRow->n4, 'tone' => 'rose'],
+        ];
+
         $overdueRows = Installment::with($relations)
             ->whereIn('plot_id', $plotIdsQuery)
             ->whereIn('status', ['pending', 'overdue'])
             ->where('due_date', '<', $todayStr)
             ->orderBy('due_date')
-            ->limit(10)
+            ->limit(20)
             ->get()
             ->map(fn ($i) => $this->installmentRow($i, $today))
             ->all();
@@ -356,6 +383,7 @@ class TownOwnerDashboard extends Component
             'upcomingAmount' => (float) $stats->upcoming_amount,
             'upcomingCount' => (int) $stats->upcoming_count,
             'overdueRows' => $overdueRows,
+            'aging' => $aging,
             'upcomingRows' => $upcomingRows,
             'totalExpenses' => $totalExpenses,
             'totalSalariesPaid' => $totalSalariesPaid,
@@ -387,12 +415,7 @@ class TownOwnerDashboard extends Component
 
         $plotLabel = $this->plotLabel($plot) ?? '#' . $installment->plot_id;
         $town = $plot?->town?->name ?? '—';
-        $amount = number_format((float) $installment->amount);
-        $greeting = 'Assalam o Alaikum' . ($name ? " {$name}" : '');
-
-        $message = $due->lt($today)
-            ? "{$greeting}, aap ke plot {$plotLabel} ({$town}) ki qist Rs. {$amount} jo {$due->format('d M Y')} ko due thi, abhi tak ada nahi hui. Barah-e-karam jald ada karein. Shukriya."
-            : "{$greeting}, yaad-dehani: aap ke plot {$plotLabel} ({$town}) ki qist Rs. {$amount} {$due->format('d M Y')} ko due hai. Shukriya.";
+        [$key, $vars] = $this->reminderFor($installment, $name, $town, $plotLabel, $due, $today);
 
         return [
             'id' => $installment->id,
@@ -400,27 +423,80 @@ class TownOwnerDashboard extends Component
             'plot' => $plotLabel,
             'customer' => $name,
             'phone' => $phone,
-            'whatsapp' => $this->whatsappUrl($phone, $message),
+            // Paigham markazi template se (admin portal se badla ja sakta hai)
+            'whatsapp' => Messenger::link($phone, Messenger::render($key, $vars)),
+            // Mobile par seedha call
+            'tel' => strlen(preg_replace('/\D+/', '', (string) $phone)) >= 10 ? 'tel:' . preg_replace('/[^\d+]/', '', (string) $phone) : null,
             'due_date' => $due,
             'days' => (int) abs($today->diffInDays($due)),
             'amount' => (float) $installment->amount,
         ];
     }
 
-    protected function whatsappUrl($phone, string $message): ?string
+    /** Late qist => "installment_overdue", aane wali => "installment_due_soon" */
+    protected function reminderFor(Installment $i, ?string $name, string $town, string $plotLabel, Carbon $due, Carbon $today): array
     {
-        $digits = preg_replace('/\D+/', '', (string) $phone);
+        $vars = ['name' => $name, 'place' => "{$town} — Plot #{$plotLabel}", 'amount' => number_format((float) $i->amount), 'portal' => ''];
 
-        // Normalize Pakistani numbers: 0300..., 0092300..., 300... => 92300...
-        if (str_starts_with($digits, '0092')) {
-            $digits = substr($digits, 2);
-        } elseif (str_starts_with($digits, '0')) {
-            $digits = '92' . substr($digits, 1);
-        } elseif (strlen($digits) === 10 && str_starts_with($digits, '3')) {
-            $digits = '92' . $digits;
+        return $due->lt($today)
+            ? ['installment_overdue', $vars + ['count' => 1, 'since' => $due->format('d M Y')]]
+            : ['installment_due_soon', $vars + ['due_date' => $due->format('d M Y')]];
+    }
+
+    /**
+     * API/SMS laga ho to dashboard se seedha reminder. Sirf apne owner ki qist; nakami par link wapas.
+     */
+    public function sendReminder(int $installmentId): void
+    {
+        $result = $this->sendFor($installmentId);
+        $this->flashResult($result['ok'] ? 1 : 0, $result['ok'] ? 0 : 1, $result['error'] ?? null);
+    }
+
+    /** Dashboard ke tamam late customers ko ek click mein (rozana had ke andar) */
+    public function sendAllOverdue(): void
+    {
+        $ids = Installment::whereIn('plot_id', $this->ownedPlotIds())->whereIn('status', ['pending', 'overdue'])
+            ->where('due_date', '<', Carbon::today()->toDateString())->orderBy('due_date')->limit(20)->pluck('id');
+
+        [$sent, $failed, $error] = [0, 0, null];
+        foreach ($ids as $id) {
+            $r = $this->sendFor($id);
+            $r['ok'] ? $sent++ : $failed++;
+            $error ??= $r['ok'] ? null : $r['error'];
+            if (in_array($r['status'] ?? '', ['limited', 'no_balance'], true)) {
+                break;
+            }
+        }
+        $this->flashResult($sent, $failed, $error);
+    }
+
+    protected function sendFor(int $installmentId): array
+    {
+        $relations = method_exists(Plot::class, 'customer') ? ['plot.town', 'plot.customer'] : ['plot.town'];
+        $i = Installment::with($relations)->whereIn('plot_id', $this->ownedPlotIds())->whereKey($installmentId)->first();
+        if (! $i) {
+            return ['ok' => false, 'status' => 'failed', 'error' => 'Qist nahi mili'];
         }
 
-        return strlen($digits) >= 11 ? 'https://wa.me/' . $digits . '?text=' . rawurlencode($message) : null;
+        $row = $this->installmentRow($i, Carbon::today());
+        [$key, $vars] = $this->reminderFor($i, $row['customer'], $row['town'], $row['plot'], Carbon::parse($i->due_date), Carbon::today());
+
+        return Messenger::send($row['phone'], $key, $vars, ['installment_id' => $i->id, 'source' => 'dashboard']);
+    }
+
+    protected function ownedPlotIds()
+    {
+        return Plot::select('id')->whereIn('town_id', Town::where('user_id', Tenant::ownerId())->select('id'));
+    }
+
+    protected function flashResult(int $sent, int $failed, ?string $error): void
+    {
+        if ($sent) {
+            session()->flash('success', "{$sent} paigham bhej diye gaye." . ($failed ? " {$failed} nahi gaye." : ''));
+        }
+        if (! $sent && $failed) {
+            session()->flash('error', 'Paigham nahi gaya: ' . ($error ?: 'wajah maloom nahi') . ' — WhatsApp link se bhej dein.');
+        }
     }
 
     protected function sumByMonth($query, string $column, Carbon $start, string $sumExpr = 'amount'): array

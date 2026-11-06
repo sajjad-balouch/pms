@@ -60,8 +60,13 @@ return new class extends Migration
 
     // Simple KEY_COLUMN_USAGE lookup — Schema::getForeignKeys() joins referential_constraints,
     // which crashes MariaDB 10.4 (XAMPP) on this server.
+    // Doosre databases (maslan tests ka sqlite) mein information_schema nahi hota; wahan Laravel ka apna tareeqa.
     private function hasForeignKey(string $table, string $column): bool
     {
+        if (! in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+            return collect(Schema::getForeignKeys($table))->contains(fn ($fk) => in_array($column, $fk['columns'], true));
+        }
+
         return (bool) DB::selectOne(
             'SELECT 1 FROM information_schema.KEY_COLUMN_USAGE
              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? AND REFERENCED_TABLE_NAME IS NOT NULL

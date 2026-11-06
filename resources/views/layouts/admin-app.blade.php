@@ -115,6 +115,13 @@
                         <span>{{ __('WhatsApp Marketing') }}</span>
                     </a>
 
+                    <!-- Messaging settings: WhatsApp API / SMS gateway / templates -->
+                    <a href="{{ route('admin.messaging') }}" wire:navigate
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 {{ request()->routeIs('admin.messaging') ? 'bg-emerald-600 text-white font-extrabold shadow-md shadow-emerald-600/30' : 'text-slate-300 hover:bg-slate-800/60 hover:text-white' }}">
+                        <i class="fa-solid fa-tower-broadcast text-sm w-5 text-center text-emerald-400"></i>
+                        <span>{{ __('Messaging (API / SMS)') }}</span>
+                    </a>
+
                     <a href="{{ route('admin.analytics') }}" wire:navigate
                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 {{ request()->routeIs('admin.analytics') ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md shadow-amber-500/20' : 'text-slate-300 hover:bg-slate-800/60 hover:text-white' }}">
                         <i class="fa-solid fa-chart-pie text-sm w-5 text-center"></i>

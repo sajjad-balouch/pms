@@ -153,3 +153,14 @@ Route::prefix('v1')->middleware(['api.token', 'api.locale', 'throttle:api'])->gr
     // Unknown API URL => JSON 404 (not the website's HTML page)
     Route::fallback(fn () => response()->json(['success' => false, 'message' => 'Endpoint not found.'], 404));
 });
+
+/*
+|--------------------------------------------------------------------------
+| Apna SMS gateway — admin ka Android phone (base URL: {APP_URL}/api/gateway)
+|--------------------------------------------------------------------------
+| Auth: "Authorization: Bearer gw_..." (admin portal > Messaging > Gateway phones)
+*/
+Route::prefix('gateway')->middleware('throttle:gateway')->group(function () {
+    Route::post('pull', [\App\Http\Controllers\Api\GatewayDeviceController::class, 'pull']);
+    Route::post('report', [\App\Http\Controllers\Api\GatewayDeviceController::class, 'report']);
+});

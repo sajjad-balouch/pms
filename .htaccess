@@ -5,6 +5,15 @@
 
     RewriteEngine On
 
+    # School domains (aischoolofsciences.com waghera) -> MSK Devs software, through msk-bridge
+    # assanzameen.com, www aur iske subdomains is se bahar hain. SSL ki files bhi.
+    # Apna computer (localhost / WiFi IP) bhi bahar, taa-ke local par yahi site khule.
+    RewriteCond %{HTTP_HOST} !(^|\.)assanzameen\.com$ [NC]
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|\[::1\]|192\.168\.[0-9.]+|10\.[0-9.]+)(:[0-9]+)?$ [NC]
+    RewriteCond %{REQUEST_URI} !/msk-bridge/
+    RewriteCond %{REQUEST_URI} !/\.well-known/acme-challenge/
+    RewriteRule ^ msk-bridge/index.php [L]
+
     # Livewire ki published JS browser ko chahiye, baqi vendor block rahe
     RewriteRule ^vendor/livewire/(livewire(\.esm|\.min)?\.js(\.map)?|manifest\.json)$ - [L]
 
