@@ -15,7 +15,9 @@ class ShajraNasab extends Component
 {
     public const MAX_PEOPLE = 120;
 
-    public const STATUSES = ['alive', 'died_after', 'died_before', 'missing', 'divorced'];
+    public const FIQH = ['hanafi', 'jafari', 'ahl_hadith', 'other'];
+
+    public const STATUSES =['alive', 'died_after', 'died_before', 'missing', 'divorced'];
 
     public array $deceased = [
         'name' => '', 'father_rel' => 'so', 'father_name' => '', 'gender' => 'male', 'death_date' => '', 'cnic' => '', 'caste' => '', 'married' => '', 'issue' => '',
@@ -23,6 +25,8 @@ class ShajraNasab extends Component
 
     public array $record = [
         'mauza' => '', 'tehsil' => '', 'district' => '', 'khewat' => '', 'khatoni' => '', 'intiqal' => '',
+        // Sarkari form ke khaane: halqa qanungoi, kis ke kehne par (hasb-e-guftah), fiqh, do gawah
+        'markaz' => '', 'informant' => '', 'fiqh' => 'hanafi', 'w1_name' => '', 'w1_cnic' => '', 'w2_name' => '', 'w2_cnic' => '',
         'kanal' => 8, 'marla' => 0, 'sarsahi' => 0,
     ];
 
@@ -71,7 +75,8 @@ class ShajraNasab extends Component
     public function clearAll(): void
     {
         $this->deceased = ['name' => '', 'father_rel' => 'so', 'father_name' => '', 'gender' => 'male', 'death_date' => '', 'cnic' => '', 'caste' => '', 'married' => '', 'issue' => ''];
-        $this->record = ['mauza' => '', 'tehsil' => '', 'district' => '', 'khewat' => '', 'khatoni' => '', 'intiqal' => '', 'kanal' => 0, 'marla' => 0, 'sarsahi' => 0];
+        $this->record = ['mauza' => '', 'tehsil' => '', 'district' => '', 'khewat' => '', 'khatoni' => '', 'intiqal' => '', 'kanal' => 0, 'marla' => 0, 'sarsahi' => 0,
+            'markaz' => '', 'informant' => '', 'fiqh' => 'hanafi', 'w1_name' => '', 'w1_cnic' => '', 'w2_name' => '', 'w2_cnic' => ''];
         $this->people = [];
         $this->nextId = 1;
         $this->resetForm('root');
@@ -99,9 +104,14 @@ class ShajraNasab extends Component
         ];
 
         $r = is_array($state['record'] ?? null) ? $state['record'] : [];
-        foreach (['mauza', 'tehsil', 'district', 'khewat', 'khatoni', 'intiqal'] as $k) {
+        foreach (['mauza', 'tehsil', 'district', 'khewat', 'khatoni', 'intiqal', 'markaz', 'informant', 'w1_name', 'w2_name'] as $k) {
             $this->record[$k] = $str($r[$k] ?? '', 60);
         }
+        // Gawahon ke shanakhti card: sirf hindse, 13 tak
+        foreach (['w1_cnic', 'w2_cnic'] as $k) {
+            $this->record[$k] = substr(preg_replace('/\D/', '', (string) ($r[$k] ?? '')), 0, 13);
+        }
+        $this->record['fiqh'] = in_array($r['fiqh'] ?? '', self::FIQH, true) ? $r['fiqh'] : 'hanafi';
         foreach (['kanal', 'marla', 'sarsahi'] as $k) {
             $this->record[$k] = $this->num($r[$k] ?? 0);
         }
@@ -146,6 +156,13 @@ class ShajraNasab extends Component
     {
         if (str_starts_with($name, 'record.') && in_array(substr($name, 7), ['kanal', 'marla', 'sarsahi'], true)) {
             $this->record[substr($name, 7)] = $this->num($this->record[substr($name, 7)]);
+        }
+        if (in_array($name, ['record.w1_cnic', 'record.w2_cnic'], true)) {
+            $k = substr($name, 7);
+            $this->record[$k] = substr(preg_replace('/\D/', '', (string) $this->record[$k]), 0, 13);
+        }
+        if ($name === 'record.fiqh' && ! in_array($this->record['fiqh'], self::FIQH, true)) {
+            $this->record['fiqh'] = 'hanafi';
         }
         if ($name === 'deceased.gender') {
             $this->deceased['gender'] = $this->deceased['gender'] === 'female' ? 'female' : 'male';

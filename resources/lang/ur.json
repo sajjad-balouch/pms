@@ -1559,5 +1559,13 @@
     "Add spouse or children of :name": ":name کی بیوی/شوہر یا اولاد درج کریں",
     "children not added yet": "اولاد ابھی درج نہیں",
     "Children are marked but not added for: :names. Add them, or their share may be wrong.": "ان کے لیے اولاد ہونا لکھا ہے مگر اولاد درج نہیں: :names۔ انہیں درج کریں ورنہ حصہ غلط ہو سکتا ہے۔",
-    "Wife, widow or mother": "زوجہ، بیوہ یا والدہ (عورت)"
+    "Wife, widow or mother": "زوجہ، بیوہ یا والدہ (عورت)",
+    "Rural revenue centre (qanungoi)": "دیہی مرکز مال (قانونگوئی)",
+    "Form details and witnesses": "فارم کے خانے اور گواہان",
+    "As stated by (hasb-e-guftah)": "حسب گفتہ (کس کے بیان پر)",
+    "Fiqh / maslak": "فقہ / مسلک",
+    "The shares here follow Hanafi law. Fiqh Jafaria divides differently, so get the shares checked by a Shia scholar.": "یہاں حصے حنفی فقہ کے مطابق ہیں۔ فقہ جعفریہ میں تقسیم مختلف ہے، اس لیے کسی شیعہ عالم سے حصے ضرور چیک کروائیں۔",
+    "Witness :n name": "نام پتی دار/گواہ نمبر :n",
+    "Witness :n CNIC": "گواہ نمبر :n شناختی کارڈ",
+    "Signatures and thumb impressions are left blank for the witnesses to sign on paper.": "دستخط اور انگوٹھے کے خانے خالی چھوڑے جاتے ہیں تاکہ گواہ کاغذ پر دستخط کریں۔"
 }

@@ -109,6 +109,7 @@
             default => '',
         };
     };
+    $fiqhLabels = ['hanafi' => 'حنفی (سنی)', 'jafari' => 'جعفریہ (شیعہ)', 'ahl_hadith' => 'اہل حدیث', 'other' => $isUr ? 'دیگر (ہاتھ سے لکھیں)' : 'Other (write by hand)'];
     $fmt = fn ($n, $d = 4) => rtrim(rtrim(number_format($n, $d), '0'), '.');
     $input = 'w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500';
     $lbl = 'block text-[10px] font-bold text-slate-400 uppercase mb-1';
@@ -143,6 +144,27 @@
 
         /* Patwar ka kaghaz: hari siyahi, narangi alamaat */
         .pw-paper { --ink: #047857; --mark: #ea580c; background: #fffdf6; border: 1px solid #e7e0c9; border-radius: 18px; padding: 14px; color: var(--ink); }
+        /* Sarkari form ka saancha */
+        .pf-form { color: #111827; font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; margin-bottom: 14px; }
+        .pf-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 3px solid #111827; padding-bottom: 8px; }
+        .pf-headline { font-size: 22px; line-height: 2.1; }
+        .pf-blank { display: inline-block; min-width: 90px; border-bottom: 1.5px dashed #111827; text-align: center; padding: 0 6px; line-height: 1.6; font-weight: 700; }
+        .pf-blank.pf-wide { min-width: 300px; }
+        .pf-logo { width: 74px; height: 74px; flex: none; border: 1.5px dashed #cbd5e1; border-radius: 999px; }
+        .pf-body { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px 28px; padding-top: 16px; }
+        .pf-main { flex: 1 1 320px; }
+        .pf-title { font-size: 40px; font-weight: 700; line-height: 1.6; margin: 0 0 10px; }
+        .pf-field { font-size: 19px; line-height: 2.4; }
+        .pf-meta { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: 14px; line-height: 2; color: #374151; margin-top: 6px; }
+        .pf-witnesses { flex: 0 1 470px; display: flex; flex-direction: column; gap: 14px; }
+        .pf-wit { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .pf-wit th, .pf-wit td { border: 1px solid #6b7280; padding: 2px 6px; height: 30px; vertical-align: middle; }
+        .pf-wit th { width: 150px; font-weight: 400; text-align: start; white-space: nowrap; }
+        .pf-wit td { font-weight: 700; font-size: 15px; }
+        .pf-wit td.pf-sign { height: 34px; }
+        .pf-cnic { display: flex; align-items: stretch; justify-content: flex-end; height: 26px; margin: -2px -6px; }
+        .pf-cell { width: 19px; border-inline-start: 1px solid #9ca3af; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 13px; }
+        .pf-dash { width: 14px; display: flex; align-items: center; justify-content: center; border-inline-start: 1px solid #9ca3af; }
         .sh-wrap { overflow-x: auto; padding-bottom: 6px; }
         .sh-canvas { position: relative; margin: 0 auto; }
         .sh-canvas > svg { position: absolute; inset: 0; overflow: visible; }
@@ -189,6 +211,10 @@
             #shajra-sheet .bg-slate-950, #shajra-sheet .bg-amber-500\/10 { background: #fff !important; }
             .sh-wrap { overflow: visible !important; }
             .shajra-signs-row { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 24px; padding-top: 36px; }
+            /* Pehla safha: form + shajra; hisson ki table agle safhe par */
+            .pf-after { break-before: page; }
+            .pf-logo { border: 0 !important; }
+            .pf-form, .pf-form * { color: #000 !important; }
             @page { size: A4 landscape; margin: 8mm; }
         }
     </style>
@@ -286,13 +312,46 @@
                     </div>
                     <p class="text-[10px] text-slate-500">{{ __('Revenue units: 1 kanal = 20 marla, 1 marla = 9 sarsahi.') }}</p>
                     <div class="grid grid-cols-2 gap-2">
-                        @foreach(['mauza' => __('Mauza'), 'tehsil' => __('Tehsil'), 'district' => __('District name'), 'khewat' => __('Khewat no.'), 'khatoni' => __('Khatoni no.'), 'intiqal' => __('Mutation no.')] as $k => $label)
-                            <div>
+                        @foreach(['markaz' => __('Rural revenue centre (qanungoi)'), 'mauza' => __('Mauza'), 'tehsil' => __('Tehsil'), 'district' => __('District name'), 'khewat' => __('Khewat no.'), 'khatoni' => __('Khatoni no.'), 'intiqal' => __('Mutation no.')] as $k => $label)
+                            <div @if($k === 'markaz') class="col-span-2" @endif>
                                 <label class="{{ $lbl }}">{{ $label }}</label>
                                 <input type="text" dir="auto" wire:model.live.debounce.400ms="record.{{ $k }}" class="{{ $input }} px-2 py-1.5">
                             </div>
                         @endforeach
                     </div>
+                </div>
+
+                {{-- Sarkari form ke khaane --}}
+                <div class="bg-slate-900/90 rounded-3xl border border-slate-800 p-5 space-y-3">
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
+                        <i class="fa-solid fa-file-signature text-sky-400"></i> {{ __('Form details and witnesses') }}
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="col-span-2">
+                            <label class="{{ $lbl }}">{{ __('As stated by (hasb-e-guftah)') }}</label>
+                            <input type="text" dir="auto" list="shajra-names" wire:model.live.debounce.400ms="record.informant" class="{{ $input }}">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="{{ $lbl }}">{{ __('Fiqh / maslak') }}</label>
+                            <select wire:model.live="record.fiqh" class="{{ $input }}">
+                                @foreach($fiqhLabels as $k => $label)<option value="{{ $k }}">{{ $label }}</option>@endforeach
+                            </select>
+                            @if($record['fiqh'] === 'jafari')
+                                <p class="mt-1 text-[10px] text-amber-300">{{ __('The shares here follow Hanafi law. Fiqh Jafaria divides differently, so get the shares checked by a Shia scholar.') }}</p>
+                            @endif
+                        </div>
+                        @foreach([1, 2] as $n)
+                            <div>
+                                <label class="{{ $lbl }}">{{ __('Witness :n name', ['n' => $n]) }}</label>
+                                <input type="text" dir="auto" wire:model.live.debounce.400ms="record.w{{ $n }}_name" class="{{ $input }}">
+                            </div>
+                            <div>
+                                <label class="{{ $lbl }}">{{ __('Witness :n CNIC', ['n' => $n]) }}</label>
+                                <input type="text" dir="ltr" inputmode="numeric" maxlength="15" placeholder="3520200000000" wire:model.live.debounce.400ms="record.w{{ $n }}_cnic" class="{{ $input }} font-mono">
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="text-[10px] text-slate-500">{{ __('Signatures and thumb impressions are left blank for the witnesses to sign on paper.') }}</p>
                 </div>
             </div>
 
@@ -500,30 +559,6 @@
 
             <div id="shajra-sheet" class="bg-slate-900/90 rounded-3xl border border-slate-800 p-5 sm:p-7 space-y-5 shadow-2xl">
 
-                <div class="border-b border-slate-800 pb-4 space-y-2">
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest block">{{ __('Draft for guidance only') }}</span>
-                            <h2 class="text-xl font-black text-white">{{ __('Shajra nasab for inheritance mutation') }}</h2>
-                        </div>
-                        <div class="text-xs text-slate-400 text-end">
-                            @if($record['intiqal'])<div>{{ __('Mutation no.') }}: <strong class="text-white">{{ $record['intiqal'] }}</strong></div>@endif
-                            <div>{{ __('Total land') }}: <strong class="text-amber-300 font-mono" dir="ltr">{{ (int) $record['kanal'] }}-{{ (int) $record['marla'] }}-{{ (float) $record['sarsahi'] }}</strong> <span class="text-[10px]">({{ __('K-M-S') }})</span></div>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-400">
-                        <span>{{ __('Deceased') }}: <strong class="text-white" dir="auto">{{ $deceased['name'] ?: '—' }}</strong>
-                            @if($deceased['father_name']) {{ $fatherRels[$deceased['father_rel']] }} <strong class="text-white" dir="auto">{{ $deceased['father_name'] }}</strong>@endif
-                            @if($deceased['caste']) &bull; {{ __('Caste (qaum)') }}: <strong class="text-white" dir="auto">{{ $deceased['caste'] }}</strong>@endif
-                        </span>
-                        @if($deceased['death_date'])<span>{{ __('Date of death') }}: <strong class="text-white">{{ \Illuminate\Support\Carbon::parse($deceased['death_date'])->format('d-m-Y') }}</strong></span>@endif
-                        @if($deceased['cnic'])<span>{{ __('CNIC') }}: <strong class="text-white font-mono">{{ $deceased['cnic'] }}</strong></span>@endif
-                        @foreach(['mauza' => __('Mauza'), 'tehsil' => __('Tehsil'), 'district' => __('District name'), 'khewat' => __('Khewat no.'), 'khatoni' => __('Khatoni no.')] as $k => $label)
-                            @if($record[$k])<span>{{ $label }}: <strong class="text-white" dir="auto">{{ $record[$k] }}</strong></span>@endif
-                        @endforeach
-                    </div>
-                </div>
-
                 {{-- Shajra --}}
                 <div class="no-print flex items-center justify-end">
                     <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
@@ -532,6 +567,54 @@
                     </label>
                 </div>
                 <div class="pw-paper">
+
+                {{-- Sarkari form ka saancha (hamesha Urdu): header, unwan, hasb-e-guftah, fiqh, do gawah --}}
+                @php
+                    $blank = fn ($v, $cls = '') => '<span class="pf-blank ' . $cls . '">' . e($v) . '</span>';
+                    $cnicBoxes = function (string $digits) {
+                        $d = str_split(str_pad(substr($digits, 0, 13), 13, ' '));
+                        $cell = fn ($c) => '<span class="pf-cell">' . e(trim($c)) . '</span>';
+                        return implode('', array_map($cell, array_slice($d, 0, 5))) . '<span class="pf-dash">-</span>'
+                            . implode('', array_map($cell, array_slice($d, 5, 7))) . '<span class="pf-dash">-</span>' . $cell($d[12]);
+                    };
+                @endphp
+                <div class="pf-form" dir="rtl" lang="ur">
+                    <div class="pf-head">
+                        <div class="pf-headline">
+                            دیہی مرکز مال قانونگوئی {!! $blank($record['markaz']) !!}
+                            موضع {!! $blank($record['mauza']) !!}
+                            تحصیل {!! $blank($record['tehsil']) !!}
+                            ضلع {!! $blank($record['district']) !!}
+                        </div>
+                        <div class="pf-logo" aria-hidden="true"></div>
+                    </div>
+
+                    <div class="pf-body">
+                        <div class="pf-main">
+                            <h2 class="pf-title">شجرہ نسب برائے وراثت</h2>
+                            <div class="pf-field">حسب گفتہ {!! $blank($record['informant'], 'pf-wide') !!}</div>
+                            <div class="pf-field">فقہ / مسلک {!! $blank($record['fiqh'] === 'other' ? '' : $fiqhLabels[$record['fiqh']], 'pf-wide') !!}</div>
+                            <div class="pf-meta">
+                                @if($deceased['name'])<span>متوفی: <b>{{ $deceased['name'] }}</b>@if($deceased['father_name']) {{ ['so' => 'ولد', 'do' => 'دختر', 'wo' => 'زوجہ'][$deceased['father_rel']] }} <b>{{ $deceased['father_name'] }}</b>@endif</span>@endif
+                                @if($deceased['caste'])<span>قوم: <b>{{ $deceased['caste'] }}</b></span>@endif
+                                @if($deceased['death_date'])<span>تاریخ وفات: <b dir="ltr">{{ \Illuminate\Support\Carbon::parse($deceased['death_date'])->format('d-m-Y') }}</b></span>@endif
+                                @if($record['khewat'])<span>کھیوٹ نمبر: <b>{{ $record['khewat'] }}</b></span>@endif
+                                @if($record['khatoni'])<span>کھتونی نمبر: <b>{{ $record['khatoni'] }}</b></span>@endif
+                                @if($record['intiqal'])<span>انتقال نمبر: <b>{{ $record['intiqal'] }}</b></span>@endif
+                                <span>کل رقبہ: <b dir="ltr">{{ (int) $record['kanal'] }}-{{ (int) $record['marla'] }}-{{ $fmt($record['sarsahi'], 2) }}</b> (ک-م-س)</span>
+                            </div>
+                        </div>
+                        <div class="pf-witnesses">
+                            @foreach([1, 2] as $n)
+                                <table class="pf-wit">
+                                    <tr><th>نام پتی دار/گواہ نمبر {{ $n }}</th><td>{{ $record['w' . $n . '_name'] }}</td></tr>
+                                    <tr><th>شناختی کارڈ نمبر</th><td><div class="pf-cnic" dir="ltr">{!! $cnicBoxes($record['w' . $n . '_cnic']) !!}</div></td></tr>
+                                    <tr><th>دستخط/انگوٹھا</th><td class="pf-sign"></td></tr>
+                                </table>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
                 <div class="sh-wrap" dir="ltr"
                      x-data
                      x-init="$nextTick(() => { $el.scrollLeft = ($el.scrollWidth - $el.clientWidth) / 2 });
@@ -565,7 +648,7 @@
                 </div>
 
                 {{-- Holders --}}
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto pf-after">
                     <table class="w-full text-xs border-collapse">
                         <thead>
                             <tr class="border-b border-slate-700 text-slate-400 uppercase font-bold text-[10px]">
