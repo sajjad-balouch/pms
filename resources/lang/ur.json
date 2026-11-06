@@ -1580,5 +1580,13 @@
     "Print page": "پرنٹ کا صفحہ",
     "A4 portrait (best for long trees and the report)": "A4 لمبا (لمبے شجرے اور رپورٹ کے لیے بہتر)",
     "A4 landscape (wide trees)": "A4 چوڑا (چوڑے شجرے کے لیے)",
-    "Legal portrait": "لیگل لمبا"
+    "Legal portrait": "لیگل لمبا",
+    "A4 landscape": "A4 چوڑا (لینڈ اسکیپ)",
+    "Legal landscape": "لیگل چوڑا (لینڈ اسکیپ)",
+    "Report title": "رپورٹ کا عنوان",
+    "Report text": "رپورٹ کا متن",
+    "You have edited this report. It no longer updates from the shajra.": "آپ نے یہ رپورٹ خود بدلی ہے، اب یہ شجرے سے خودبخود نہیں بدلے گی۔",
+    "Discard your changes and write the report again from the shajra?": "اپنی تبدیلیاں ختم کر کے رپورٹ دوبارہ شجرے سے لکھیں؟",
+    "Restore automatic report": "خودکار رپورٹ واپس لائیں",
+    "Written from the shajra. Click in the box to change any word.": "شجرے سے خود لکھی گئی ہے۔ کوئی بھی لفظ بدلنے کے لیے خانے میں کلک کریں۔"
 }

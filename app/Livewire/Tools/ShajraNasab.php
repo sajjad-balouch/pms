@@ -16,13 +16,15 @@ class ShajraNasab extends Component
 {
     public const MAX_PEOPLE = 120;
 
+    /** Report ke text ki had (haroof) */
+    public const MAX_REPORT = 4000;
+
     public const FIQH = ['hanafi', 'jafari', 'ahl_hadith', 'other'];
 
     /** Print ka safha: CSS size, aur margin ke baad dastyab chaurai/lambai (px, 96 dpi) */
     public const PAGES = [
-        'a4p' => ['css' => 'A4 portrait', 'w' => 734, 'h' => 1060],
         'a4l' => ['css' => 'A4 landscape', 'w' => 1063, 'h' => 731],
-        'legal' => ['css' => 'legal portrait', 'w' => 756, 'h' => 1280],
+        'legal' => ['css' => 'legal landscape', 'w' => 1284, 'h' => 756],
     ];
 
     public const STATUSES =['alive', 'died_after', 'died_before', 'missing', 'divorced'];
@@ -39,7 +41,8 @@ class ShajraNasab extends Component
     ];
 
     /** Shajre ke neeche patwari report: kaun se kaghzaat tasdeeq hue, patwari ka naam, izafi kaifiyat */
-    public array $report = ['on' => true, 'death_cert' => false, 'frc' => false, 'cnic' => false, 'patwari' => '', 'date' => '', 'remarks' => '', 'page' => 'a4p'];
+    public array $report = ['on' => true, 'death_cert' => false, 'frc' => false, 'cnic' => false, 'patwari' => '', 'date' => '', 'remarks' => '', 'page' => 'a4l',
+        'title' => 'رپورٹ پٹواری حلقہ', 'custom' => false, 'text' => ''];
 
     public array $people = [];
 
@@ -86,7 +89,8 @@ class ShajraNasab extends Component
     public function clearAll(): void
     {
         $this->deceased = ['name' => '', 'father_rel' => 'so', 'father_name' => '', 'gender' => 'male', 'death_date' => '', 'cnic' => '', 'caste' => '', 'married' => '', 'issue' => ''];
-        $this->report = ['on' => true, 'death_cert' => false, 'frc' => false, 'cnic' => false, 'patwari' => '', 'date' => '', 'remarks' => '', 'page' => 'a4p'];
+        $this->report = ['on' => true, 'death_cert' => false, 'frc' => false, 'cnic' => false, 'patwari' => '', 'date' => '', 'remarks' => '', 'page' => 'a4l',
+        'title' => 'رپورٹ پٹواری حلقہ', 'custom' => false, 'text' => ''];
         $this->record = ['mauza' => '', 'tehsil' => '', 'district' => '', 'khewat' => '', 'khatoni' => '', 'intiqal' => '', 'kanal' => 0, 'marla' => 0, 'sarsahi' => 0,
             'markaz' => '', 'informant' => '', 'fiqh' => 'hanafi', 'w1_name' => '', 'w1_cnic' => '', 'w2_name' => '', 'w2_cnic' => ''];
         $this->people = [];
@@ -134,7 +138,11 @@ class ShajraNasab extends Component
             'patwari' => $str($rp['patwari'] ?? ''),
             'date' => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($rp['date'] ?? '')) ? $rp['date'] : '',
             'remarks' => $str($rp['remarks'] ?? '', 600),
-            'page' => array_key_exists($rp['page'] ?? '', self::PAGES) ? $rp['page'] : 'a4p',
+            'page' => array_key_exists($rp['page'] ?? '', self::PAGES) ? $rp['page'] : 'a4l',
+            'title' => $str($rp['title'] ?? '', 80) ?: 'رپورٹ پٹواری حلقہ',
+            // Haath se badli hui report (custom) mehfooz rahe; warna har dafa shajre se dobara likhi jati hai
+            'custom' => ! empty($rp['custom']) && trim((string) ($rp['text'] ?? '')) !== '',
+            'text' => mb_substr(is_string($rp['text'] ?? null) ? $rp['text'] : '', 0, self::MAX_REPORT),
         ];
         foreach (['kanal', 'marla', 'sarsahi'] as $k) {
             $this->record[$k] = $this->num($r[$k] ?? 0);
@@ -191,8 +199,14 @@ class ShajraNasab extends Component
             }
             $this->report['remarks'] = mb_substr((string) $this->report['remarks'], 0, 600);
             $this->report['patwari'] = mb_substr((string) $this->report['patwari'], 0, 120);
+            $this->report['title'] = mb_substr((string) $this->report['title'], 0, 80);
+            if ($name === 'report.text') {
+                // Patwari ne khud likha/badla: ab shajre se dobara mat likho
+                $this->report['text'] = mb_substr((string) $this->report['text'], 0, self::MAX_REPORT);
+                $this->report['custom'] = trim($this->report['text']) !== '';
+            }
             if (! array_key_exists($this->report['page'] ?? '', self::PAGES)) {
-                $this->report['page'] = 'a4p';
+                $this->report['page'] = 'a4l';
             }
             if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $this->report['date'])) {
                 $this->report['date'] = '';
@@ -484,6 +498,27 @@ class ShajraNasab extends Component
         return is_numeric($v) ? min(1_000_000, max(0.0, (float) $v)) : 0.0;
     }
 
+    /**
+     * Report box ka text: jab tak patwari ne khud na badla ho, har dafa shajre se taaza likha jata hai
+     * (taa-ke box mein wohi dikhe jo shajra kehta hai). Badalne ke baad us ka apna text rehta hai.
+     */
+    private function syncReportText(array $result): array
+    {
+        $auto = ShajraReport::build($this->deceased, $this->record, $this->people, $result, $this->report);
+        if (! $this->report['custom']) {
+            $this->report['text'] = implode("\n", $auto['paragraphs']);
+        }
+
+        return ['title' => $this->report['title'] ?: $auto['title'], 'text' => $this->report['text'], 'custom' => $this->report['custom']];
+    }
+
+    /** Haath se ki gayi tabdeeli chhor kar report dobara shajre se likhwana */
+    public function resetReportText(): void
+    {
+        $this->report['custom'] = false;
+        $this->report['title'] = 'رپورٹ پٹواری حلقہ';
+    }
+
     public function render()
     {
         $totalMarlas = $this->record['kanal'] * 20 + $this->record['marla'] + $this->record['sarsahi'] / 9;
@@ -496,7 +531,7 @@ class ShajraNasab extends Component
 
         return view('livewire.tools.shajra-nasab', [
             'result' => $result,
-            'patwariReport' => $this->report['on'] ? ShajraReport::build($this->deceased, $this->record, $this->people, $result, $this->report) : null,
+            'patwariReport' => $this->report['on'] ? $this->syncReportText($result) : null,
             'layout' => $layout,
             'parentOptions' => $this->parentOptions(),
             'formRelations' => $this->allowedFor($this->form['parent']),

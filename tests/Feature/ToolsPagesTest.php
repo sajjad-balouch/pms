@@ -98,6 +98,32 @@ class ToolsPagesTest extends TestCase
         $c->set('people.1.status', 'alive')->assertSet('people.1.married', '');
     }
 
+    public function test_report_box_is_editable_and_can_go_back_to_automatic(): void
+    {
+        $c = Livewire::test(\App\Livewire\Tools\ShajraNasab::class)
+            ->assertSet('report.page', 'a4l') // print hamesha landscape
+            ->assertSet('report.custom', false);
+        $this->assertStringContainsString('کوئی وارث پوشیدہ نہیں', $c->get('report.text'));
+
+        // Patwari ne box mein khud likha: ab shajra badalne par bhi wahi rahe
+        $c->set('report.text', 'میری اپنی رپورٹ')->set('report.title', 'رپورٹ')
+            ->assertSet('report.custom', true)
+            ->set('deceased.name', 'Naya Naam')
+            ->assertSet('report.text', 'میری اپنی رپورٹ')
+            ->assertSee('میری اپنی رپورٹ');
+
+        // Wapas khudkaar: shajre se taaza
+        $c->call('resetReportText')
+            ->assertSet('report.custom', false)
+            ->assertSet('report.title', 'رپورٹ پٹواری حلقہ');
+        $this->assertStringContainsString('Naya Naam', $c->get('report.text'));
+
+        // Purana portrait wala size bacha ho to landscape ban jata hai
+        $c->call('restore', ['people' => [], 'report' => ['page' => 'a4p', 'custom' => true, 'text' => '  ']])
+            ->assertSet('report.page', 'a4l')
+            ->assertSet('report.custom', false);
+    }
+
     public function test_tax_uses_configured_slabs_and_clean_rates(): void
     {
         Livewire::test(RegistryTaxCalculator::class)

@@ -164,10 +164,20 @@
         .pf-cnic { display: flex; align-items: stretch; justify-content: flex-end; height: 26px; margin: -2px -6px; }
         .pf-cell { width: 19px; border-inline-start: 1px solid #9ca3af; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 13px; }
         .pf-dash { width: 14px; display: flex; align-items: center; justify-content: center; border-inline-start: 1px solid #9ca3af; }
-        .pf-report { color: #111827; font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; border-top: 2px solid #111827; margin-top: 12px; padding-top: 8px; }
-        .pf-report-title { font-size: 22px; font-weight: 700; text-decoration: underline; text-underline-offset: 6px; margin: 0 0 4px; }
-        .pf-report p { font-size: 15px; line-height: 2.05; margin: 0; text-align: justify; }
-        .pf-report-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 26px; font-size: 14px; line-height: 1.9; text-align: center; }
+        /* Shajra aur report ka box saath saath (landscape) */
+        .pf-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+        .pf-tree { flex: 1 1 520px; min-width: 0; }
+        .pf-report { flex: 0 0 380px; max-width: 100%; color: #111827; font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif;
+            border: 1.5px solid #111827; border-radius: 8px; padding: 10px 14px; background: #fff; }
+        .pf-report-title { display: block; width: 100%; font-size: 20px; font-weight: 700; text-decoration: underline; text-underline-offset: 6px; margin: 0 0 4px; line-height: 1.9; }
+        .pf-report-text { font-size: 14.5px; line-height: 2.05; text-align: justify; white-space: pre-wrap; }
+        .pf-edit { font-family: inherit; color: inherit; background: #fffef9; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 2px 6px; outline: none; }
+        .pf-edit:focus { border-color: #f59e0b; background: #fffbeb; }
+        textarea.pf-report-text { display: block; width: 100%; min-height: 360px; field-sizing: content; resize: vertical; }
+        .pf-print-only { display: none; }
+        .pf-report-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 4px; font: 11px/1.5 system-ui, sans-serif; color: #64748b; }
+        .pf-report-tools button { cursor: pointer; border-radius: 6px; background: #fef3c7; color: #92400e; padding: 1px 8px; font-weight: 700; }
+        .pf-report-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 30px; font-size: 12.5px; line-height: 1.8; text-align: center; }
         .pf-sign-line { display: block; border-top: 1px solid #111827; margin: 0 12px 2px; }
         .sh-wrap { overflow-x: auto; padding-bottom: 6px; }
         .sh-canvas { position: relative; margin: 0 auto; }
@@ -217,6 +227,8 @@
             /* Print mein sirf form + shajra + report: legend, hisson ki table, warnings, wazahat waghera nahi */
             #shajra-sheet > *:not(.pw-paper) { display: none !important; }
             .pw-legend, .pf-meta { display: none !important; }
+            .pf-print-only { display: block !important; }
+            .pf-row { flex-wrap: nowrap !important; }
             .pf-logo { border: 0 !important; }
             .pf-form, .pf-form *, .pf-report, .pf-report * { color: #000 !important; }
             /* Safhe ka size neeche report ke option se (@page alag style mein) */
@@ -396,9 +408,8 @@
                     <div>
                         <label class="{{ $lbl }}">{{ __('Print page') }}</label>
                         <select wire:model.live="report.page" class="{{ $input }}">
-                            <option value="a4p">{{ __('A4 portrait (best for long trees and the report)') }}</option>
-                            <option value="a4l">{{ __('A4 landscape (wide trees)') }}</option>
-                            <option value="legal">{{ __('Legal portrait') }}</option>
+                            <option value="a4l">{{ __('A4 landscape') }}</option>
+                            <option value="legal">{{ __('Legal landscape') }}</option>
                         </select>
                     </div>
                 </div>
@@ -664,6 +675,9 @@
                         </div>
                     </div>
                 </div>
+                {{-- Landscape: shajra aur report box saath saath --}}
+                <div class="pf-row" dir="rtl">
+                <div class="pf-tree" dir="ltr">
                 <div class="sh-wrap" dir="ltr"
                      x-data
                      x-init="$nextTick(() => { $el.scrollLeft = ($el.scrollWidth - $el.clientWidth) / 2 });
@@ -671,8 +685,10 @@
                              // Print: form + shajra + report ek hi safhe mein (chuna hua size); poora kaghaz chhota kar ke
                              const paper = $el.closest('.pw-paper');
                              window.addEventListener('beforeprint', () => {
-                                 const pw = +paper.dataset.printW || 734, ph = +paper.dataset.printH || 1060;
-                                 paper.style.zoom = ''; const w = Math.max(pw, c.offsetWidth + 30); paper.style.width = w + 'px';
+                                 const pw = +paper.dataset.printW || 1063, ph = +paper.dataset.printH || 731;
+                                 const box = paper.querySelector('.pf-report');
+                                 // Kaghaz itna chaura ke shajra aur report box ek line mein aa jayein
+                                 paper.style.zoom = ''; const w = Math.max(pw, c.offsetWidth + 30 + (box ? box.offsetWidth + 16 : 0)); paper.style.width = w + 'px';
                                  // Legend aur upar ki chhoti line print mein chhup jati hain; un ki lambai hisaab se nikaal do
                                  const hidden = [...paper.querySelectorAll('.pw-legend, .pf-meta')].reduce((s, e) => s + e.offsetHeight, 0);
                                  paper.style.zoom = Math.min(1, pw / w, ph / (paper.scrollHeight - hidden));
@@ -690,6 +706,32 @@
                     </div>
                 </div>
 
+                </div>{{-- /pf-tree --}}
+
+                {{-- Rapor patwari ka box: shajre se khud likha jata hai, aur patwari usi box mein badal sakta hai --}}
+                @if($patwariReport)
+                    <div class="pf-report" dir="rtl" lang="ur">
+                        <input type="text" class="pf-report-title pf-edit no-print" wire:model.live.debounce.500ms="report.title" maxlength="80" aria-label="{{ __('Report title') }}">
+                        <h3 class="pf-report-title pf-print-only">{{ $patwariReport['title'] }}</h3>
+                        <textarea class="pf-report-text pf-edit no-print" wire:model.live.debounce.700ms="report.text" maxlength="{{ \App\Livewire\Tools\ShajraNasab::MAX_REPORT }}" aria-label="{{ __('Report text') }}"></textarea>
+                        <div class="pf-report-text pf-print-only">{!! nl2br(e($patwariReport['text'])) !!}</div>
+                        <div class="pf-report-tools no-print">
+                            @if($patwariReport['custom'])
+                                <span>{{ __('You have edited this report. It no longer updates from the shajra.') }}</span>
+                                <button type="button" wire:click="resetReportText" wire:confirm="{{ __('Discard your changes and write the report again from the shajra?') }}">{{ __('Restore automatic report') }}</button>
+                            @else
+                                <span>{{ __('Written from the shajra. Click in the box to change any word.') }}</span>
+                            @endif
+                        </div>
+                        <div class="pf-report-sign">
+                            <div><span class="pf-sign-line"></span>پٹواری حلقہ @if($report['patwari'])<b>{{ $report['patwari'] }}</b>@endif<br>تاریخ: <span dir="ltr">{{ $report['date'] ? \Illuminate\Support\Carbon::parse($report['date'])->format('d-m-Y') : '__________' }}</span></div>
+                            <div><span class="pf-sign-line"></span>گرداور / قانونگو</div>
+                            <div><span class="pf-sign-line"></span>ریونیو آفیسر</div>
+                        </div>
+                    </div>
+                @endif
+                </div>{{-- /pf-row --}}
+
                 {{-- Alamaat --}}
                 <div class="pw-legend">
                     <strong>{{ __('Signs:') }}</strong>
@@ -703,20 +745,6 @@
                     @endforeach
                 </div>
 
-                {{-- Rapor patwari: shajre ke mutabiq khud likhi hui, isi safhe par --}}
-                @if($patwariReport)
-                    <div class="pf-report" dir="rtl" lang="ur">
-                        <h3 class="pf-report-title">{{ $patwariReport['title'] }}</h3>
-                        @foreach($patwariReport['paragraphs'] as $para)
-                            <p>{{ $para }}</p>
-                        @endforeach
-                        <div class="pf-report-sign">
-                            <div><span class="pf-sign-line"></span>پٹواری حلقہ @if($report['patwari'])<b>{{ $report['patwari'] }}</b>@endif<br>تاریخ: <span dir="ltr">{{ $report['date'] ? \Illuminate\Support\Carbon::parse($report['date'])->format('d-m-Y') : '__________' }}</span></div>
-                            <div><span class="pf-sign-line"></span>گرداور / قانونگو</div>
-                            <div><span class="pf-sign-line"></span>ریونیو آفیسر</div>
-                        </div>
-                    </div>
-                @endif
                 </div>
 
                 {{-- Holders --}}
