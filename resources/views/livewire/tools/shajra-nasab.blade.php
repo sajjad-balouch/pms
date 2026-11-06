@@ -26,24 +26,23 @@
     $relWords = $isUr
         ? ['father' => 'والد', 'mother' => 'والدہ', 'husband' => 'خاوند', 'son' => 'پسر', 'daughter' => 'دختر', 'brother' => 'برادر حقیقی', 'sister' => 'ہمشیرہ حقیقی', 'wife' => 'زوجہ', 'widow' => 'بیوہ', 'grandfather' => 'دادا', 'paternal_brother' => 'برادر علاتی (باپ شریک)', 'paternal_sister' => 'ہمشیرہ علاتی (باپ شریک)', 'nephew' => 'بھتیجا (حقیقی بھائی کا بیٹا)', 'uncle' => 'چچا (حقیقی)', 'cousin' => 'چچا زاد (حقیقی چچا کا بیٹا)']
         : ['father' => 'Father', 'mother' => 'Mother', 'husband' => 'Husband', 'son' => 'Son', 'daughter' => 'Daughter', 'brother' => 'Full brother', 'sister' => 'Full sister', 'wife' => 'Wife', 'widow' => 'Widow', 'grandfather' => 'Paternal grandfather', 'paternal_brother' => 'Half brother (same father)', 'paternal_sister' => 'Half sister (same father)', 'nephew' => 'Nephew (full brother’s son)', 'uncle' => 'Paternal uncle (full)', 'cousin' => 'Cousin (full paternal uncle’s son)'];
-    $rel = function (array $node, ?array $card) use ($relWords, $ordinals, $deceased, $isUr) {
+    // Shajra sarkari kaghaz hai: us ke andar rishte hamesha Urdu mein (site ki zaban kuch bhi ho)
+    $rel = function (array $node, ?array $card) use ($deceased) {
+        $words = \App\Support\Tools\ShajraReport::REL;
         if ($node['relation'] === 'root') {
-            return $deceased['gender'] === 'female' ? ($isUr ? 'مورثہ (متوفیہ)' : 'Deceased') : ($isUr ? 'مورث (متوفی)' : 'Deceased');
+            return $deceased['gender'] === 'female' ? 'مورثہ (متوفیہ)' : 'مورث (متوفی)';
         }
         if ($node['relation'] === 'wife') {
             // Mard ki wafat par zinda zauja "bewa" kehlati hai
-            $word = in_array($node['status'], ['alive', 'missing']) ? $relWords['widow'] : $relWords['wife'];
-            if ($node['status'] === 'divorced') {
-                $word = $isUr ? 'مطلقہ' : 'Divorced wife';
-            }
+            $word = match ($node['status']) { 'alive', 'missing' => 'بیوہ', 'divorced' => 'مطلقہ', default => 'زوجہ' };
             if ($card && ($card['of'] ?? 1) > 1) {
-                $word .= ' ' . $ordinals[$card['ord'] - 1];
+                $word .= ' ' . ['اول', 'دوم', 'سوم', 'چہارم'][$card['ord'] - 1];
             }
 
             return $word;
         }
 
-        return $relWords[$node['relation']] ?? $node['relation'];
+        return $words[$node['relation']] ?? $node['relation'];
     };
     $childrenCount = collect($people)->groupBy('parent')->map(fn ($g) => $g->whereIn('relation', ['son', 'daughter'])->count());
     // Patwar ki alamaat, naam ke neeche narangi rang mein (har zaban mein Urdu hi, jaise record mein)
@@ -168,10 +167,6 @@
         .pf-report { color: #111827; font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; border-top: 2px solid #111827; margin-top: 12px; padding-top: 8px; }
         .pf-report-title { font-size: 22px; font-weight: 700; text-decoration: underline; text-underline-offset: 6px; margin: 0 0 4px; }
         .pf-report p { font-size: 15px; line-height: 2.05; margin: 0; text-align: justify; }
-        .pf-heirs { border-collapse: collapse; margin: 4px 0 6px; font-size: 13px; }
-        .pf-heirs th, .pf-heirs td { border: 1px solid #6b7280; padding: 0 8px; line-height: 1.9; text-align: start; }
-        .pf-heirs th { background: #f3f4f6; font-weight: 400; }
-        .pf-heirs td[dir=ltr] { font-family: ui-monospace, monospace; font-size: 12px; text-align: center; }
         .pf-report-sign { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 26px; font-size: 14px; line-height: 1.9; text-align: center; }
         .pf-sign-line { display: block; border-top: 1px solid #111827; margin: 0 12px 2px; }
         .sh-wrap { overflow-x: auto; padding-bottom: 6px; }
@@ -219,12 +214,11 @@
             #shajra-sheet table, #shajra-sheet th, #shajra-sheet td { border-color: #94a3b8 !important; }
             #shajra-sheet .bg-slate-950, #shajra-sheet .bg-amber-500\/10 { background: #fff !important; }
             .sh-wrap { overflow: visible !important; }
-            .shajra-signs-row { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 24px; padding-top: 36px; }
-            /* Pehla safha: form + shajra; hisson ki table agle safhe par */
-            .pf-after { break-before: page; }
+            /* Print mein sirf form + shajra + report: legend, hisson ki table, warnings, wazahat waghera nahi */
+            #shajra-sheet > *:not(.pw-paper) { display: none !important; }
+            .pw-legend, .pf-meta { display: none !important; }
             .pf-logo { border: 0 !important; }
             .pf-form, .pf-form *, .pf-report, .pf-report * { color: #000 !important; }
-            .pf-heirs th { background: #f3f4f6 !important; }
             /* Safhe ka size neeche report ke option se (@page alag style mein) */
         }
     </style>
@@ -407,8 +401,6 @@
                             <option value="legal">{{ __('Legal portrait') }}</option>
                         </select>
                     </div>
-                    @if(false)
-                    @endif
                 </div>
             </div>
 
@@ -657,8 +649,6 @@
                                 @if($deceased['name'])<span>متوفی: <b>{{ $deceased['name'] }}</b>@if($deceased['father_name']) {{ ['so' => 'ولد', 'do' => 'دختر', 'wo' => 'زوجہ'][$deceased['father_rel']] }} <b>{{ $deceased['father_name'] }}</b>@endif</span>@endif
                                 @if($deceased['caste'])<span>قوم: <b>{{ $deceased['caste'] }}</b></span>@endif
                                 @if($deceased['death_date'])<span>تاریخ وفات: <b dir="ltr">{{ \Illuminate\Support\Carbon::parse($deceased['death_date'])->format('d-m-Y') }}</b></span>@endif
-                                @if($record['khewat'])<span>کھیوٹ نمبر: <b>{{ $record['khewat'] }}</b></span>@endif
-                                @if($record['khatoni'])<span>کھتونی نمبر: <b>{{ $record['khatoni'] }}</b></span>@endif
                                 @if($record['intiqal'])<span>انتقال نمبر: <b>{{ $record['intiqal'] }}</b></span>@endif
                                 <span>کل رقبہ: <b dir="ltr">{{ (int) $record['kanal'] }}-{{ (int) $record['marla'] }}-{{ $fmt($record['sarsahi'], 2) }}</b> (ک-م-س)</span>
                             </div>
@@ -683,7 +673,9 @@
                              window.addEventListener('beforeprint', () => {
                                  const pw = +paper.dataset.printW || 734, ph = +paper.dataset.printH || 1060;
                                  paper.style.zoom = ''; const w = Math.max(pw, c.offsetWidth + 30); paper.style.width = w + 'px';
-                                 paper.style.zoom = Math.min(1, pw / w, ph / paper.scrollHeight);
+                                 // Legend aur upar ki chhoti line print mein chhup jati hain; un ki lambai hisaab se nikaal do
+                                 const hidden = [...paper.querySelectorAll('.pw-legend, .pf-meta')].reduce((s, e) => s + e.offsetHeight, 0);
+                                 paper.style.zoom = Math.min(1, pw / w, ph / (paper.scrollHeight - hidden));
                              });
                              window.addEventListener('afterprint', () => { paper.style.zoom = ''; paper.style.width = ''; });">
                     <div class="sh-canvas" style="width: {{ $layout['width'] }}px; height: {{ $layout['height'] }}px;">
@@ -715,18 +707,7 @@
                 @if($patwariReport)
                     <div class="pf-report" dir="rtl" lang="ur">
                         <h3 class="pf-report-title">{{ $patwariReport['title'] }}</h3>
-                        @foreach($patwariReport['paragraphs'] as $i => $para)
-                            @if($i === 2)
-                                {{-- Warisan aur un ke hisse --}}
-                                <table class="pf-heirs">
-                                    <thead><tr><th>نمبر</th><th>نام وارث</th><th>رشتہ</th><th>حصہ</th>@if($result['total_parts'])<th>از {{ number_format($result['total_parts']) }}</th>@endif<th>رقبہ (ک-م-س)</th></tr></thead>
-                                    <tbody>
-                                        @foreach($patwariReport['heirs'] as $n => $h)
-                                            <tr><td>{{ $n + 1 }}</td><td>{{ $h['name'] ?: '—' }}</td><td>{{ $h['relation'] }}</td><td dir="ltr">{{ $h['fraction'] }}</td>@if($result['total_parts'])<td dir="ltr">{{ number_format($h['parts']) }}</td>@endif<td dir="ltr">{{ $h['land'] }}</td></tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            @endif
+                        @foreach($patwariReport['paragraphs'] as $para)
                             <p>{{ $para }}</p>
                         @endforeach
                         <div class="pf-report-sign">
@@ -739,7 +720,7 @@
                 </div>
 
                 {{-- Holders --}}
-                <div class="overflow-x-auto pf-after">
+                <div class="overflow-x-auto">
                     <table class="w-full text-xs border-collapse">
                         <thead>
                             <tr class="border-b border-slate-700 text-slate-400 uppercase font-bold text-[10px]">

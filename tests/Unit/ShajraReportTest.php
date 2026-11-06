@@ -30,7 +30,8 @@ class ShajraReportTest extends TestCase
         $text = implode("\n", $r['paragraphs']);
 
         $this->assertStringContainsString('مسمی Ali Khan ولد Ahmad قوم Arain', $text);
-        $this->assertStringContainsString('کھیوٹ نمبر 45', $text);
+        $this->assertStringNotContainsString('کھیوٹ', $text); // ek se zyada khewat ho sakte hain
+        $this->assertStringContainsString('مالک/حصہ دار اراضی واقع موضع Chak 101', $text);
         $this->assertStringContainsString('بتاریخ 15-01-2026', $text);
         $this->assertStringContainsString('ڈیتھ سرٹیفکیٹ', $text);
         $this->assertStringNotContainsString('فیملی رجسٹریشن', $text); // FRC chuna nahi gaya
@@ -41,8 +42,7 @@ class ShajraReportTest extends TestCase
         $this->assertStringContainsString('بذریعہ ولی Ayesha', $text);
         $this->assertStringContainsString('خواتین ورثاء', $text);
         $this->assertStringContainsString('فقہ حنفی کے مطابق', $text);
-        $this->assertCount(4, $r['heirs']);
-        $this->assertSame('پسر (بذریعہ Umar)', collect($r['heirs'])->firstWhere('name', 'Hamza')['relation']);
+        $this->assertArrayNotHasKey('heirs', $r); // report mein table nahi
     }
 
     public function test_female_deceased_and_blank_fields_are_left_to_fill(): void
@@ -58,5 +58,15 @@ class ShajraReportTest extends TestCase
         $this->assertStringContainsString('دفعہ 4', $text);
         $this->assertStringContainsString('ورثاء اور گواہان نے', $text);
         $this->assertStringContainsString('انتقال وراثت حسب شجرہ', $text);
+    }
+
+    public function test_no_guidance_line_when_part_of_estate_is_unassigned(): void
+    {
+        // Sirf biwi: tarke ka kuch hissa kisi ko nahi pohnchta, magar report mein "hidayat darkar" nahi likha jata
+        $people = [$this->p('w', 'root', 'wife', 'Salma')];
+        $result = ShajraEngine::build('male', $people, 20);
+        $this->assertGreaterThan(0, $result['unassigned_pct']);
+        $text = implode("\n", ShajraReport::build(['name' => 'Ali', 'gender' => 'male'], [], $people, $result, [])['paragraphs']);
+        $this->assertStringNotContainsString('ہدایت', $text);
     }
 }

@@ -25,7 +25,7 @@ class ShajraReport
     public const FIQH = ['hanafi' => 'فقہ حنفی', 'jafari' => 'فقہ جعفریہ', 'ahl_hadith' => 'مسلک اہل حدیث', 'other' => ''];
 
     /**
-     * @return array{title:string,paragraphs:array<int,string>,heirs:array<int,array>}
+     * @return array{title:string,paragraphs:array<int,string>}
      */
     public static function build(array $deceased, array $record, array $people, array $result, array $opt): array
     {
@@ -45,14 +45,8 @@ class ShajraReport
         if (trim((string) ($deceased['caste'] ?? '')) !== '') {
             $who .= ' قوم ' . trim($deceased['caste']);
         }
-        $land = [];
-        foreach (['khewat' => 'کھیوٹ نمبر', 'khatoni' => 'کھتونی نمبر'] as $k => $label) {
-            if (trim((string) ($record[$k] ?? '')) !== '') {
-                $land[] = $label . ' ' . trim($record[$k]);
-            }
-        }
-        $owner = ($land ? 'مالک/حصہ دار ' . implode('، ', $land) . ' ' : 'مالک/حصہ دار اراضی ')
-            . 'واقع موضع ' . $dash($record['mauza'] ?? '');
+        // Khewat ka hawala nahi: aksar ek se zyada khewat hote hain
+        $owner = 'مالک/حصہ دار اراضی واقع موضع ' . $dash($record['mauza'] ?? '');
         $date = '';
         if (! empty($deceased['death_date'])) {
             try {
@@ -104,23 +98,13 @@ class ShajraReport
             $p[] = implode('، ', $mflo) . ' مورث کی زندگی میں فوت ہو چکے تھے، اس لیے مسلم عائلی قوانین آرڈیننس 1961 کی دفعہ 4 کے تحت ان کا حصہ ان کی اولاد کو دیا گیا ہے۔';
         }
 
-        $heirs = [];
         $minors = [];
         $missing = [];
         $women = false;
         foreach ($result['holders'] ?? [] as $h) {
             $chain = $h['via'][0] ?? [];
             $last = end($chain) ?: ['relation' => $h['relation']];
-            $relWord = self::REL[$last['relation']] ?? '';
-            if (count($chain) > 1) {
-                $via = $chain[count($chain) - 2];
-                $relWord .= ' (بذریعہ ' . ($via['name'] ?: '—') . ')';
-            }
             $women = $women || in_array($last['relation'], self::FEMALE, true);
-            $heirs[] = [
-                'name' => $h['name'], 'relation' => $relWord, 'fraction' => $h['fraction'], 'parts' => $h['parts'],
-                'land' => $h['kanal'] . '-' . $h['marla'] . '-' . rtrim(rtrim(number_format($h['sarsahi'], 2), '0'), '.'),
-            ];
             if ($h['minor']) {
                 $minors[] = $h['name'] . ($h['guardian'] !== '' ? ' (بذریعہ ولی ' . $h['guardian'] . ')' : '');
             }
@@ -137,9 +121,6 @@ class ShajraReport
         if ($women) {
             $p[] = 'خواتین ورثاء کو ان کا پورا شرعی حصہ دیا گیا ہے۔';
         }
-        if (($result['unassigned_pct'] ?? 0) > 0) {
-            $p[] = 'ترکے کا کچھ حصہ (' . rtrim(rtrim(number_format($result['unassigned_pct'], 2), '0'), '.') . '%) درج ورثاء میں کسی کو نہیں پہنچتا؛ اس کے بارے میں ہدایت درکار ہے۔';
-        }
         if (trim((string) ($opt['remarks'] ?? '')) !== '') {
             $p[] = trim($opt['remarks']);
         }
@@ -149,7 +130,7 @@ class ShajraReport
         $as = $fiqh !== '' ? "{$fiqh} کے مطابق " : '';
         $p[] = "لہٰذا شجرہ نسب مرتب کر کے رپورٹ پیش ہے کہ انتقال وراثت {$as}حسب شجرہ ہذا جلسہ عام میں ورثاء کی موجودگی میں تصدیق کر کے منظور فرمایا جائے۔";
 
-        return ['title' => 'رپورٹ پٹواری حلقہ', 'paragraphs' => $p, 'heirs' => $heirs];
+        return ['title' => 'رپورٹ پٹواری حلقہ', 'paragraphs' => $p];
     }
 
     private static function nameOf(array $x): string
