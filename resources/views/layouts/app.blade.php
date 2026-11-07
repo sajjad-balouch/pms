@@ -99,13 +99,8 @@
             @include('partials.town-owner-bottom-nav')
         @endif
 
-        <!-- Fully Generic Livewire Script Endpoint -->
-        <script
-            src="{{ url('livewire/livewire.js') }}"
-            data-csrf="{{ csrf_token() }}"
-            data-update-uri="{{ url('livewire/update') }}"
-            data-navigate-once>
-        </script>
-        @livewireScriptConfig
+        {{-- Wahi Livewire script jo front-app aur admin-app mein hai (/vendor/livewire/livewire.js).
+             Alag URL hone se login -> dashboard (wire:navigate) par Livewire aur Alpine do dafa chal parte the. --}}
+        @livewireScripts
     </body>
 </html>
