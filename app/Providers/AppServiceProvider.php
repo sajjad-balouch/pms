@@ -27,10 +27,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api-unlock', fn (Request $r) => Limit::perMinute(20)->by($by($r)));
         RateLimiter::for('gateway', fn (Request $r) => Limit::perMinute(60)->by($r->ip()));
 
-        // Livewire script path
-        Livewire::setScriptRoute(function ($handle) {
-            return Route::get('/vendor/livewire/livewire.js', $handle);
-        });
+        // Livewire JS hamesha Livewire ke apne route (/livewire/livewire.js) se aaye.
+        // Published copy (vendor/livewire/livewire.js) live server par mojood nahi thi
+        // aur 404 deti thi, jis se live par Livewire bilkul kaam nahi karti thi.
+        // url() request ka root leta hai: local par /pms/..., live par domain root.
+        config(['livewire.asset_url' => url('livewire/livewire.js')]);
 
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post(
